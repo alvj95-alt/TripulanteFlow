@@ -1,459 +1,1923 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TripulanteFlow Renfe Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        .day-cell { aspect-ratio: 1/1.1; display: flex; flex-direction: column; padding: 6px; border-radius: 1rem; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; position: relative; background: white; overflow: hidden; }
-        .day-cell:hover { border-color: #4f46e5; transform: scale(1.02); }
-        .day-today { background: #eef2ff; border-color: #4f46e5; }
-        .day-has-shift { background: #f1f5f9; }
-        .day-planner-selected { background: #4f46e5 !important; color: white !important; }
-        .tab-active { color: #4f46e5 !important; border-bottom: 2px solid #4f46e5; }
-        
-        #planner-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .notification { position: fixed; top: 20px; right: 20px; padding: 16px 24px; background: #1e293b; color: white; border-radius: 1rem; transform: translateX(150%); transition: transform 0.3s; z-index: 3000; }
-        .notification.show { transform: translateX(0); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0B0E16">
+<title>TripulanteFlow AV Pro+</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/es.global.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  /* Renfe palette - Light mode (default) */
+  --bg: #F5F6FA;
+  --surface: #FFFFFF;
+  --surface-2: #F0F2F7;
+  --border: rgba(51,51,51,0.10);
+  --text: #333333;
+  --text-2: #555555;
+  --text-3: #8A8A8A;
+  --primary: #82305C;
+  --primary-hover: #9B3F70;
+  --primary-dark: #5F2444;
+  --neto-glow: rgba(130, 48, 92, 0.32);
+  --indigo: #4A5BAD; --amber: #C77B00; --teal: #007D7A; --emerald: #2D8C5E; --violet: #6A2E8C; --cyan: #0F7CB8;
+}
+.theme-dark {
+  /* Antracita + morado vibrante */
+  --bg: #0B0E14;
+  --surface: #161B25;
+  --surface-2: #1E2532;
+  --border: rgba(255,255,255,0.08);
+  --text: #F1F4F9;
+  --text-2: #C7CDD8;
+  --text-3: #8892A0;
+  --primary: #D070A8;
+  --primary-hover: #E589C0;
+  --primary-dark: #82305C;
+  --neto-glow: rgba(208, 112, 168, 0.45);
+  --indigo: #818CF8; --amber: #FBBF24; --teal: #2DD4BF; --emerald: #34D399; --violet: #C084FC; --cyan: #38BDF8;
+}
+.dark, .light { /* compat: ignore */ }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; min-height: 100vh; }
+h1,h2,h3,h4 { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; letter-spacing: -0.01em; }
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60% 35% at 10% -5%, color-mix(in srgb, var(--primary) 10%, transparent), transparent 70%),
+    radial-gradient(50% 35% at 100% 100%, color-mix(in srgb, var(--primary) 6%, transparent), transparent 70%);
+}
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 18px rgba(51,51,51,0.06);
+}
+.gradient-rail { background: linear-gradient(135deg, #82305C 0%, #5F2444 100%); }
+.gradient-text { background: linear-gradient(135deg, #82305C, #C77B00); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+.input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; color: var(--text); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; outline: none; transition: border-color .2s, box-shadow .2s; }
+.input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent); }
+.input::placeholder { color: var(--text-3); }
+.input:disabled { opacity: 0.6; cursor: not-allowed; background: var(--surface-2); }
+.input[readonly] { cursor: pointer; caret-color: transparent; }
+.input[readonly]:focus { border-color: var(--primary); }
+
+button, .btn-primary, .btn-secondary, .btn-icon, .btn-accent {
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .22s, background-color .2s, border-color .2s, color .2s, filter .2s;
+}
+button:active, .btn-primary:active, .btn-secondary:active, .btn-icon:active, .btn-accent:active { transform: scale(.97); }
+
+.btn-primary { background: var(--primary); color: white; border-radius: 8px; padding: 12px 24px; font-weight: 600; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; border: none; cursor: pointer; letter-spacing: 0.02em; }
+.btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in srgb, var(--primary) 32%, transparent); }
+
+.btn-soft { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 18px; font-weight: 500; cursor: pointer; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+.btn-soft:hover { background: color-mix(in srgb, var(--primary) 8%, transparent); border-color: color-mix(in srgb, var(--primary) 30%, transparent); }
+
+.btn-icon { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 10px; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; }
+.btn-icon:hover { background: color-mix(in srgb, var(--primary) 10%, transparent); border-color: color-mix(in srgb, var(--primary) 35%, transparent); color: var(--primary); transform: translateY(-1px); }
+
+.btn-accent { border-radius: 8px; padding: 10px 18px; font-weight: 600; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 6px; }
+.btn-accent:hover { transform: translateY(-1px); }
+
+.btn-add { background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary); border-color: color-mix(in srgb, var(--primary) 35%, transparent); }
+.btn-add:hover { background: var(--primary); color: #fff; box-shadow: 0 6px 18px color-mix(in srgb, var(--primary) 32%, transparent); }
+.btn-clear { background: transparent; color: var(--primary); border-color: color-mix(in srgb, var(--primary) 40%, transparent); }
+.btn-clear:hover { background: var(--primary); color: #fff; }
+
+.row-btn { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; }
+.row-btn:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--primary) 40%, transparent); }
+.row-btn.danger { color: var(--primary); }
+.row-btn.danger:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* Animación tren */
+.train-anim { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; overflow: hidden; pointer-events: none; }
+.train-anim::before { content: ""; position: absolute; top: 0; bottom: 0; width: 38%; background: linear-gradient(90deg, transparent, var(--primary), transparent); animation: trainSlide 3.2s linear infinite; }
+@keyframes trainSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(280%); } }
+.kinetic-loader { width:48px; height:48px; border-radius:50%; border: 3px solid color-mix(in srgb, var(--primary) 20%, transparent); border-top-color: var(--primary); animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.label { text-transform: uppercase; letter-spacing: 0.2em; font-size: 10px; font-weight: 600; color: var(--text-3); }
+.badge { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+.badge-default { background: color-mix(in srgb, var(--surface-2) 70%, transparent); border: 1px solid var(--border); color: var(--text-2); }
+.badge-plus { background: color-mix(in srgb, var(--amber) 15%, transparent); border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent); color: var(--amber); }
+.tag { padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 800; }
+
+.tabs-nav { display: flex; gap: 4px; padding: 4px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+.tabs-nav::-webkit-scrollbar { display: none; }
+.tab-btn { flex: 1; min-width: max-content; padding: 9px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer; background: transparent; border: 0; color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all .2s; }
+.tab-btn:hover { color: var(--text); background: color-mix(in srgb, var(--primary) 8%, transparent); }
+.tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 28%, transparent); }
+.tab-pane { display: none; animation: fadeSlide .25s ease; }
+.tab-pane.active { display: block; }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.seg { display: grid; gap: 8px; }
+.seg-2 { grid-template-columns: 1fr 1fr; }
+.seg-3 { grid-template-columns: repeat(3, 1fr); }
+.seg label { display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: 14px; cursor: pointer; text-align: center; background: color-mix(in srgb, var(--surface-2) 50%, transparent); border: 1.5px solid var(--border); transition: all .2s; }
+.seg label:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--text) 18%, transparent); }
+.seg label input { display: none; }
+.seg label .seg-ico { font-size: 18px; margin-bottom: 2px; }
+.seg label .seg-title { font-size: 13px; font-weight: 600; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+.seg label .seg-sub { font-size: 10.5px; color: var(--text-3); }
+.seg label.checked { background: color-mix(in srgb, var(--accent, var(--primary)) 14%, transparent); border-color: color-mix(in srgb, var(--accent, var(--primary)) 60%, transparent); box-shadow: 0 6px 18px color-mix(in srgb, var(--accent, var(--primary)) 25%, transparent); }
+.seg label.checked .seg-title { color: var(--accent, var(--primary)); }
+
+.toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border-radius: 16px; cursor: pointer; background: color-mix(in srgb, var(--surface) 60%, transparent); border: 1px solid var(--border); transition: all .2s; }
+.toggle-row:hover { border-color: color-mix(in srgb, var(--primary) 35%, transparent); }
+.toggle-row .tr-title { font-size: 13.5px; font-weight: 600; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+.toggle-row .tr-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.toggle-row input { display: none; }
+.toggle-pill { width: 44px; height: 26px; border-radius: 999px; background: color-mix(in srgb, var(--text-3) 25%, transparent); position: relative; flex-shrink: 0; transition: background .2s; }
+.toggle-pill::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 999px; transition: transform .25s cubic-bezier(.4,.1,.3,1.4); box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.toggle-row.on .toggle-pill { background: var(--primary); }
+.toggle-row.on .toggle-pill::after { transform: translateX(18px); }
+
+.combo { position: relative; }
+.combo-input { padding-right: 40px; }
+.combo-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 999px; border: 0; cursor: pointer; background: color-mix(in srgb, var(--surface-2) 80%, transparent); color: var(--text-2); display: none; align-items: center; justify-content: center; font-size: 14px; }
+.combo-clear:hover { color: var(--primary); background: color-mix(in srgb, var(--primary) 15%, transparent); }
+.combo.has-value .combo-clear { display: inline-flex; }
+.combo-pop { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 50; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 18px 48px rgba(0,0,0,.4); max-height: 320px; overflow-y: auto; opacity: 0; transform: translateY(-6px) scale(.98); pointer-events: none; transition: opacity .18s, transform .18s; padding: 6px; }
+.combo.open .combo-pop { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.combo-group-title { padding: 8px 12px 4px; font-size: 10px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+.combo-group-title .dot { width: 8px; height: 8px; border-radius: 999px; }
+.combo-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 14px; transition: background .15s, transform .15s; }
+.combo-item:hover, .combo-item.active { background: color-mix(in srgb, var(--primary) 12%, transparent); transform: translateX(2px); }
+.combo-item mark { background: color-mix(in srgb, var(--primary) 30%, transparent); color: var(--text); border-radius: 4px; padding: 0 2px; }
+.combo-pill { font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 999px; letter-spacing: .08em; text-transform: uppercase; flex-shrink: 0; }
+.pill-ave { background: color-mix(in srgb, #F43F5E 18%, transparent); color: #FB7185; }
+.pill-ld { background: color-mix(in srgb, #6366F1 18%, transparent); color: #818CF8; }
+.pill-euromed { background: color-mix(in srgb, #14B8A6 18%, transparent); color: #2DD4BF; }
+.pill-intl { background: color-mix(in srgb, #A855F7 18%, transparent); color: #C084FC; }
+/* Filtros de categoría dentro del combobox */
+.combo-cats { display: flex; gap: 4px; padding: 6px; position: sticky; top: 0; background: var(--surface); border-bottom: 1px solid var(--border); z-index: 2; }
+.combo-cat { flex: 1; min-width: 0; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); transition: all .15s; text-align: center; }
+.combo-cat:hover { color: var(--primary); border-color: color-mix(in srgb, var(--primary) 35%, transparent); }
+.combo-cat.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.combo-empty { padding: 14px; text-align: center; color: var(--text-3); font-size: 13px; }
+
+.fc { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important; color: var(--text); }
+.fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid { border-color: var(--border) !important; }
+.fc .fc-toolbar-title { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important; font-weight: 700 !important; color: var(--text) !important; font-size: 1.25rem !important; letter-spacing: -0.01em; }
+.fc .fc-button { background: var(--surface) !important; border: 1px solid var(--border) !important; color: var(--text) !important; border-radius: 8px !important; font-weight: 600 !important; text-transform: capitalize !important; padding: 8px 14px !important; box-shadow: none !important; transition: transform .2s, background .2s, border-color .2s !important; }
+.fc .fc-button:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--primary) 10%, transparent) !important; border-color: color-mix(in srgb, var(--primary) 35%, transparent) !important; }
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:hover { background: var(--primary) !important; border-color: var(--primary) !important; color: #fff !important; }
+.fc-col-header-cell { background: var(--surface-2) !important; padding: 10px 0 !important; }
+.fc-col-header-cell-cushion { color: var(--text-2) !important; font-weight: 600 !important; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
+.fc-daygrid-day-number { color: var(--text-2) !important; padding: 8px !important; font-weight: 500; }
+.fc-day-today { background: color-mix(in srgb, var(--primary) 8%, transparent) !important; }
+.fc-day-today .fc-daygrid-day-number { color: var(--primary) !important; font-weight: 700; }
+.fc-daygrid-day:hover { background: color-mix(in srgb, var(--text) 5%, transparent) !important; cursor: pointer; }
+.fc-event { border: none !important; border-radius: 10px !important; padding: 3px 6px !important; font-weight: 600 !important; font-size: 10px !important; cursor: pointer; transition: transform .15s; }
+.fc-event:hover { transform: scale(1.04); }
+.evt { display: flex; flex-direction: column; gap: 1px; padding: 1px 2px; }
+.evt-train { font-size: 10px; font-weight: 800; }
+.evt-route { font-size: 9px; font-weight: 600; opacity: 0.95; }
+.evt-hours { font-size: 8px; opacity: 0.8; }
+
+.modal { position: fixed; inset: 0; background: rgba(5,7,12,0.75); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 9998; padding: 16px; }
+.modal.open { display: flex; }
+.modal-content { max-height: 92vh; overflow-y: auto; width: 100%; max-width: 620px; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); color: var(--text); padding: 14px 20px; border-radius: 14px; border: 1px solid var(--border); font-weight: 500; opacity: 0; transform: translateY(20px); transition: 0.3s; z-index: 99999; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+.toast.show { opacity: 1; transform: translateY(0); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+
+.free-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; cursor: pointer; background: color-mix(in srgb, var(--emerald) 15%, transparent); color: var(--emerald); border: 1px solid color-mix(in srgb, var(--emerald) 30%, transparent); transition: all .2s; }
+.free-chip:hover { background: var(--emerald); color: #0B0E16; transform: translateY(-1px); }
+.free-chip.empty { background: color-mix(in srgb, var(--amber) 12%, transparent); color: var(--amber); border-color: color-mix(in srgb, var(--amber) 30%, transparent); }
+.free-chip.empty:hover { background: var(--amber); color: #0B0E16; }
+
+form .btn-primary { transition: transform .2s, box-shadow .25s, filter .2s; }
+form .btn-primary:hover { transform: translateY(-2px) scale(1.01); }
+
+/* ===== Acordeón de Ajustes ===== */
+.acc { border-radius: 18px; overflow: hidden; border: 1px solid var(--border); background: color-mix(in srgb, var(--surface-2) 50%, transparent); transition: border-color .25s; }
+.acc + .acc { margin-top: 10px; }
+.acc.open { border-color: color-mix(in srgb, var(--primary) 40%, transparent); }
+.acc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; cursor: pointer; user-select: none; transition: background .2s; }
+.acc-head:hover { background: color-mix(in srgb, var(--primary) 8%, transparent); }
+.acc-head .acc-left { display: flex; align-items: center; gap: 10px; }
+.acc-head .acc-icon { width: 36px; height: 36px; border-radius: 12px; background: color-mix(in srgb, var(--primary) 14%, transparent); display: inline-flex; align-items: center; justify-content: center; font-size: 18px; transition: background .25s; }
+.acc.open .acc-icon { background: var(--primary); color: #fff; }
+.acc-head .acc-title { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 600; font-size: 14px; }
+.acc-head .acc-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.acc-head .acc-chev { color: var(--text-3); transition: transform .25s ease; font-size: 14px; }
+.acc.open .acc-chev { transform: rotate(180deg); color: var(--primary); }
+.acc-body { max-height: 0; overflow: hidden; transition: max-height .35s cubic-bezier(.2,.8,.2,1); }
+.acc.open .acc-body { max-height: 800px; }
+.acc-body-inner { padding: 4px 16px 16px; }
+
+/* Calendar mobile-friendly */
+@media (max-width: 640px) {
+  .cal-card { padding: 10px !important; border-radius: 20px !important; }
+  .fc .fc-toolbar.fc-header-toolbar { flex-wrap: wrap; gap: 8px; margin-bottom: 8px !important; }
+  .fc .fc-toolbar-title { font-size: 1rem !important; }
+  .fc .fc-button { padding: 6px 10px !important; font-size: 12px !important; }
+  .fc-daygrid-day-number { padding: 4px !important; font-size: 11px; }
+  .fc-event { font-size: 9px !important; padding: 2px 4px !important; }
+  .evt-train { font-size: 9px; }
+  .evt-route, .evt-hours { font-size: 8px; }
+}
+#calendar { touch-action: pan-y; }
+
+@media print { .no-print { display: none !important; } body { background: white; color: #0f172a; } .glass { background: white !important; color: #0f172a !important; } }
+
+/* ===== Tarjeta principal "Dinero a Percibir" ===== */
+.neto-card {
+  width: 100%;
+  border-radius: 32px;
+  padding: 36px 28px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 18px 50px var(--neto-glow);
+  transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .3s;
+  color: #fff;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+.neto-card::before {
+  content: ""; position: absolute; inset: -50% -10% auto auto; width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(255,255,255,0.18), transparent 65%);
+  transition: transform .6s ease;
+}
+.neto-card::after {
+  content: ""; position: absolute; left: -20%; bottom: -60%; width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);
+}
+.neto-card:hover { transform: translateY(-3px); box-shadow: 0 26px 64px var(--neto-glow); }
+.neto-card:hover::before { transform: scale(1.15) rotate(15deg); }
+.neto-card:active { transform: scale(.985); }
+.neto-card-inner { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.neto-label { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.85; display: flex; align-items: center; gap: 8px; }
+.neto-value { font-size: clamp(40px, 8vw, 64px); font-weight: 800; line-height: 1.05; margin-top: 4px; letter-spacing: -0.02em; transition: transform .3s; }
+.neto-card.pulse .neto-value { animation: netoPulse .55s cubic-bezier(.2,.8,.2,1); }
+@keyframes netoPulse { 0% { transform: scale(1); } 40% { transform: scale(1.06); } 100% { transform: scale(1); } }
+.neto-sub { font-size: 13px; opacity: 0.78; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+.neto-card-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.neto-role-chip { font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,0.18); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.22); letter-spacing: 0.08em; }
+.neto-mini-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; opacity: 0.92; font-size: 11px; font-weight: 600; }
+.neto-mini { background: rgba(255,255,255,0.14); padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); }
+.neto-chev { width: 38px; height: 38px; border-radius: 999px; background: rgba(255,255,255,0.18); display: inline-flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid rgba(255,255,255,0.22); transition: transform .3s; }
+.neto-card:hover .neto-chev { transform: translateX(4px); }
+
+/* Theme toggle icon */
+#btn-theme .ico-sun, #btn-theme .ico-moon { transition: opacity .25s, transform .35s; }
+#btn-theme .ico-sun { display: none; }
+#btn-theme .ico-moon { display: inline-block; }
+.theme-dark #btn-theme .ico-sun { display: inline-block; }
+.theme-dark #btn-theme .ico-moon { display: none; }
+
+/* Touch feedback ripple */
+.btn-primary, .btn-soft, .btn-accent, .btn-icon, .row-btn, .neto-card, .seg label, .toggle-row, .combo-cat, .combo-item, .acc-head {
+  -webkit-tap-highlight-color: transparent;
+}
+.touch-press { position: relative; overflow: hidden; }
+.touch-press::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(circle at var(--rx,50%) var(--ry,50%), color-mix(in srgb, var(--primary) 35%, transparent), transparent 65%);
+  opacity: 0; pointer-events: none; transition: opacity .35s;
+}
+.touch-press.tap::after { opacity: 0.6; transition: opacity .08s; }
+
+/* ===== Modal: animación slide-up ===== */
+.modal-content { animation: modalIn .32s cubic-bezier(.2,.8,.2,1); }
+@keyframes modalIn { from { opacity: 0; transform: translateY(28px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* Concept rows en modal Conceptos */
+.cn-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border-radius: 14px; background: color-mix(in srgb, var(--surface-2) 60%, transparent); border: 1px solid var(--border); transition: transform .2s, background .2s; }
+.cn-row:hover { transform: translateX(2px); background: color-mix(in srgb, var(--primary) 8%, var(--surface-2)); }
+.cn-row.cn-total { background: color-mix(in srgb, var(--primary) 10%, transparent); border-color: color-mix(in srgb, var(--primary) 30%, transparent); }
+.cn-row.cn-irpf { background: color-mix(in srgb, #DC2626 8%, transparent); border-color: color-mix(in srgb, #DC2626 25%, transparent); }
+.cn-icon { font-size: 22px; }
+.cn-label { font-weight: 600; font-size: 14px; color: var(--text); }
+.cn-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.cn-val { font-weight: 800; font-size: 17px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; flex-shrink: 0; }
+</style>
 </head>
-<body class="pb-24">
+<body>
 
-    <div id="notification" class="notification font-bold text-sm shadow-2xl"></div>
+<div id="toast" class="toast"></div>
 
-    <!-- Modal Planificador Mes Siguiente -->
-    <div id="planner-modal">
-        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-md mx-4 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h3 class="text-xl font-black" id="planner-month-name">Mes Siguiente</h3>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="planner-instruction">Selecciona días libres</p>
-                </div>
-                <button onclick="closePlanner()" class="p-2 bg-slate-100 rounded-full hover:bg-red-50 text-red-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5"></path></svg></button>
-            </div>
-            <div id="planner-calendar-grid" class="calendar-grid"></div>
-            <div class="mt-6 flex gap-2">
-                <button onclick="closePlanner()" class="flex-1 py-4 bg-slate-100 font-black rounded-2xl text-xs uppercase">Cancelar</button>
-                <button onclick="confirmPlanner()" class="flex-1 py-4 bg-indigo-600 text-white font-black rounded-2xl text-xs uppercase shadow-lg">Confirmar Selección</button>
-            </div>
+<header class="border-b relative" style="background: var(--surface); border-color: var(--border)">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-wrap gap-4 items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-xl gradient-rail flex items-center justify-center text-white text-xl">🚄</div>
+      <div>
+        <div class="label">TripulanteFlow · Base <span id="hdr-base">Madrid Puerta de Atocha</span></div>
+        <h1 class="text-2xl" style="font-weight:600">AV Pro<span class="gradient-text">+</span></h1>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 no-print">
+      <button id="btn-theme" class="btn-icon" title="Cambiar tema" data-testid="btn-theme-toggle">
+        <span class="ico-sun">☀️</span><span class="ico-moon">🌙</span>
+      </button>
+      <button id="btn-notif" class="btn-icon" title="Notificaciones 1h antes de firma">🔔</button>
+      <button id="btn-settings" class="btn-icon" title="Ajustes">⚙️</button>
+    </div>
+  </div>
+  <div class="train-anim"></div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+
+  <section class="space-y-4">
+    <button type="button" id="btn-neto-card" class="neto-card" data-testid="neto-card-main">
+      <div class="neto-card-inner">
+        <div>
+          <div class="neto-label">💰 Dinero a percibir <span style="opacity:0.6">· neto mensual</span></div>
+          <div id="stat-neto" class="neto-value">0.00€</div>
+          <div class="neto-sub" id="neto-sub">Toca la tarjeta para ver el desglose completo <span class="neto-chev" style="display:inline-flex; width:24px; height:24px; font-size:13px; margin-left:6px">↓</span></div>
         </div>
+        <div class="neto-card-side">
+          <span class="neto-role-chip" id="neto-role-chip">🧑‍✈️ Auxiliar</span>
+          <div class="neto-mini-row">
+            <span class="neto-mini" id="neto-mini-hours">⏱️ 0.0h</span>
+            <span class="neto-mini" id="neto-mini-bruto">Bruto 0.00€</span>
+            <span class="neto-mini" id="neto-mini-irpf">IRPF 15%</span>
+          </div>
+          <span class="neto-chev">›</span>
+        </div>
+      </div>
+    </button>
+  </section>
+
+  <section class="glass cal-card rounded-[32px] p-5 sm:p-6">
+    <div class="flex justify-between items-center mb-4 px-2 flex-wrap gap-2">
+      <h2 class="text-xl" style="font-weight:600">Calendario</h2>
+      <p class="text-xs" style="color:var(--text-3)">Doble clic = añadir turno · Desliza ⟷ para cambiar de mes</p>
+    </div>
+    <div id="calendar"></div>
+  </section>
+
+  <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <aside class="lg:col-span-4">
+      <div class="glass rounded-2xl p-6 lg:sticky lg:top-6">
+        <h2 class="text-2xl mb-1" style="font-weight:600">Nuevo Turno</h2>
+        <p class="text-sm mb-5" style="color:var(--text-2)">Organiza tu turno por pestañas. Solo fecha y nº de tren son obligatorios.</p>
+        <form id="shift-form" class="space-y-3"></form>
+      </div>
+    </aside>
+
+    <section class="lg:col-span-8">
+      <div class="flex justify-between items-center mb-5 no-print flex-wrap gap-2">
+        <h2 class="text-3xl" style="font-weight:600">Historial</h2>
+        <div class="flex gap-2 flex-wrap">
+          <button id="btn-quick" class="btn-accent btn-add">➕ Añadir rápido</button>
+          <button id="btn-clear" class="btn-accent btn-clear">🗑️ Vaciar historial</button>
+        </div>
+      </div>
+      <div id="pdf-area">
+        <div id="empty-state" class="glass rounded-2xl p-16 text-center" style="color:var(--text-2)">No hay turnos registrados aún.</div>
+        <div id="history" class="space-y-4"></div>
+      </div>
+    </section>
+  </section>
+
+</main>
+
+<!-- MODALS -->
+<div id="modal-settings" class="modal" data-modal>
+  <div class="glass rounded-[28px] p-7 modal-content max-w-md">
+    <div class="flex justify-between items-center mb-5">
+      <h2 class="text-2xl flex items-center gap-2" style="font-weight:600">⚙️ Ajustes</h2>
+      <button class="text-2xl opacity-60 hover:opacity-100" data-close="modal-settings">×</button>
     </div>
 
-    <!-- Navegación -->
-    <nav class="sticky top-0 z-50 glass border-b border-slate-200/50 px-6 py-4">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-black tracking-tight text-slate-800">Renfe<span class="text-indigo-600">Flow</span> Pro</h1>
-            <div class="flex gap-6">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="text-xs font-black uppercase tracking-tighter transition-all tab-active pb-1">Panel</button>
-                <button onclick="switchTab('new')" id="nav-new" class="text-xs font-black text-slate-400 uppercase tracking-tighter transition-all pb-1">Nuevo Tren</button>
-                <button onclick="switchTab('history')" id="nav-history" class="text-xs font-black text-slate-400 uppercase tracking-tighter transition-all pb-1">Listado</button>
+    <div class="space-y-0">
+      <!-- 👤 Cargo y Sueldo -->
+      <div class="acc" data-acc>
+        <div class="acc-head">
+          <div class="acc-left">
+            <span class="acc-icon">👤</span>
+            <div>
+              <div class="acc-title">Configurar Cargo y Sueldo</div>
+              <div class="acc-sub">Rol y salario base mensual</div>
             </div>
+          </div>
+          <span class="acc-chev">▾</span>
         </div>
-    </nav>
+        <div class="acc-body"><div class="acc-body-inner space-y-4">
+          <div class="seg seg-2" id="set-role-seg" style="--accent: var(--indigo)">
+            <label data-val="tripulante">
+              <span class="seg-ico">⭐</span><span class="seg-title">Tripulante</span><span class="seg-sub">Base 1.614,15€</span>
+              <input type="radio" name="role" value="tripulante"/>
+            </label>
+            <label data-val="auxiliar">
+              <span class="seg-ico">🧑‍✈️</span><span class="seg-title">Auxiliar de Tripulante</span><span class="seg-sub">Base 1.212,77€</span>
+              <input type="radio" name="role" value="auxiliar"/>
+            </label>
+          </div>
+          <div>
+            <label class="text-sm block mb-1" style="color:var(--text-2)">⭐ Salario base · Tripulante (€)</label>
+            <input id="set-baseTri" type="number" step="0.01" min="0" class="input"/>
+          </div>
+          <div>
+            <label class="text-sm block mb-1" style="color:var(--text-2)">🧑‍✈️ Salario base · Auxiliar (€)</label>
+            <input id="set-baseAux" type="number" step="0.01" min="0" class="input"/>
+          </div>
+          <p class="text-xs" style="color:var(--text-3)">Edita los importes para ajustar por antigüedad o acuerdo.</p>
+        </div></div>
+      </div>
 
-    <main class="max-w-6xl mx-auto px-6 mt-8">
-        <section id="tab-dashboard" class="space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Ingresos Mes</p>
-                    <div class="text-2xl font-black text-slate-800"><span id="stat-money">0</span>€</div>
-                </div>
-                <div class="bg-indigo-600 p-6 rounded-[2rem] shadow-xl text-white flex justify-between items-center">
-                    <div>
-                        <p class="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-1">Libres Acumulados</p>
-                        <div class="text-2xl font-black" id="stat-accumulated">0</div>
-                    </div>
-                    <button onclick="openPlanner()" class="p-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all" title="Planificar Mes Siguiente">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2.5"></path></svg>
-                    </button>
-                </div>
-                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pernoctas</p>
-                    <div class="text-2xl font-black text-emerald-600" id="stat-pernoctas">0</div>
-                </div>
-                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Trenes Realizados</p>
-                    <div class="text-2xl font-black text-orange-600" id="stat-trains">0</div>
-                </div>
+      <!-- 💰 Valores de Pluses -->
+      <div class="acc" data-acc>
+        <div class="acc-head">
+          <div class="acc-left">
+            <span class="acc-icon">💰</span>
+            <div>
+              <div class="acc-title">Editar Valores de Pluses</div>
+              <div class="acc-sub">Nocturnidad · Internacional · Activación · JT</div>
             </div>
-
-            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-                <div class="p-6 flex justify-between items-center bg-slate-50/50 border-b">
-                    <button onclick="changeMonth(-1)" class="p-2 hover:bg-indigo-600 hover:text-white rounded-lg transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3"></path></svg></button>
-                    <h2 id="calendar-month-year" class="font-black text-lg capitalize text-slate-800"></h2>
-                    <button onclick="changeMonth(1)" class="p-2 hover:bg-indigo-600 hover:text-white rounded-lg transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3"></path></svg></button>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-7 text-center mb-4 text-[10px] font-black text-slate-400 uppercase">
-                        <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sá</div><div>Do</div>
-                    </div>
-                    <div id="calendar-grid" class="calendar-grid"></div>
-                </div>
+          </div>
+          <span class="acc-chev">▾</span>
+        </div>
+        <div class="acc-body"><div class="acc-body-inner space-y-3">
+          <p class="label">🌙 Nocturnidad (€/h)</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm block mb-1" style="color:var(--text-2)">⭐ Tripulante</label>
+              <input id="set-nightTri" type="number" step="0.01" min="0" class="input"/>
             </div>
-        </section>
-
-        <section id="tab-new" class="hidden max-w-2xl mx-auto">
-            <div class="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                <h2 class="text-3xl font-black text-slate-800 mb-6">Nuevo Servicio</h2>
-                <form id="shift-form" onsubmit="saveShift(event)" class="space-y-6">
-                    <input type="hidden" id="edit-id">
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 block mb-2 ml-2">Fecha</label>
-                            <input type="date" id="form-date" required class="w-full p-4 bg-slate-50 border-2 border-transparent outline-none font-bold rounded-2xl">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 block mb-2 ml-2">Mi Base Principal</label>
-                            <select id="form-base" onchange="calculateJornada()" class="w-full p-4 bg-slate-50 rounded-2xl font-bold">
-                                <option value="MADRID - ATOCHA">MADRID - ATOCHA</option>
-                                <option value="BARCELONA - SANTS">BARCELONA - SANTS</option>
-                                <option value="VALENCIA - J. SOROLLA">VALENCIA - J. SOROLLA</option>
-                                <option value="SEVILLA - SANTA JUSTA">SEVILLA - SANTA JUSTA</option>
-                                <option value="MALAGA - M. ZAMBRANO">MÁLAGA - M. ZAMBRANO</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 block mb-2 ml-2">Origen</label>
-                            <select id="form-origin" class="w-full p-4 bg-slate-50 rounded-2xl font-bold"></select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 block mb-2 ml-2">Destino</label>
-                            <select id="form-destination" onchange="calculateJornada()" class="w-full p-4 bg-slate-50 rounded-2xl font-bold"></select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 block mb-2 ml-2">Salida Tren</label>
-                            <input type="time" id="time-train-departure" onchange="calculateJornada()" class="w-full p-4 bg-slate-50 font-bold rounded-2xl">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 block mb-2 ml-2">Llegada Tren</label>
-                            <input type="time" id="time-train-arrival" onchange="calculateJornada()" class="w-full p-4 bg-slate-50 font-bold rounded-2xl">
-                        </div>
-                    </div>
-
-                    <div class="p-6 bg-indigo-50 rounded-3xl grid grid-cols-2 gap-4 border border-indigo-100">
-                        <div>
-                            <p class="text-[9px] font-black uppercase text-indigo-400 mb-1">Entrada Jornada (+1H)</p>
-                            <div id="display-entry" class="text-xl font-black text-indigo-700">--:--</div>
-                        </div>
-                        <div>
-                            <p class="text-[9px] font-black uppercase text-indigo-400 mb-1">Salida Jornada (Base+20/Fuera+15)</p>
-                            <div id="display-exit" class="text-xl font-black text-indigo-700">--:--</div>
-                        </div>
-                    </div>
-
-                    <div class="p-6 bg-slate-50 rounded-3xl space-y-4">
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" id="form-descanso" class="w-5 h-5 rounded text-indigo-600">
-                            <span class="text-xs font-black uppercase text-slate-600">He trabajado mi descanso (120€)</span>
-                        </label>
-                        <div id="compensatory-btn-container" class="hidden">
-                            <button type="button" onclick="openPlanner(2)" class="w-full py-3 bg-white border-2 border-indigo-200 text-indigo-600 rounded-xl text-[10px] font-black uppercase hover:bg-indigo-50 transition-all">
-                                Elegir 2 días compensatorios del mes siguiente →
-                            </button>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-indigo-700 transition-all uppercase text-sm tracking-widest">Guardar Registro</button>
-                </form>
+            <div>
+              <label class="text-sm block mb-1" style="color:var(--text-2)">🧑‍✈️ Auxiliar</label>
+              <input id="set-nightAux" type="number" step="0.01" min="0" class="input"/>
             </div>
-        </section>
+          </div>
+          <div class="border-t pt-3 mt-3" style="border-color:var(--border)">
+            <div><label class="text-sm block mb-1" style="color:var(--text-2)">🌍 Plus Internacionalidad</label><input id="set-pInt" type="number" step="0.01" min="0" class="input"/></div>
+            <div class="mt-2"><label class="text-sm block mb-1" style="color:var(--text-2)">⚡ Plus Activación</label><input id="set-pAct" type="number" step="0.01" min="0" class="input"/></div>
+            <div class="mt-2"><label class="text-sm block mb-1" style="color:var(--text-2)">🚄 Plus JT</label><input id="set-pJT" type="number" step="0.01" min="0" class="input"/></div>
+          </div>
+        </div></div>
+      </div>
 
-        <section id="tab-history" class="hidden">
-            <h2 class="text-3xl font-black text-slate-800 mb-6">Historial</h2>
-            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase">
-                        <tr>
-                            <th class="px-8 py-4">Fecha</th>
-                            <th class="px-8 py-4">Ruta / Jornada</th>
-                            <th class="px-8 py-4 text-right">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-tbody" class="divide-y divide-slate-100"></tbody>
-                </table>
+      <!-- 📉 IRPF -->
+      <div class="acc" data-acc>
+        <div class="acc-head">
+          <div class="acc-left">
+            <span class="acc-icon">📉</span>
+            <div>
+              <div class="acc-title">Porcentaje IRPF</div>
+              <div class="acc-sub">Retención personalizada</div>
             </div>
-        </section>
-    </main>
+          </div>
+          <span class="acc-chev">▾</span>
+        </div>
+        <div class="acc-body"><div class="acc-body-inner space-y-2">
+          <label class="text-sm block mb-1" style="color:var(--text-2)">% de IRPF</label>
+          <input id="set-irpf" type="number" step="0.1" min="0" max="60" class="input"/>
+          <p class="text-xs" style="color:var(--text-3)">Se aplica sobre Salario Base + Pluses.</p>
+        </div></div>
+      </div>
 
-    <script>
-        const STATIONS = [
-            "MADRID - ATOCHA", "MADRID - CHAMARTIN", "BARCELONA - SANTS", "VALENCIA - J. SOROLLA", 
-            "SEVILLA - SANTA JUSTA", "MALAGA - M. ZAMBRANO", "ALICANTE - TERMINAL", "ZARAGOZA - DELICIAS", 
-            "CORDOBA", "VALLADOLID - C. GRANDE", "LEON", "MURCIA - DEL CARMEN", "CASTELLON", 
-            "TARRAGONA - CAMP", "GIRONA", "FIGUERES - VILAFANT", "ALBACETE - LOS LLANOS", 
-            "CUENCA - F. ZOBEL", "CIUDAD REAL", "PUERTOLLANO", "TOLEDO", "SEGOVIA - GUIOMAR", 
-            "ZAMORA", "OURENSE", "SANTIAGO DE C.", "A CORUÑA", "VIGO - URZAIZ", "PONTEVEDRA", 
-            "OVIEDO", "GIJON", "SANTANDER", "BILBAO - ABANDO", "SAN SEBASTIAN", "PAMPLONA", 
-            "LOGROÑO", "HUESCA", "LLEIDA - PIRINEUS", "GRANADA", "CADIZ", "ALGECIRAS", 
-            "HUELVA - TERMINO", "BADAJOZ", "CACERES"
-        ].sort();
+      <!-- ⏱️ Jornada y Horas Extra -->
+      <div class="acc" data-acc>
+        <div class="acc-head">
+          <div class="acc-left">
+            <span class="acc-icon">⏱️</span>
+            <div>
+              <div class="acc-title">Jornada y Horas Extra</div>
+              <div class="acc-sub">Umbral diario y tarifa €/h extra</div>
+            </div>
+          </div>
+          <span class="acc-chev">▾</span>
+        </div>
+        <div class="acc-body"><div class="acc-body-inner space-y-3">
+          <div>
+            <label class="text-sm block mb-1" style="color:var(--text-2)">📅 Jornada ordinaria (h/día)</label>
+            <input id="set-hoursOrd" type="number" step="0.25" min="0" max="24" class="input"/>
+            <p class="text-xs mt-1" style="color:var(--text-3)">Si la firma supera este valor, el exceso cuenta como hora extra. <b>Los retrasos del tren siempre cuentan como hora extra.</b></p>
+          </div>
+          <div>
+            <label class="text-sm block mb-1" style="color:var(--text-2)">💶 Tarifa hora extra (€/h)</label>
+            <input id="set-extraRate" type="number" step="0.01" min="0" class="input"/>
+          </div>
+        </div></div>
+      </div>
 
-        let shifts = JSON.parse(localStorage.getItem('renfe_flow_v2')) || [];
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
-        let plannerSelectedDays = [];
-        let plannerLimit = null;
+      <!-- 💪 Descanso trabajado (Por Dinero) -->
+      <div class="acc" data-acc>
+        <div class="acc-head">
+          <div class="acc-left">
+            <span class="acc-icon">💪</span>
+            <div>
+              <div class="acc-title">Descanso Trabajado · Por Dinero</div>
+              <div class="acc-sub">Importe €/turno según rol</div>
+            </div>
+          </div>
+          <span class="acc-chev">▾</span>
+        </div>
+        <div class="acc-body"><div class="acc-body-inner space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm block mb-1" style="color:var(--text-2)">⭐ Tripulante (€/turno)</label>
+              <input id="set-restTri" type="number" step="0.01" min="0" class="input"/>
+            </div>
+            <div>
+              <label class="text-sm block mb-1" style="color:var(--text-2)">🧑‍✈️ Auxiliar (€/turno)</label>
+              <input id="set-restAux" type="number" step="0.01" min="0" class="input"/>
+            </div>
+          </div>
+          <p class="text-xs" style="color:var(--text-3)">Se suma al bruto del mes y aplica IRPF. La opción "Por Días (2x1)" no suma dinero, solo acumula 2 días libres.</p>
+        </div></div>
+      </div>
 
-        // CALCULO DE JORNADA
-        function calculateJornada() {
-            const depTime = document.getElementById('time-train-departure').value;
-            const arrTime = document.getElementById('time-train-arrival').value;
-            const base = document.getElementById('form-base').value;
-            const dest = document.getElementById('form-destination').value;
+      <!-- 🏠 Estación base (compacta) -->
+      <div class="acc" data-acc>
+        <div class="acc-head">
+          <div class="acc-left">
+            <span class="acc-icon">🏠</span>
+            <div>
+              <div class="acc-title">Estación base</div>
+              <div class="acc-sub" id="acc-base-hint">—</div>
+            </div>
+          </div>
+          <span class="acc-chev">▾</span>
+        </div>
+        <div class="acc-body"><div class="acc-body-inner space-y-3">
+          <p class="label">⚡ Acceso rápido</p>
+          <div class="grid grid-cols-3 gap-2" id="set-base-quick">
+            <button type="button" class="btn-soft text-xs" data-quickbase="Madrid">📍 Madrid</button>
+            <button type="button" class="btn-soft text-xs" data-quickbase="Barcelona">📍 Barcelona</button>
+            <button type="button" class="btn-soft text-xs" data-quickbase="Valencia">📍 Valencia</button>
+            <button type="button" class="btn-soft text-xs" data-quickbase="Sevilla">📍 Sevilla</button>
+            <button type="button" class="btn-soft text-xs" data-quickbase="Bilbao">📍 Bilbao</button>
+          </div>
+          <p class="label mt-3">🔍 Selección manual</p>
+          <div class="combo" data-station-combo>
+            <input class="input combo-input" placeholder="Pulsa para elegir estación..." autocomplete="off" id="set-baseStation" readonly inputmode="none"/>
+            <button type="button" class="combo-clear" aria-label="Limpiar">×</button>
+            <div class="combo-pop"></div>
+          </div>
+        </div></div>
+      </div>
+    </div>
 
-            if (depTime) {
-                const [h, m] = depTime.split(':').map(Number);
-                const entryH = (h + 1) % 24;
-                document.getElementById('display-entry').innerText = `${String(entryH).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-            }
+    <button id="set-save" class="btn-primary w-full mt-5">💾 Guardar Ajustes</button>
+  </div>
+</div>
 
-            if (arrTime) {
-                const [h, m] = arrTime.split(':').map(Number);
-                const isBase = dest === base;
-                const extra = isBase ? 20 : 15;
-                let totalMin = m + extra;
-                let finalH = h;
-                if (totalMin >= 60) { finalH = (h + 1) % 24; totalMin -= 60; }
-                document.getElementById('display-exit').innerText = `${String(finalH).padStart(2, '0')}:${String(totalMin).padStart(2, '0')}`;
-            }
+<!-- Aviso legal (popup que aparece al cambiar Rol o IRPF) -->
+<div id="modal-disclaimer" class="modal" data-modal>
+  <div class="glass rounded-[28px] p-7 modal-content max-w-md text-center">
+    <div class="mx-auto mb-3 inline-flex items-center justify-center w-14 h-14 rounded-2xl" style="background:color-mix(in srgb, var(--amber) 18%, transparent); color:var(--amber); font-size:28px">⚠️</div>
+    <h3 class="text-xl mb-2" style="font-weight:600">Aviso</h3>
+    <p class="text-sm mb-5" style="color:var(--text-2); line-height:1.6">
+      Los resultados son cálculos estimativos. No constituye una nómina oficial y puede variar según antigüedad, Seguridad Social o normativa vigente.
+    </p>
+    <button class="btn-primary w-full" data-close="modal-disclaimer">Entendido</button>
+  </div>
+</div>
+
+<!-- 💸 Conceptos y Neto - Desglose salarial -->
+<div id="modal-conceptos" class="modal" data-modal>
+  <div class="glass rounded-[28px] p-7 modal-content max-w-lg" data-testid="modal-conceptos-content">
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-2xl flex items-center gap-2" style="font-weight:700">
+        <span style="color:var(--primary)">💰</span> Dinero a percibir
+      </h2>
+      <button class="text-2xl opacity-60 hover:opacity-100" data-close="modal-conceptos">×</button>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap mb-4">
+      <span id="cn-role-pill" class="badge badge-default">🧑‍✈️ Auxiliar</span>
+      <span id="cn-hours-pill" class="badge badge-default">⏱️ 0.0h trabajadas</span>
+      <span id="cn-rests-pill" class="badge badge-default">Δ Descansos: 0</span>
+    </div>
+    <div id="conceptos-body" class="space-y-2"></div>
+    <!-- Aviso días acumulados (Por Días 2x1) -->
+    <div id="cn-days-alert" class="mt-3 rounded-2xl p-4" style="display:none; align-items:center; gap:12px; background:color-mix(in srgb, var(--emerald) 12%, transparent); border:1px solid color-mix(in srgb, var(--emerald) 35%, transparent)">
+      <div style="font-size:32px">🌴</div>
+      <div style="flex:1">
+        <div style="font-weight:700; font-size:14px; color:var(--emerald)">Días libres acumulados para el mes siguiente: <span id="cn-days-count" style="font-size:18px">0</span></div>
+        <div id="cn-days-sub" style="font-size:11px; color:var(--text-3); margin-top:2px"></div>
+      </div>
+    </div>
+    <div class="mt-5 rounded-2xl p-5" style="background:linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border:none; box-shadow: 0 14px 38px var(--neto-glow); color:#fff">
+      <div class="flex justify-between items-center gap-3 flex-wrap">
+        <div>
+          <div style="font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; opacity:0.85">💚 Neto a percibir</div>
+          <div style="font-size:11px; opacity:0.75; margin-top:4px">Bruto − IRPF</div>
+        </div>
+        <div id="conceptos-neto" style="font-size:38px; font-weight:800; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; letter-spacing:-0.02em">0.00€</div>
+      </div>
+    </div>
+    <p class="text-xs mt-4 text-center" style="color:var(--text-3)">⚠ Cálculo estimativo. No incluye Seguridad Social ni otros descuentos.</p>
+  </div>
+</div>
+
+<div id="modal-edit" class="modal" data-modal>
+  <div class="glass rounded-[28px] p-8 modal-content">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl" style="font-weight:600">Editar Turno</h2>
+      <button class="text-2xl opacity-60 hover:opacity-100" data-close="modal-edit">×</button>
+    </div>
+    <form id="edit-form" class="space-y-3"></form>
+  </div>
+</div>
+
+<div id="modal-quick" class="modal" data-modal>
+  <div class="glass rounded-[28px] p-7 modal-content">
+    <div class="flex justify-between items-center mb-1">
+      <h2 class="text-2xl" style="font-weight:600">Añadir turno</h2>
+      <button class="text-2xl opacity-60 hover:opacity-100" data-close="modal-quick">×</button>
+    </div>
+    <p id="quick-date-label" class="text-sm mb-5" style="color:var(--text-2)"></p>
+    <form id="quick-form" class="space-y-3"></form>
+  </div>
+</div>
+
+<!-- Popup turno de VUELTA -->
+<div id="modal-return" class="modal" data-modal>
+  <div class="glass rounded-[28px] p-7 modal-content">
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="text-2xl flex items-center gap-2" style="font-weight:600">
+        <span style="color:var(--violet)">↩</span> Añadir turno de vuelta
+      </h2>
+      <button class="text-2xl opacity-60 hover:opacity-100" data-close="modal-return">×</button>
+    </div>
+    <p id="return-info" class="text-sm mb-5" style="color:var(--text-2)"></p>
+    <form id="return-form" class="space-y-3"></form>
+  </div>
+</div>
+
+<!-- Modal: editar días compensatorios -->
+<div id="modal-freedays" class="modal" data-modal>
+  <div class="glass rounded-[28px] p-7 modal-content max-w-md">
+    <div class="flex justify-between items-center mb-2">
+      <h3 class="text-xl flex items-center gap-2" style="font-weight:600">🌴 Días Compensatorios</h3>
+      <button class="text-2xl opacity-60 hover:opacity-100" data-close="modal-freedays">×</button>
+    </div>
+    <p id="freedays-info" class="text-sm mb-4" style="color:var(--text-2)"></p>
+    <div class="space-y-3">
+      <div>
+        <label class="label block mb-1">📅 Día 1</label>
+        <input id="fd-d1" type="date" class="input"/>
+      </div>
+      <div>
+        <label class="label block mb-1">📅 Día 2</label>
+        <input id="fd-d2" type="date" class="input"/>
+      </div>
+      <div id="fd-validation" class="text-xs" style="color:var(--amber); display:none">⚠ Las fechas deben estar en el mes siguiente al turno.</div>
+      <div class="flex gap-2 flex-wrap pt-2">
+        <button id="fd-save" class="btn-primary flex-1">💾 Guardar</button>
+        <button id="fd-delete" class="btn-accent btn-clear">🗑️ Eliminar</button>
+      </div>
+      <div class="border-t pt-4 mt-2" style="border-color:var(--border)">
+        <p class="label mb-2">💡 ¿Prefieres compensación en dinero?</p>
+        <button id="fd-to-money" class="btn-soft w-full">💰 Convertir a Por Dinero (según tu rol)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================= ESTACIONES =================
+const STATION_GROUPS = {
+  "AVE": ["Madrid Puerta de Atocha-Almudena Grandes","Madrid Chamartín-Clara Campoamor","Guadalajara-Yebes","Calatayud","Zaragoza Delicias","Lleida Pirineus","Camp de Tarragona","Barcelona Sants","Girona","Figueres Vilafant","Cuenca Fernando Zóbel","Albacete Los Llanos","Requena-Utiel","Valencia Joaquín Sorolla","Villena AV","Elche AV","Orihuela Miguel Hernández","Alicante Terminal","Murcia del Carmen","Puertollano","Ciudad Real","Córdoba Central","Puente Genil-Herrera","Antequera-Santa Ana","Málaga María Zambrano","Granada","Sevilla Santa Justa","Cádiz","Segovia Guiomar","Valladolid Campo Grande","Medina del Campo AV","Zamora","Sanabria AV","Ourense","Santiago de Compostela","A Coruña","Vigo Urzaiz","Vigo Guixar","Pontevedra","León","Palencia","Burgos Rosa Manzano"],
+  "Larga Distancia": ["Madrid Príncipe Pío","Bilbao Abando","San Sebastián / Donostia","Pamplona / Iruña","Logroño","Vitoria / Gasteiz","Miranda de Ebro","Oviedo","Gijón","Santander","Torrelavega","Salamanca","Ávila","Cáceres","Mérida","Badajoz","Plasencia","Talavera de la Reina","Huelva","Algeciras","Ronda","Linares-Baeza","Jaén","Almería","Lorca Sutullena","Cartagena","Castellón","Valencia Nord","Tortosa","Huesca","Teruel","Sagunto"],
+  "Euromed": ["Barcelona Sants","Camp de Tarragona","Castellón","Valencia Joaquín Sorolla","Valencia Nord","Alicante Terminal"],
+  "Renfe International": ["Lyon Part-Dieu","Marseille Saint-Charles"]
+};
+const GROUP_META = {
+  "AVE": { pill: "pill-ave", color: "#F43F5E", short: "AVE" },
+  "Larga Distancia": { pill: "pill-ld", color: "#6366F1", short: "LD" },
+  "Euromed": { pill: "pill-euromed", color: "#14B8A6", short: "Euromed" },
+  "Renfe International": { pill: "pill-intl", color: "#A855F7", short: "Internacional" }
+};
+
+const SHIFTS_KEY = "tf_shifts_html_v3";
+const SETTINGS_KEY = "tf_settings_html_v3";
+const DEFAULT_SETTINGS = {
+  plusInternational: 16, plusActivation: 45, plusJT: 16,
+  baseSalaryTripulante: 1614.15, baseSalaryAuxiliar: 1212.77,
+  nightRateTripulante: 2.70, nightRateAuxiliar: 1.97,
+  restWorkedPayTripulante: 19.72, restWorkedPayAuxiliar: 14.87,
+  hoursOrdinary: 7.5, extraHourRate: 12,
+  hourlyRate: 12,
+  baseStation: "Madrid Puerta de Atocha-Almudena Grandes",
+  irpf: 15, role: "auxiliar", theme: "light"
+};
+// Estaciones rápidas principales (acceso directo en Ajustes)
+const QUICK_STATIONS = {
+  "Madrid": "Madrid Puerta de Atocha-Almudena Grandes",
+  "Barcelona": "Barcelona Sants",
+  "Valencia": "Valencia Joaquín Sorolla",
+  "Sevilla": "Sevilla Santa Justa",
+  "Bilbao": "Bilbao Abando"
+};
+// Helpers de configuración por rol
+function getBaseSalary() { return Number(settings.role === "tripulante" ? settings.baseSalaryTripulante : settings.baseSalaryAuxiliar) || 0; }
+function getNightRate() { return Number(settings.role === "tripulante" ? settings.nightRateTripulante : settings.nightRateAuxiliar) || 0; }
+function getRestWorkedPay() { return Number(settings.role === "tripulante" ? settings.restWorkedPayTripulante : settings.restWorkedPayAuxiliar) || 0; }
+function getRoleLabel() { return settings.role === "tripulante" ? "Tripulante" : "Auxiliar de Tripulante"; }
+
+let shifts = [];
+let settings = { ...DEFAULT_SETTINGS };
+
+function loadStore() {
+  try { shifts = JSON.parse(localStorage.getItem(SHIFTS_KEY)) || []; } catch { shifts = []; }
+  if (!shifts.length) {
+    for (const k of ["tf_shifts_html_v2","tf_shifts_html_v1"]) {
+      try { const v = JSON.parse(localStorage.getItem(k)); if (Array.isArray(v) && v.length) { shifts = v; break; } } catch {}
+    }
+  }
+  try { const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)); if (s) settings = { ...DEFAULT_SETTINGS, ...s }; } catch {}
+  if (!localStorage.getItem(SETTINGS_KEY)) {
+    for (const k of ["tf_settings_html_v2","tf_settings_html_v1"]) {
+      try { const s = JSON.parse(localStorage.getItem(k)); if (s) { settings = { ...DEFAULT_SETTINGS, ...s }; break; } } catch {}
+    }
+  }
+  // Migración: rol "jt" antiguo → "tripulante"
+  if (settings.role === "jt") settings.role = "tripulante";
+}
+function saveStore() {
+  localStorage.setItem(SHIFTS_KEY, JSON.stringify(shifts));
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+
+// ================= CALC =================
+const toMin = (v) => { const [h,m] = v.split(":").map(Number); return h*60+m; };
+const fromMin = (m) => { m = ((m % 1440) + 1440) % 1440; return String(Math.floor(m/60)).padStart(2,"0") + ":" + String(m%60).padStart(2,"0"); };
+
+function calculateFirma(s) {
+  // Modelo: signTime = firma. depTime = signTime + 1h (salida tren auto). Retraso SIEMPRE se considera hora extra.
+  let signTime = s.signTime || s.workStart || "";
+  let depTime = s.depTime || "";
+  if (!signTime && depTime) {
+    const pre = s.serviceType === "pasivo" ? 30 : 60;
+    signTime = fromMin(toMin(depTime) - pre);
+  }
+  if (signTime) depTime = fromMin(toMin(signTime) + 60);
+  if (!signTime || !s.arrTime) return { signTime: signTime||"", workStart: signTime||"", workEnd: "", depTime: depTime||"", hours: 0, hoursBase: 0, delayHours: 0 };
+  const post = s.destType === "base" ? 20 : 15;
+  const delayMin = s.delayed ? (Number(s.delayMinutes)||0) : 0;
+  const start = toMin(signTime);
+  let endBase = toMin(s.arrTime) + post;
+  if (endBase < start) endBase += 1440;
+  const hoursBase = (endBase - start) / 60;
+  const delayHours = delayMin / 60;
+  const end = endBase + delayMin;
+  return { signTime, workStart: signTime, workEnd: fromMin(end), depTime, hours: hoursBase + delayHours, hoursBase, delayHours };
+}
+
+// Calcula horas dentro del tramo 22:00-05:00 (nocturnidad)
+function calcNightHours(workStart, workEnd) {
+  if (!workStart || !workEnd) return 0;
+  let start = toMin(workStart);
+  let end = toMin(workEnd);
+  if (end <= start) end += 1440;
+  const nights = [[-120, 300], [1320, 1740], [2760, 3180]];
+  let mins = 0;
+  for (const [ns, ne] of nights) {
+    mins += Math.max(0, Math.min(end, ne) - Math.max(start, ns));
+  }
+  return mins / 60;
+}
+
+function buildShift(input) {
+  const firma = calculateFirma(input);
+  let pluses = 0; const details = [];
+  // Nocturnidad
+  const nightHours = calcNightHours(firma.workStart, firma.workEnd);
+  const nightRate = getNightRate();
+  const plusNocturnidad = +(nightHours * nightRate).toFixed(2);
+  if (plusNocturnidad > 0) { pluses += plusNocturnidad; details.push(`🌙 Nocturnidad ${nightHours.toFixed(2)}h (+${plusNocturnidad.toFixed(2)}€)`); }
+  // Horas extra: (jornada base − ordinaria) + TODO el retraso (siempre cuenta como extra)
+  const ordHours = Number(settings.hoursOrdinary)||0;
+  const extraRate = Number(settings.extraHourRate)||0;
+  const baseOverflow = Math.max(0, (firma.hoursBase||0) - ordHours);
+  const extraHours = +(baseOverflow + (firma.delayHours||0)).toFixed(4);
+  const plusExtra = +(extraHours * extraRate).toFixed(2);
+  if (plusExtra > 0) { pluses += plusExtra; details.push(`⏱️ H. Extra ${extraHours.toFixed(2)}h (+${plusExtra.toFixed(2)}€)`); }
+  // Pluses opcionales
+  if (input.plusInternational) { pluses += +settings.plusInternational; details.push("🌍 Internacional"); }
+  if (input.plusActivation) { pluses += +settings.plusActivation; details.push("⚡ Activación"); }
+  if (input.plusJT) { pluses += +settings.plusJT; details.push("🚄 JT"); }
+  // Descanso trabajado por dinero — compat legacy: aux/trip → money
+  let restChange = 0, freeDays = [];
+  let compType = input.compType;
+  if (compType === "aux" || compType === "trip") compType = "money";
+  let plusRestWorked = 0;
+  if (input.restType === "worked") {
+    if (compType === "days") { restChange = 2; freeDays = (input.freeDays||[]).filter(Boolean); }
+    else if (compType === "money") {
+      plusRestWorked = +getRestWorkedPay().toFixed(2);
+      if (plusRestWorked > 0) { pluses += plusRestWorked; details.push(`💰 Desc. trabajado (+${plusRestWorked.toFixed(2)}€)`); }
+    }
+  } else if (input.restType === "enjoyed") restChange = -1;
+  return { ...input, compType, base: settings.baseStation, ...firma, pluses, plusDetails: details, income: pluses, nightHours, plusNocturnidad, extraHours, plusExtra, plusRestWorked, restChange, freeDays };
+}
+
+// Fecha del mes siguiente (primer día)
+function nextMonthStart(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  d.setMonth(d.getMonth() + 1, 1);
+  return d.toISOString().slice(0,10);
+}
+function nextMonthEnd(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  d.setMonth(d.getMonth() + 2, 0);
+  return d.toISOString().slice(0,10);
+}
+function isInNextMonth(shiftDate, candidate) {
+  if (!candidate) return true;
+  const start = nextMonthStart(shiftDate);
+  const end = nextMonthEnd(shiftDate);
+  return candidate >= start && candidate <= end;
+}
+
+function showToast(text, type="info") {
+  const t = document.getElementById("toast");
+  t.innerText = text;
+  t.style.borderLeft = "4px solid " + (type==="error"?"#F43F5E":type==="success"?"#10B981":"#6366F1");
+  t.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+// ================= COMBOBOX =================
+const norm = (s) => (s||"").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function highlight(name, q) {
+  if (!q) return escape(name);
+  const nq = norm(q); const nn = norm(name); const idx = nn.indexOf(nq);
+  if (idx === -1) return escape(name);
+  return escape(name.slice(0, idx)) + "<mark>" + escape(name.slice(idx, idx+q.length)) + "</mark>" + escape(name.slice(idx+q.length));
+}
+function buildComboItems(catFilter) {
+  const groupsOut = [];
+  for (const [group, list] of Object.entries(STATION_GROUPS)) {
+    if (catFilter && catFilter !== group) continue;
+    if (list.length) groupsOut.push({ group, items: list });
+  }
+  return groupsOut;
+}
+function renderComboPop(combo, catFilter) {
+  const pop = combo.querySelector(".combo-pop");
+  const groups = buildComboItems(catFilter);
+  const cats = ["", "AVE", "Larga Distancia", "Euromed", "Renfe International"];
+  const labels = { "": "TODAS", "AVE": "AVE", "Larga Distancia": "LD", "Euromed": "Euromed", "Renfe International": "Internacional" };
+  const tabs = `<div class="combo-cats">${cats.map(c => `<div class="combo-cat ${(catFilter||'')===c?'active':''}" data-cat="${c}">${labels[c]}</div>`).join("")}</div>`;
+  if (!groups.length) { pop.innerHTML = tabs + `<div class="combo-empty">Sin estaciones</div>`; return; }
+  pop.innerHTML = tabs + groups.map(({group, items}) => {
+    const meta = GROUP_META[group];
+    return `<div class="combo-group-title"><span class="dot" style="background:${meta.color}"></span>${group}</div>` +
+      items.map(name => `<div class="combo-item" data-value="${escape(name)}"><span>${escape(name)}</span><span class="combo-pill ${meta.pill}">${meta.short}</span></div>`).join("");
+  }).join("");
+}
+function attachCombo(combo) {
+  const input = combo.querySelector(".combo-input");
+  const pop = combo.querySelector(".combo-pop");
+  const clearBtn = combo.querySelector(".combo-clear");
+  let currentFilter = "";
+  const refresh = () => combo.classList.toggle("has-value", !!input.value);
+  const open = () => { renderComboPop(combo, currentFilter); combo.classList.add("open"); };
+  const close = () => combo.classList.remove("open");
+  input.addEventListener("click", open);
+  input.addEventListener("focus", open);
+  pop.addEventListener("mousedown", (e) => {
+    const cat = e.target.closest(".combo-cat");
+    if (cat) { e.preventDefault(); currentFilter = cat.dataset.cat; renderComboPop(combo, currentFilter); return; }
+    const item = e.target.closest(".combo-item"); if (!item) return;
+    e.preventDefault();
+    input.value = item.dataset.value; refresh(); close();
+    input.dispatchEvent(new Event("change",{bubbles:true})); input.dispatchEvent(new Event("station-change",{bubbles:true}));
+  });
+  clearBtn.addEventListener("click", (e) => { e.preventDefault(); input.value=""; refresh(); currentFilter=""; input.dispatchEvent(new Event("change",{bubbles:true})); input.dispatchEvent(new Event("station-change",{bubbles:true})); open(); });
+  document.addEventListener("click", (e) => { if (!combo.contains(e.target)) close(); });
+  refresh();
+}
+function initAllCombos(root=document) { root.querySelectorAll("[data-station-combo]").forEach(c => { if (!c.dataset.wired) { c.dataset.wired="1"; attachCombo(c); } }); }
+function comboHTML(name, value, placeholder) {
+  return `<div class="combo" data-station-combo>
+    <input class="input combo-input" name="${name}" value="${escape(value||'')}" placeholder="${placeholder||'Pulsa para elegir...'}" autocomplete="off" readonly inputmode="none"/>
+    <button type="button" class="combo-clear" aria-label="Limpiar">×</button>
+    <div class="combo-pop"></div>
+  </div>`;
+}
+
+// ================= FORM TEMPLATE =================
+// flavor: "new" | "edit" | "quick" | "return"
+function formTemplate(flavor, data) {
+  const d = data || {};
+  const isReturnForm = flavor === "return";
+  const isVueltaShift = d.direction === "vuelta" || d.isReturn;
+  // Para FORM solo se muestran "ida" e "idavuelta". Si se edita un vuelta, ocultamos el segment.
+  const dirForm = isReturnForm ? "vuelta" : (d.direction === "idavuelta" ? "idavuelta" : "ida");
+  const returnMode = d.returnMode || "pernocta"; // pernocta | sameday
+  const srv = d.serviceType || "activo";
+  const dst = d.destType || (dirForm === "idavuelta" ? "outside" : "base");
+  const rst = d.restType || "none";
+
+  // Sección dirección — ocultada en form de retorno y al editar un vuelta existente
+  const showDirection = !isReturnForm && !isVueltaShift;
+
+  return `
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="label block mb-1">📅 Fecha *</label><input type="date" name="date" required class="input" value="${d.date||''}"/></div>
+      <div><label class="label block mb-1">🚄 Nº Tren *</label><input name="train" required placeholder="AVE 03112" class="input" value="${escape(d.train||'')}"/></div>
+    </div>
+
+    ${isVueltaShift && !isReturnForm ? `<div class="rounded-2xl p-3 text-center" style="background:color-mix(in srgb, var(--violet) 12%, transparent); border:1px solid color-mix(in srgb, var(--violet) 30%, transparent); color:var(--violet); font-size:12px; font-weight:600">↩ Turno de vuelta</div>`:''}
+
+    <div class="tabs-nav" role="tablist">
+      <button type="button" class="tab-btn active" data-tab="ruta">🗺️ Ruta</button>
+      <button type="button" class="tab-btn" data-tab="servicio">🚉 Servicio</button>
+      <button type="button" class="tab-btn" data-tab="pluses">💶 Pluses</button>
+      <button type="button" class="tab-btn" data-tab="jornada">📋 Jornada</button>
+      <button type="button" class="tab-btn" data-tab="extras">⏰ Extras</button>
+    </div>
+
+    <!-- RUTA -->
+    <div class="tab-pane active" data-pane="ruta">
+      <div class="space-y-3">
+        <div><label class="label block mb-1">📍 Salida</label>${comboHTML("origin", d.origin, "AVE · LD · Euromed · Internacional")}</div>
+        <div><label class="label block mb-1">🎯 Destino</label>${comboHTML("destination", d.destination, "AVE · LD · Euromed · Internacional")}</div>
+          <div class="grid grid-cols-2 gap-3">
+          <div><label class="label block mb-1">⏰ Hora Firma</label><input name="signTime" type="time" class="input" value="${d.signTime||d.workStart||(d.depTime?fromMin(toMin(d.depTime)-(d.serviceType==='pasivo'?30:60)):'')}"/></div>
+          <div><label class="label block mb-1">Llegada tren</label><input name="arrTime" type="time" class="input" value="${d.arrTime||''}"/></div>
+        </div>
+        <div class="rounded-lg p-2 text-xs text-center auto-dep" style="background:color-mix(in srgb, var(--primary) 6%, transparent); border:1px solid color-mix(in srgb, var(--primary) 20%, transparent); color:var(--text-2); display:none">
+          🚄 Salida del tren (auto): <b class="dep-auto" style="color:var(--primary)">—</b> · firma + 1h
+        </div>
+        <div class="firma-preview rounded-2xl p-3 text-center" style="background:color-mix(in srgb, var(--primary) 10%, transparent); border:1px solid color-mix(in srgb, var(--primary) 30%, transparent); display:none">
+          <div class="label" style="color:var(--primary)">Firma estimada</div>
+          <div class="font-medium firma-text mt-1" style="color:var(--primary)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVICIO -->
+    <div class="tab-pane" data-pane="servicio">
+      <div class="space-y-4">
+        ${showDirection ? `
+          <div>
+            <p class="label mb-2">Dirección</p>
+            <div class="seg seg-2" data-seg="direction" style="--accent: var(--indigo)">
+              <label data-val="ida" class="${dirForm==='ida'?'checked':''}">
+                <span class="seg-ico">➡️</span><span class="seg-title">Ida</span><span class="seg-sub">Trayecto único</span>
+                <input type="radio" name="direction" value="ida" ${dirForm==='ida'?'checked':''}/>
+              </label>
+              <label data-val="idavuelta" class="${dirForm==='idavuelta'?'checked':''}">
+                <span class="seg-ico">🔄</span><span class="seg-title">Ida/Vuelta</span><span class="seg-sub">Crea ambos turnos</span>
+                <input type="radio" name="direction" value="idavuelta" ${dirForm==='idavuelta'?'checked':''}/>
+              </label>
+            </div>
+          </div>
+
+          <div class="return-mode-block" style="display:${dirForm==='idavuelta'?'block':'none'}">
+            <p class="label mb-2">¿Cuándo es la vuelta?</p>
+            <div class="seg seg-2" data-seg="returnMode" style="--accent: var(--violet)">
+              <label data-val="pernocta" class="${returnMode==='pernocta'?'checked':''}">
+                <span class="seg-ico">🌙</span><span class="seg-title">Pernocta</span><span class="seg-sub">Vuelta día siguiente</span>
+                <input type="radio" name="returnMode" value="pernocta" ${returnMode==='pernocta'?'checked':''}/>
+              </label>
+              <label data-val="sameday" class="${returnMode==='sameday'?'checked':''}">
+                <span class="seg-ico">📍</span><span class="seg-title">Mismo día</span><span class="seg-sub">Vuelta inmediata</span>
+                <input type="radio" name="returnMode" value="sameday" ${returnMode==='sameday'?'checked':''}/>
+              </label>
+            </div>
+            <p class="text-xs mt-2" style="color:var(--text-3)">Al guardar este turno se abrirá un popup para añadir el turno de vuelta.</p>
+          </div>
+        `:''}
+
+        <div>
+          <p class="label mb-2">Tipo de servicio</p>
+          <div class="seg seg-2" data-seg="serviceType" style="--accent: var(--cyan)">
+            <label data-val="activo" class="${srv==='activo'?'checked':''}">
+              <span class="seg-ico">⚙️</span><span class="seg-title">Activo</span><span class="seg-sub">1h antes</span>
+              <input type="radio" name="serviceType" value="activo" ${srv==='activo'?'checked':''}/>
+            </label>
+            <label data-val="pasivo" class="${srv==='pasivo'?'checked':''}">
+              <span class="seg-ico">🛌</span><span class="seg-title">Pasivo</span><span class="seg-sub">30 min antes</span>
+              <input type="radio" name="serviceType" value="pasivo" ${srv==='pasivo'?'checked':''}/>
+            </label>
+          </div>
+        </div>
+
+        <div class="desttype-block" style="display:${dirForm==='idavuelta'?'none':'block'}">
+          <p class="label mb-2">Destino del trayecto</p>
+          <div class="seg seg-2" data-seg="destType" style="--accent: var(--teal)">
+            <label data-val="base" class="${dst==='base'?'checked':''}">
+              <span class="seg-ico">🏠</span><span class="seg-title">Llega a Base</span><span class="seg-sub">+20 min firma</span>
+              <input type="radio" name="destType" value="base" ${dst==='base'?'checked':''}/>
+            </label>
+            <label data-val="outside" class="${dst==='outside'?'checked':''}">
+              <span class="seg-ico">🗺️</span><span class="seg-title">Fuera de Base</span><span class="seg-sub">+15 min firma</span>
+              <input type="radio" name="destType" value="outside" ${dst==='outside'?'checked':''}/>
+            </label>
+          </div>
+        </div>
+        <!-- Cuando dir==idavuelta, destType es fijo "outside" -->
+        <input type="hidden" class="desttype-hidden" name="destType_hidden" value="${dst}"/>
+      </div>
+    </div>
+
+    <!-- PLUSES -->
+    <div class="tab-pane" data-pane="pluses">
+      <div class="space-y-2">
+        <label class="toggle-row ${d.plusInternational?'on':''}" data-toggle>
+          <div><div class="tr-title">🌍 Plus Internacional</div><div class="tr-sub">+${settings.plusInternational}€</div></div>
+          <input type="checkbox" name="plusInternational" ${d.plusInternational?'checked':''}/>
+          <span class="toggle-pill"></span>
+        </label>
+        <label class="toggle-row ${d.plusActivation?'on':''}" data-toggle>
+          <div><div class="tr-title">⚡ Plus Activación</div><div class="tr-sub">+${settings.plusActivation}€</div></div>
+          <input type="checkbox" name="plusActivation" ${d.plusActivation?'checked':''}/>
+          <span class="toggle-pill"></span>
+        </label>
+        <label class="toggle-row ${d.plusJT?'on':''}" data-toggle>
+          <div><div class="tr-title">🚄 Plus JT</div><div class="tr-sub">+${settings.plusJT}€</div></div>
+          <input type="checkbox" name="plusJT" ${d.plusJT?'checked':''}/>
+          <span class="toggle-pill"></span>
+        </label>
+        <div class="rounded-2xl p-3 mt-3 text-center" style="background:color-mix(in srgb, var(--amber) 10%, transparent); border:1px solid color-mix(in srgb, var(--amber) 28%, transparent)">
+          <div class="label" style="color:var(--amber)">Total pluses</div>
+          <div class="font-medium plus-total mt-1" style="color:var(--amber); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size:22px">0.00€</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JORNADA -->
+    <div class="tab-pane" data-pane="jornada">
+      <div class="space-y-4">
+        <p class="label">Tipo de jornada</p>
+        <div class="seg" style="grid-template-columns: 1fr" data-seg="restType">
+          <label data-val="none" class="${rst==='none'?'checked':''}" style="--accent: var(--text-2)">
+            <div style="display:flex; align-items:center; gap:10px; justify-content:flex-start"><span class="seg-ico" style="margin:0">📅</span><div style="text-align:left"><div class="seg-title">Jornada Ordinaria</div><div class="seg-sub">Sin compensaciones</div></div></div>
+            <input type="radio" name="restType" value="none" ${rst==='none'?'checked':''}/>
+          </label>
+          <label data-val="worked" class="${rst==='worked'?'checked':''}" style="--accent: var(--emerald)">
+            <div style="display:flex; align-items:center; gap:10px; justify-content:flex-start"><span class="seg-ico" style="margin:0">💪</span><div style="text-align:left"><div class="seg-title">Descanso Trabajado</div><div class="seg-sub">Genera compensación</div></div></div>
+            <input type="radio" name="restType" value="worked" ${rst==='worked'?'checked':''}/>
+          </label>
+          <label data-val="enjoyed" class="${rst==='enjoyed'?'checked':''}" style="--accent: var(--primary)">
+            <div style="display:flex; align-items:center; gap:10px; justify-content:flex-start"><span class="seg-ico" style="margin:0">🌴</span><div style="text-align:left"><div class="seg-title">Disfrute Descanso</div><div class="seg-sub">Consume 1 día</div></div></div>
+            <input type="radio" name="restType" value="enjoyed" ${rst==='enjoyed'?'checked':''}/>
+          </label>
+        </div>
+        <div class="comp-row rounded-2xl p-4" style="background:color-mix(in srgb, var(--emerald) 8%, transparent); border:1px solid color-mix(in srgb, var(--emerald) 30%, transparent); display:${rst==='worked'?'block':'none'}">
+          <p class="label mb-2" style="color:var(--emerald)">Compensación</p>
+          <div class="seg seg-2" data-seg="compType" style="--accent: var(--emerald)">
+            <label data-val="money" class="${(d.compType==='money'||d.compType==='aux'||d.compType==='trip')?'checked':''}">
+              <span class="seg-ico">💰</span><span class="seg-title">Por Dinero</span>
+              <span class="seg-sub">+€ al bruto (según rol)</span>
+              <input type="radio" name="compType" value="money" ${(d.compType==='money'||d.compType==='aux'||d.compType==='trip')?'checked':''}/>
+            </label>
+            <label data-val="days" class="${d.compType==='days'?'checked':''}">
+              <span class="seg-ico">🌴</span><span class="seg-title">Por Días (2x1)</span>
+              <span class="seg-sub">2 días libres mes siguiente</span>
+              <input type="radio" name="compType" value="days" ${d.compType==='days'?'checked':''}/>
+            </label>
+          </div>
+          <p class="text-xs mt-3" style="color:var(--text-3)">💡 Los días libres se pueden editar después desde el calendario o el historial.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXTRAS (solo retraso) -->
+    <div class="tab-pane" data-pane="extras">
+      <div class="space-y-3">
+        <label class="toggle-row ${d.delayed?'on':''}" data-toggle style="background:color-mix(in srgb, var(--amber) 8%, transparent); border-color:color-mix(in srgb, var(--amber) 28%, transparent)">
+          <div><div class="tr-title">⏰ Tren con retraso</div><div class="tr-sub">Suma los minutos a la firma fin</div></div>
+          <input type="checkbox" name="delayed" ${d.delayed?'checked':''}/>
+          <span class="toggle-pill"></span>
+        </label>
+        <input type="number" min="0" step="1" name="delayMinutes" placeholder="Minutos de retraso" class="input delay-min-row" value="${d.delayMinutes||0}" style="display:${d.delayed?'block':'none'}"/>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-primary w-full mt-2">${flavor==='edit'?'💾 Guardar Cambios':(flavor==='return'?'↩ Guardar vuelta':'✨ Guardar Turno')}</button>
+  `;
+}
+
+// ================= FORM WIRING =================
+function getFormData(form) {
+  const fd = new FormData(form); const data = {};
+  for (const [k,v] of fd.entries()) data[k] = v;
+  ["plusInternational","plusActivation","plusJT","delayed"].forEach(k => { data[k] = form.querySelector(`[name="${k}"]`)?.checked || false; });
+  data.delayMinutes = Number(data.delayMinutes)||0;
+  // destType: si está oculto (idavuelta) lee del hidden, si no del visible
+  if (data.direction === "idavuelta") {
+    data.destType = "outside";
+  } else if (!data.destType) {
+    data.destType = form.querySelector('.desttype-hidden')?.value || "base";
+  }
+  return data;
+}
+
+function wireForm(form, defaults, onSubmit, flavor) {
+  form.innerHTML = formTemplate(flavor || form.dataset.prefix || "new", defaults || {});
+  initAllCombos(form);
+
+  const tabs = form.querySelectorAll(".tab-btn");
+  const panes = form.querySelectorAll(".tab-pane");
+  tabs.forEach(t => t.addEventListener("click", (e) => {
+    e.preventDefault();
+    tabs.forEach(x=>x.classList.remove("active"));
+    panes.forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    const pane = form.querySelector(`[data-pane="${t.dataset.tab}"]`);
+    if (pane) pane.classList.add("active");
+  }));
+
+  form.querySelectorAll("[data-seg]").forEach(seg => {
+    seg.addEventListener("change", () => {
+      seg.querySelectorAll("label").forEach(l => { const inp = l.querySelector("input"); l.classList.toggle("checked", !!inp.checked); });
+    });
+    seg.addEventListener("click", (e) => {
+      const lbl = e.target.closest("label[data-val]"); if (!lbl) return;
+      const inp = lbl.querySelector("input"); if (!inp.checked) { inp.checked = true; inp.dispatchEvent(new Event("change", { bubbles: true })); }
+    });
+  });
+
+  form.querySelectorAll("[data-toggle]").forEach(row => {
+    const input = row.querySelector('input[type="checkbox"]');
+    row.addEventListener("click", (e) => { if (e.target === input) return; e.preventDefault(); input.checked = !input.checked; input.dispatchEvent(new Event("change", { bubbles: true })); });
+    input.addEventListener("change", () => row.classList.toggle("on", input.checked));
+  });
+
+  const updatePreview = () => {
+    const d = getFormData(form);
+    const f = calculateFirma(d);
+    const prev = form.querySelector(".firma-preview");
+    if (f.workStart) { prev.style.display = "block"; prev.querySelector(".firma-text").innerText = `${f.workStart} – ${f.workEnd} (${f.hours.toFixed(1)}h)`; }
+    else prev.style.display = "none";
+
+    // Salida automática del tren = firma + 1h
+    const signVal = form.querySelector('[name="signTime"]')?.value;
+    const autoBlock = form.querySelector('.auto-dep');
+    const depAuto = form.querySelector('.dep-auto');
+    if (signVal && autoBlock && depAuto) {
+      autoBlock.style.display = "block";
+      depAuto.innerText = fromMin(toMin(signVal) + 60);
+    } else if (autoBlock) {
+      autoBlock.style.display = "none";
+    }
+
+    // Mostrar/ocultar return-mode-block según direction
+    const dirEl = form.querySelector('[name="direction"]:checked');
+    const direction = dirEl ? dirEl.value : null;
+    const retBlock = form.querySelector(".return-mode-block");
+    if (retBlock) retBlock.style.display = direction === "idavuelta" ? "block" : "none";
+
+    // Ocultar destType cuando direction=idavuelta (fijo a outside)
+    const destBlock = form.querySelector(".desttype-block");
+    if (destBlock) {
+      const isCombo = direction === "idavuelta";
+      destBlock.style.display = isCombo ? "none" : "block";
+      if (isCombo) {
+        const out = form.querySelector('[name="destType"][value="outside"]');
+        if (out && !out.checked) {
+          out.checked = true;
+          out.dispatchEvent(new Event("change", { bubbles: true }));
         }
+      }
+    }
 
-        // GESTIÓN DE TABS
-        function switchTab(tab) {
-            document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`tab-${tab}`).classList.remove('hidden');
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active', 'text-slate-400'));
-            document.getElementById(`nav-${tab}`).classList.add('tab-active');
-            
-            if (tab === 'new') {
-                document.getElementById('shift-form').reset();
-                document.getElementById('display-entry').innerText = "--:--";
-                document.getElementById('display-exit').innerText = "--:--";
-            }
-            updateUI();
-        }
+    const delayed = form.querySelector('[name="delayed"]')?.checked;
+    const delayInput = form.querySelector(".delay-min-row");
+    if (delayInput) delayInput.style.display = delayed ? "block" : "none";
 
-        // PLANIFICADOR
-        function openPlanner(limit = null) {
-            plannerLimit = limit;
-            plannerSelectedDays = [];
-            const modal = document.getElementById('planner-modal');
-            const nextMonth = (currentMonth + 1) % 12;
-            const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-            
-            document.getElementById('planner-month-name').innerText = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(new Date(nextYear, nextMonth));
-            document.getElementById('planner-instruction').innerText = limit ? `Elige exactamente ${limit} días para compensar` : "Selecciona días de disfrute";
-            
-            renderPlannerCalendar(nextMonth, nextYear);
-            modal.style.display = 'flex';
-        }
+    const restEl = form.querySelector('[name="restType"]:checked');
+    const restType = restEl ? restEl.value : "none";
+    const compRow = form.querySelector(".comp-row");
+    if (compRow) compRow.style.display = restType === "worked" ? "block" : "none";
+    if (restType !== "worked") {
+      // Desmarcar radios de compType cuando no es descanso trabajado
+      form.querySelectorAll('[name="compType"]').forEach(r => { r.checked = false; r.closest("label")?.classList.remove("checked"); });
+    }
 
-        function closePlanner() {
-            document.getElementById('planner-modal').style.display = 'none';
-        }
+    let t = 0;
+    if (form.querySelector('[name="plusInternational"]')?.checked) t += +settings.plusInternational;
+    if (form.querySelector('[name="plusActivation"]')?.checked) t += +settings.plusActivation;
+    if (form.querySelector('[name="plusJT"]')?.checked) t += +settings.plusJT;
+    const totEl = form.querySelector(".plus-total"); if (totEl) totEl.innerText = t.toFixed(2) + "€";
+  };
 
-        function renderPlannerCalendar(month, year) {
-            const grid = document.getElementById('planner-calendar-grid');
-            grid.innerHTML = '';
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
+  form.addEventListener("input", updatePreview);
+  form.addEventListener("change", (e) => {
+    updatePreview();
+    if (e.target.name === "compType" && e.target.value === "days") {
+      // Abrir modal de free days al elegir "Por Días (2x1)"
+      const date = form.querySelector('[name="date"]').value;
+      if (!date) {
+        showToast("Selecciona primero la fecha del turno", "error");
+        // revert to money
+        const moneyInp = form.querySelector('[name="compType"][value="money"]');
+        if (moneyInp) { moneyInp.checked = true; moneyInp.dispatchEvent(new Event("change",{bubbles:true})); }
+        return;
+      }
+      openFreeDaysModal({ tempForm: form, shiftDate: date });
+    }
+  });
+  form.addEventListener("station-change", updatePreview);
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    const data = getFormData(form);
+    if (!data.date || !data.train) return showToast("La fecha y el nº de tren son obligatorios", "error");
+    onSubmit(data);
+  };
+  updatePreview();
+}
 
-            for(let i=0; i<firstDay; i++) grid.appendChild(document.createElement('div'));
+// ================= FREE DAYS MODAL =================
+// State: o bien edita los freeDays de un shift existente (shiftId), o bien selecciona dias para un form en construccion (tempForm)
+let freeDaysState = null; // { mode: "shift"|"form", shiftId?, tempForm?, shiftDate, current:[d1,d2] }
+let formPendingFreeDays = null; // for "form" mode, stored separately for read by submit
 
-            for(let d=1; d<=daysInMonth; d++) {
-                const dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const el = document.createElement('div');
-                el.className = 'day-cell border-slate-100 items-center justify-center font-bold text-sm';
-                el.innerText = d;
-                el.onclick = () => {
-                    if (el.classList.contains('day-planner-selected')) {
-                        el.classList.remove('day-planner-selected');
-                        plannerSelectedDays = plannerSelectedDays.filter(day => day !== dateStr);
-                    } else {
-                        if (plannerLimit && plannerSelectedDays.length >= plannerLimit) return;
-                        el.classList.add('day-planner-selected');
-                        plannerSelectedDays.push(dateStr);
-                        
-                        // AUTO-CIERRE SI LLEGA AL LIMITE
-                        if (plannerLimit && plannerSelectedDays.length === plannerLimit) {
-                            setTimeout(() => confirmPlanner(), 400);
-                        }
-                    }
-                };
-                grid.appendChild(el);
-            }
-        }
+function openFreeDaysModal(opts) {
+  const shiftDate = opts.shiftDate;
+  let current = ["",""];
+  if (opts.shiftId) {
+    const s = shifts.find(x => x.id === opts.shiftId);
+    if (s) current = (s.freeDays||["",""]).slice(0,2);
+    while (current.length < 2) current.push("");
+    freeDaysState = { mode: "shift", shiftId: opts.shiftId, shiftDate, current };
+  } else {
+    current = (formPendingFreeDays||["",""]).slice(0,2);
+    while (current.length < 2) current.push("");
+    freeDaysState = { mode: "form", tempForm: opts.tempForm, shiftDate, current };
+  }
+  const start = nextMonthStart(shiftDate);
+  const end = nextMonthEnd(shiftDate);
+  const d1 = document.getElementById("fd-d1");
+  const d2 = document.getElementById("fd-d2");
+  d1.min = start; d1.max = end; d1.value = current[0] || "";
+  d2.min = start; d2.max = end; d2.value = current[1] || "";
+  document.getElementById("freedays-info").innerHTML = `📅 Turno del <b>${shiftDate}</b>. Los días libres deben estar entre <b>${start}</b> y <b>${end}</b> (mes siguiente).`;
+  document.getElementById("fd-validation").style.display = "none";
+  openModal("modal-freedays");
+}
 
-        function confirmPlanner() {
-            plannerSelectedDays.forEach(date => {
-                shifts.push({
-                    id: Date.now() + Math.random(),
-                    date: date,
-                    type: 'libres',
-                    origin: 'LIBRE',
-                    destination: 'DISFRUTE',
-                    isDescanso: false
-                });
-            });
-            localStorage.setItem('renfe_flow_v2', JSON.stringify(shifts));
-            showNotification(`Se han registrado ${plannerSelectedDays.length} días de disfrute.`);
-            closePlanner();
-            updateUI();
-        }
+function closeFreeDaysModal() { closeModal("modal-freedays"); freeDaysState = null; }
 
-        // RENDERIZADO CALENDARIO PRINCIPAL (CON INFO)
-        function renderCalendar() {
-            const grid = document.getElementById('calendar-grid');
-            grid.innerHTML = '';
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            const firstDay = (new Date(currentYear, currentMonth, 1).getDay() + 6) % 7;
+document.getElementById("fd-save").onclick = () => {
+  const d1 = document.getElementById("fd-d1").value;
+  const d2 = document.getElementById("fd-d2").value;
+  const shiftDate = freeDaysState.shiftDate;
+  const valid = (!d1 || isInNextMonth(shiftDate, d1)) && (!d2 || isInNextMonth(shiftDate, d2));
+  if (!valid) { document.getElementById("fd-validation").style.display = "block"; return; }
+  const days = [d1, d2].filter(Boolean);
+  if (freeDaysState.mode === "shift") {
+    const s = shifts.find(x => x.id === freeDaysState.shiftId);
+    if (s) {
+      s.freeDays = days;
+      s.restType = "worked"; s.compType = "days"; s.restChange = 2;
+      const rebuilt = buildShift(s);
+      const idx = shifts.findIndex(x => x.id === s.id);
+      shifts[idx] = rebuilt;
+      saveStore(); render();
+      showToast("Días compensatorios actualizados", "success");
+    }
+  } else {
+    // form mode
+    formPendingFreeDays = days;
+    showToast("Días asignados — recuerda guardar el turno", "info");
+  }
+  closeFreeDaysModal();
+};
 
-            document.getElementById('calendar-month-year').innerText = 
-                new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(new Date(currentYear, currentMonth));
+document.getElementById("fd-delete").onclick = () => {
+  if (!confirm("¿Eliminar los dos días libres? Volverá a 'sin compensación de días'.")) return;
+  if (freeDaysState.mode === "shift") {
+    const s = shifts.find(x => x.id === freeDaysState.shiftId);
+    if (s) {
+      s.freeDays = []; s.compType = "none"; s.restChange = 0;
+      const rebuilt = buildShift(s);
+      const idx = shifts.findIndex(x => x.id === s.id);
+      shifts[idx] = rebuilt; saveStore(); render();
+      showToast("Días libres eliminados", "success");
+    }
+  } else {
+    formPendingFreeDays = [];
+    const form = freeDaysState.tempForm;
+    form.querySelectorAll('[name="compType"]').forEach(r => { r.checked = false; r.closest("label")?.classList.remove("checked"); });
+    showToast("Días eliminados del turno", "success");
+  }
+  closeFreeDaysModal();
+};
 
-            for(let i=0; i<firstDay; i++) grid.appendChild(document.createElement('div'));
+function convertFreeDaysTo(/* legacy ignored */) {
+  // Convertir a "Por Dinero" (usa el rol actual)
+  if (freeDaysState.mode === "shift") {
+    const s = shifts.find(x => x.id === freeDaysState.shiftId);
+    if (s) {
+      s.compType = "money"; s.freeDays = []; s.restChange = 0;
+      const rebuilt = buildShift(s);
+      const idx = shifts.findIndex(x => x.id === s.id);
+      shifts[idx] = rebuilt; saveStore(); render();
+      showToast(`Convertido a Por Dinero (+${getRestWorkedPay().toFixed(2)}€)`, "success");
+    }
+  } else {
+    formPendingFreeDays = [];
+    const form = freeDaysState.tempForm;
+    const inp = form.querySelector('[name="compType"][value="money"]');
+    if (inp) { inp.checked = true; inp.dispatchEvent(new Event("change",{bubbles:true})); }
+    showToast(`Compensación cambiada a Por Dinero`, "success");
+  }
+  closeFreeDaysModal();
+}
+document.getElementById("fd-to-money").onclick = convertFreeDaysTo;
 
-            for(let d=1; d<=daysInMonth; d++) {
-                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const dayShifts = shifts.filter(s => s.date === dateStr);
-                const isToday = new Date().toISOString().split('T')[0] === dateStr;
+// ================= RENDER =================
+let calendar;
+let lastNetoValue = null;
+function render() {
+  const totalPluses = shifts.reduce((a,s)=>a+(s.income||0),0);
+  const hours = shifts.reduce((a,s)=>a+(s.hours||0),0);
+  const rests = shifts.reduce((a,s)=>a+(s.restChange||0),0);
+  const nightH = shifts.reduce((a,s)=>a+(s.nightHours||0),0);
+  const nightEUR = shifts.reduce((a,s)=>a+(s.plusNocturnidad||0),0);
+  const extraH = shifts.reduce((a,s)=>a+(s.extraHours||0),0);
+  const extraEUR = shifts.reduce((a,s)=>a+(s.plusExtra||0),0);
+  const baseSalary = getBaseSalary();
+  const bruto = +(baseSalary + totalPluses).toFixed(2);
+  const irpfPct = Number(settings.irpf)||0;
+  const irpfAmount = +(bruto * irpfPct / 100).toFixed(2);
+  const neto = +(bruto - irpfAmount).toFixed(2);
 
-                const el = document.createElement('div');
-                el.className = `day-cell ${isToday ? 'day-today' : ''} ${dayShifts.length > 0 ? 'day-has-shift shadow-sm' : ''}`;
-                
-                let content = `<span class="text-[10px] font-black ${isToday ? 'text-indigo-600' : 'text-slate-400'}">${d}</span>`;
-                
-                dayShifts.forEach(s => {
-                    const isLibre = s.type === 'libres';
-                    content += `
-                        <div class="mt-1 px-1 py-0.5 rounded text-[8px] font-black truncate ${isLibre ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}">
-                            ${s.origin.split(' ')[0]} ${isLibre ? '' : '→ ' + s.destination.split(' ')[0]}
-                        </div>
-                    `;
-                });
+  // Neto card (pantalla principal)
+  const netoEl = document.getElementById("stat-neto");
+  if (netoEl) {
+    const newText = neto.toFixed(2) + "€";
+    if (lastNetoValue !== null && lastNetoValue !== newText) {
+      const card = document.getElementById("btn-neto-card");
+      if (card) { card.classList.remove("pulse"); void card.offsetWidth; card.classList.add("pulse"); }
+    }
+    netoEl.innerText = newText;
+    lastNetoValue = newText;
+  }
+  const roleChip = document.getElementById("neto-role-chip");
+  if (roleChip) roleChip.innerText = settings.role === "tripulante" ? "⭐ Tripulante" : "🧑‍✈️ Auxiliar";
+  const miniHours = document.getElementById("neto-mini-hours");
+  if (miniHours) miniHours.innerText = "⏱️ " + hours.toFixed(1) + "h";
+  const miniBruto = document.getElementById("neto-mini-bruto");
+  if (miniBruto) miniBruto.innerText = "Bruto " + bruto.toFixed(2) + "€";
+  const miniIrpf = document.getElementById("neto-mini-irpf");
+  if (miniIrpf) miniIrpf.innerText = "IRPF " + irpfPct + "%";
 
-                el.innerHTML = content;
-                el.onclick = () => {
-                    document.getElementById('form-date').value = dateStr;
-                    switchTab('new');
-                };
-                grid.appendChild(el);
-            }
-        }
+  document.getElementById("hdr-base").innerText = settings.baseStation;
 
-        function saveShift(e) {
-            e.preventDefault();
-            const id = document.getElementById('edit-id').value;
-            const shiftData = {
-                id: id ? parseFloat(id) : Date.now(),
-                date: document.getElementById('form-date').value,
-                base: document.getElementById('form-base').value,
-                origin: document.getElementById('form-origin').value,
-                destination: document.getElementById('form-destination').value,
-                trainDeparture: document.getElementById('time-train-departure').value,
-                trainArrival: document.getElementById('time-train-arrival').value,
-                entry: document.getElementById('display-entry').innerText,
-                exit: document.getElementById('display-exit').innerText,
-                isDescanso: document.getElementById('form-descanso').checked,
-                type: 'tren'
-            };
+  // Guardar cifras calculadas para abrir modal sin recalcular
+  render._lastCalc = { totalPluses, hours, rests, nightH, nightEUR, extraH, extraEUR, baseSalary, bruto, irpfPct, irpfAmount, neto };
 
-            if(id) shifts = shifts.filter(s => s.id !== shiftData.id);
-            shifts.push(shiftData);
-            localStorage.setItem('renfe_flow_v2', JSON.stringify(shifts));
-            showNotification("Registro guardado con éxito");
-            switchTab('dashboard');
-        }
+  shifts.sort((a,b)=> a.date<b.date?1:-1);
+  const hist = document.getElementById("history");
+  hist.innerHTML = "";
+  document.getElementById("empty-state").style.display = shifts.length?"none":"block";
+  shifts.forEach((s) => hist.appendChild(renderCard(s)));
 
-        function updateUI() {
-            renderCalendar();
-            renderStats();
-            renderHistory();
-        }
+  if (calendar) { calendar.removeAllEvents(); buildEvents().forEach(e => calendar.addEvent(e)); }
+  scheduleNotifications();
+  saveStore();
+}
 
-        function renderStats() {
-            const currentShifts = shifts.filter(s => s.date.startsWith(`${currentYear}-${String(currentMonth+1).padStart(2,'0')}`));
-            // Solo sumamos 120€ si el campo isDescanso es verdadero. Los trenes normales ya no suman 60€.
-            const money = currentShifts.reduce((acc, s) => acc + (s.isDescanso ? 120 : 0), 0);
-            
-            const pernoctas = currentShifts.filter(s => s.type === 'tren' && s.destination !== s.base).length;
-            
-            // Días acumulados: cada descanso trabajado genera 2 días, menos los días ya disfrutados
-            const accumulated = shifts.filter(s => s.isDescanso).length * 2 - shifts.filter(s => s.destination === 'DISFRUTE').length;
+function renderCard(s) {
+  const div = document.createElement("div");
+  const isVuelta = s.direction === "vuelta" || s.isReturn;
+  const borderColor = s.restChange>0?"var(--emerald)":s.restChange<0?"var(--primary)":isVuelta?"var(--violet)":"var(--indigo)";
+  div.className = "glass rounded-[28px] p-6";
+  div.style.borderLeft = `4px solid ${borderColor}`;
+  // Free days chips
+  let freeChips = "";
+  if (s.restType === "worked" && s.compType === "days") {
+    const days = (s.freeDays||["",""]).slice(0,2);
+    while (days.length<2) days.push("");
+    freeChips = `<div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="label" style="color:var(--emerald)">🌴 Días libres</span>
+      ${days.map((d,i)=>`<span class="free-chip ${d?'':'empty'}" data-freedays="${s.id}">${d?`📅 ${d}`:`Día ${i+1} sin asignar`}</span>`).join('')}
+      <span class="text-xs" style="color:var(--text-3)">· clic para editar</span>
+    </div>`;
+  } else if (s.restType === "worked" && (s.compType === "money" || s.compType === "aux" || s.compType === "trip")) {
+    const restPay = +(s.plusRestWorked||0).toFixed(2);
+    freeChips = `<div class="mt-3 flex items-center gap-2"><span class="badge" style="background:color-mix(in srgb, var(--emerald) 15%, transparent); border:1px solid color-mix(in srgb, var(--emerald) 30%, transparent); color:var(--emerald)">💰 Por Dinero +${restPay.toFixed(2)}€</span></div>`;
+  }
+  div.innerHTML = `
+    <div class="flex justify-between gap-4 flex-wrap">
+      <div class="flex-1 min-w-0">
+        <div class="label mb-2 flex items-center gap-2 flex-wrap">
+          <span>${s.date}</span>
+          ${isVuelta ? '<span class="tag" style="background:color-mix(in srgb, var(--violet) 22%, transparent);color:var(--violet)">↩ VUELTA</span>':'<span class="tag" style="background:color-mix(in srgb, var(--indigo) 22%, transparent);color:var(--indigo)">➡ IDA</span>'}
+          ${s.pernoctaFueraBase ? '<span class="tag" style="background:color-mix(in srgb, var(--violet) 22%, transparent);color:var(--violet)">🌙 PERNOCTA</span>':''}
+          ${s.serviceType==='pasivo' ? '<span class="tag" style="background:color-mix(in srgb, var(--cyan) 22%, transparent);color:var(--cyan)">PASIVO</span>':'<span class="tag" style="background:color-mix(in srgb, var(--teal) 22%, transparent);color:var(--teal)">ACTIVO</span>'}
+          ${s.delayed ? `<span class="tag" style="background:color-mix(in srgb, var(--amber) 22%, transparent);color:var(--amber)">⏰ +${s.delayMinutes||0}min</span>`:''}
+          ${s.restType==='worked' ? '<span class="tag" style="background:color-mix(in srgb, var(--emerald) 22%, transparent);color:var(--emerald)">💪 DESC. TRABAJADO</span>':''}
+          ${s.restType==='enjoyed' ? '<span class="tag" style="background:color-mix(in srgb, var(--primary) 22%, transparent);color:var(--primary)">🌴 DISFRUTE</span>':''}
+        </div>
+        <h3 class="text-xl sm:text-2xl" style="font-weight:600">🚄 ${escape(s.train||'Sin número')}</h3>
+        <p class="text-sm mt-1" style="color:var(--text-2)">${escape(s.origin||'—')} <span style="color:var(--primary)">→</span> ${escape(s.destination||'—')}</p>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <span class="badge badge-default">🏠 ${escape(s.base)}</span>
+          <span class="badge badge-default">⏱️ ${(s.hours||0).toFixed(1)}h</span>
+          ${s.destType==='outside' ? '<span class="badge badge-default">🗺️ Fuera base</span>':''}
+        </div>
+        ${s.plusDetails?.length ? `<div class="flex flex-wrap gap-2 mt-3">${s.plusDetails.map(p=>`<span class="badge badge-plus">${p}</span>`).join('')}</div>`:''}
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <div class="rounded-2xl p-3" style="background:color-mix(in srgb, var(--surface-2) 60%, transparent); border:1px solid var(--border)">
+            <div class="label">Tren</div>
+            <div class="font-semibold mt-1 text-sm">${s.depTime||'—'} – ${s.arrTime||'—'}</div>
+          </div>
+          <div class="rounded-2xl p-3" style="background:color-mix(in srgb, var(--primary) 10%, transparent); border:1px solid color-mix(in srgb, var(--primary) 30%, transparent)">
+            <div class="label" style="color:var(--primary)">Firma</div>
+            <div class="font-semibold mt-1 text-sm" style="color:var(--primary)">${s.workStart||'—'} – ${s.workEnd||'—'}</div>
+          </div>
+        </div>
+        ${freeChips}
+      </div>
+      <div class="text-right flex flex-col items-end gap-2 no-print">
+        <div class="flex gap-1">
+          <button data-edit="${s.id}" class="row-btn" title="Editar">✏️</button>
+          <button data-del="${s.id}" class="row-btn danger" title="Eliminar">🗑️</button>
+        </div>
+        <div class="rounded-2xl p-3 text-right" style="background:color-mix(in srgb, var(--amber) 10%, transparent); border:1px solid color-mix(in srgb, var(--amber) 28%, transparent); min-width:140px">
+          <div class="label" style="color:var(--amber)">Pluses del turno</div>
+          <div class="font-medium mt-1" style="color:var(--amber); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size:20px">+${(s.income||0).toFixed(2)}€</div>
+          ${s.plusNocturnidad>0?`<div class="text-xs mt-1" style="color:var(--text-3)">de los cuales 🌙 ${(s.plusNocturnidad||0).toFixed(2)}€</div>`:''}
+        </div>
+      </div>
+    </div>
+  `;
+  return div;
+}
+function escape(s){ return String(s||"").replace(/[<>&"']/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'})[c]); }
 
-            document.getElementById('stat-money').innerText = money;
-            document.getElementById('stat-pernoctas').innerText = pernoctas;
-            document.getElementById('stat-trains').innerText = currentShifts.filter(s => s.type === 'tren').length;
-            document.getElementById('stat-accumulated').innerText = Math.max(0, accumulated);
-        }
+function buildEvents() {
+  const events = [];
+  shifts.forEach((s) => {
+    const isVuelta = s.direction === "vuelta" || s.isReturn;
+    const color = s.restChange>0?"#FBBF24":s.restChange<0?"#F43F5E":isVuelta?"#A855F7":s.serviceType==='pasivo'?"#06B6D4":"#6366F1";
+    events.push({ id: s.id, title: s.train||'Turno', start: s.date, backgroundColor: color, borderColor: color, extendedProps: s });
+    (s.freeDays||[]).forEach(d => {
+      if (d) events.push({ title: "🌴 Libre", start: d, backgroundColor: "#10B981", borderColor: "#10B981", extendedProps: { isFree: true, parentShiftId: s.id, parentShiftDate: s.date } });
+    });
+  });
+  return events;
+}
 
-        function renderHistory() {
-            const tbody = document.getElementById('history-tbody');
-            tbody.innerHTML = '';
-            [...shifts].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(s => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="px-8 py-4 font-bold text-sm">${s.date}</td>
-                    <td class="px-8 py-4">
-                        <div class="text-xs font-black uppercase text-slate-700">${s.origin} → ${s.destination}</div>
-                        <div class="text-[9px] text-indigo-500 font-bold">JORNADA: ${s.entry || '--:--'} - ${s.exit || '--:--'}</div>
-                    </td>
-                    <td class="px-8 py-4 text-right">
-                        <button onclick="deleteShift(${s.id})" class="text-red-400 hover:text-red-600 font-black text-[10px]">BORRAR</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+// ================= CRUD =================
+let pendingPrimaryShiftId = null;
+function createShift(input, opts={}) {
+  const wantsReturn = input.direction === "idavuelta";
+  const returnMode = input.returnMode || "pernocta";
+  // Si tiene days libres pendientes en form mode, aplícalos
+  if (input.restType === "worked" && input.compType === "days" && formPendingFreeDays && formPendingFreeDays.length) {
+    input.freeDays = formPendingFreeDays.slice();
+  }
+  formPendingFreeDays = null;
 
-        function deleteShift(id) {
-            shifts = shifts.filter(s => s.id !== id);
-            localStorage.setItem('renfe_flow_v2', JSON.stringify(shifts));
-            updateUI();
-        }
+  // Forzar destino fuera de base si es idavuelta
+  if (wantsReturn) { input.destType = "outside"; input.pernoctaFueraBase = returnMode === "pernocta"; }
 
-        function showNotification(msg) {
-            const n = document.getElementById('notification');
-            n.innerText = msg; n.classList.add('show');
-            setTimeout(() => n.classList.remove('show'), 3000);
-        }
+  // direction final del turno principal siempre "ida"
+  const mainDirection = wantsReturn ? "ida" : (input.direction === "vuelta" ? "vuelta" : "ida");
+  const main = buildShift({ ...input, id: uid(), direction: mainDirection });
+  shifts.unshift(main);
+  saveStore(); render();
 
-        function changeMonth(dir) {
-            currentMonth += dir;
-            if(currentMonth < 0) { currentMonth = 11; currentYear--; }
-            if(currentMonth > 11) { currentMonth = 0; currentYear++; }
-            updateUI();
-        }
+  if (wantsReturn) {
+    showToast("Turno guardado · añade los datos de la vuelta", "info");
+    openReturnPopup(main, returnMode);
+  } else {
+    showToast("Turno guardado", "success");
+  }
+}
+function updateShift(id, input) {
+  const i = shifts.findIndex(x => x.id === id); if (i === -1) return;
+  // Free days actualizados desde modal viven en shifts[i].freeDays ya
+  const existingFree = shifts[i].freeDays;
+  if (input.restType === "worked" && input.compType === "days" && !input.freeDays) input.freeDays = existingFree;
+  shifts[i] = buildShift({ ...shifts[i], ...input });
+  showToast("Turno actualizado", "success");
+  render();
+}
+function deleteShift(id) {
+  if (!confirm("¿Eliminar este turno?")) return;
+  // Si es ida y tiene vuelta vinculada, preguntar
+  const s = shifts.find(x => x.id === id);
+  if (s && s.linkedReturnId) {
+    const ret = shifts.find(x => x.id === s.linkedReturnId);
+    if (ret && confirm("Este turno tiene una vuelta vinculada. ¿Eliminar también la vuelta?")) {
+      shifts = shifts.filter(x => x.id !== s.linkedReturnId);
+    }
+  }
+  shifts = shifts.filter(x => x.id !== id);
+  showToast("Turno eliminado", "success");
+  render();
+}
+function clearAll() {
+  if (shifts.length === 0) return showToast("El historial ya está vacío");
+  if (!confirm(`¿Eliminar TODOS los turnos (${shifts.length})? Esta acción no se puede deshacer.`)) return;
+  shifts = []; render(); showToast("Historial eliminado", "success");
+}
 
-        // Checkbox Listener para mostrar botón de compensatorios
-        document.getElementById('form-descanso').addEventListener('change', (e) => {
-            document.getElementById('compensatory-btn-container').classList.toggle('hidden', !e.target.checked);
-        });
+// ================= RETURN POPUP =================
+function openReturnPopup(idaShift, returnMode) {
+  const d = new Date(idaShift.date + "T00:00:00");
+  if (returnMode === "pernocta") d.setDate(d.getDate()+1);
+  const retDate = d.toISOString().slice(0,10);
+  document.getElementById("return-info").innerHTML =
+    `↩ Vuelta del turno <b>${escape(idaShift.train||'sin nº')}</b> · ${returnMode==='pernocta'?'🌙 día siguiente':'📍 mismo día'} (<b>${retDate}</b>)`;
+  const form = document.getElementById("return-form");
+  form.dataset.prefix = "return";
+  const defaults = {
+    date: retDate,
+    origin: idaShift.destination || "",
+    destination: idaShift.origin || settings.baseStation,
+    direction: "vuelta",
+    isReturn: true,
+    serviceType: idaShift.serviceType || "activo",
+    destType: "base",
+    restType: "none"
+  };
+  wireForm(form, defaults, (data) => {
+    const ret = buildShift({ ...data, id: uid(), direction: "vuelta", isReturn: true, parentShiftId: idaShift.id });
+    shifts.unshift(ret);
+    // Vincular
+    const i = shifts.findIndex(x => x.id === idaShift.id);
+    if (i !== -1) { shifts[i].linkedReturnId = ret.id; shifts[i] = buildShift(shifts[i]); }
+    showToast("Vuelta añadida ✅", "success");
+    closeModal("modal-return"); render();
+  }, "return");
+  openModal("modal-return");
+}
 
-        window.onload = () => {
-            const selects = ['form-origin', 'form-destination'];
-            selects.forEach(id => {
-                const s = document.getElementById(id);
-                STATIONS.forEach(st => {
-                    const opt = document.createElement('option');
-                    opt.value = st; opt.innerText = st;
-                    s.appendChild(opt);
-                });
-            });
-            updateUI();
-        };
-    </script>
-</body>
+// ================= MODALS =================
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => closeModal(b.dataset.close));
+document.querySelectorAll("[data-modal]").forEach(m => m.addEventListener("click", (e) => { if (e.target === m) closeModal(m.id); }));
+
+// SETTINGS
+function openSettings() {
+  const baseInput = document.getElementById("set-baseStation");
+  baseInput.value = settings.baseStation;
+  baseInput.closest(".combo").classList.toggle("has-value", !!settings.baseStation);
+  document.getElementById("acc-base-hint").innerText = settings.baseStation || "Sin asignar";
+  document.getElementById("set-pInt").value = settings.plusInternational;
+  document.getElementById("set-pAct").value = settings.plusActivation;
+  document.getElementById("set-pJT").value = settings.plusJT;
+  document.getElementById("set-baseTri").value = settings.baseSalaryTripulante;
+  document.getElementById("set-baseAux").value = settings.baseSalaryAuxiliar;
+  document.getElementById("set-nightTri").value = settings.nightRateTripulante;
+  document.getElementById("set-nightAux").value = settings.nightRateAuxiliar;
+  document.getElementById("set-restTri").value = settings.restWorkedPayTripulante;
+  document.getElementById("set-restAux").value = settings.restWorkedPayAuxiliar;
+  document.getElementById("set-irpf").value = settings.irpf;
+  document.getElementById("set-hoursOrd").value = settings.hoursOrdinary;
+  document.getElementById("set-extraRate").value = settings.extraHourRate;
+  // Wire role seg
+  const roleSeg = document.getElementById("set-role-seg");
+  roleSeg.querySelectorAll("label").forEach(l => {
+    const inp = l.querySelector("input");
+    inp.checked = (inp.value === settings.role);
+    l.classList.toggle("checked", inp.checked);
+  });
+  if (!roleSeg.dataset.wired) {
+    roleSeg.dataset.wired = "1";
+    roleSeg.addEventListener("click", (e) => {
+      const lbl = e.target.closest("label[data-val]"); if (!lbl) return;
+      const inp = lbl.querySelector("input"); if (!inp.checked) {
+        roleSeg.querySelectorAll("input").forEach(x => x.checked = false);
+        inp.checked = true;
+        roleSeg.querySelectorAll("label").forEach(l => l.classList.toggle("checked", l.querySelector("input").checked));
+      }
+    });
+  }
+  // Wire acordeón (una sola vez)
+  document.querySelectorAll('#modal-settings [data-acc]').forEach(acc => {
+    if (acc.dataset.wired) return;
+    acc.dataset.wired = "1";
+    acc.querySelector(".acc-head").addEventListener("click", () => {
+      // Toggle individual (permitir varios abiertos)
+      acc.classList.toggle("open");
+    });
+  });
+  // Asegurar todos cerrados al abrir el modal
+  document.querySelectorAll('#modal-settings [data-acc]').forEach(a => a.classList.remove("open"));
+  // Wire quick-base buttons (una sola vez)
+  const quickWrap = document.getElementById("set-base-quick");
+  if (quickWrap && !quickWrap.dataset.wired) {
+    quickWrap.dataset.wired = "1";
+    quickWrap.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-quickbase]"); if (!btn) return;
+      const key = btn.dataset.quickbase;
+      const full = QUICK_STATIONS[key];
+      if (full) {
+        const inp = document.getElementById("set-baseStation");
+        inp.value = full;
+        inp.closest(".combo").classList.add("has-value");
+        document.getElementById("acc-base-hint").innerText = full;
+        showToast(`Base seleccionada: ${key}`, "info");
+      }
+    });
+  }
+  openModal("modal-settings");
+}
+document.getElementById("set-save").onclick = () => {
+  const prevRole = settings.role;
+  const prevIrpf = Number(settings.irpf);
+  settings.baseStation = document.getElementById("set-baseStation").value || DEFAULT_SETTINGS.baseStation;
+  settings.plusInternational = Number(document.getElementById("set-pInt").value)||0;
+  settings.plusActivation = Number(document.getElementById("set-pAct").value)||0;
+  settings.plusJT = Number(document.getElementById("set-pJT").value)||0;
+  settings.baseSalaryTripulante = Number(document.getElementById("set-baseTri").value)||0;
+  settings.baseSalaryAuxiliar = Number(document.getElementById("set-baseAux").value)||0;
+  settings.nightRateTripulante = Number(document.getElementById("set-nightTri").value)||0;
+  settings.nightRateAuxiliar = Number(document.getElementById("set-nightAux").value)||0;
+  settings.restWorkedPayTripulante = Number(document.getElementById("set-restTri").value)||0;
+  settings.restWorkedPayAuxiliar = Number(document.getElementById("set-restAux").value)||0;
+  settings.irpf = Math.max(0, Math.min(60, Number(document.getElementById("set-irpf").value)||0));
+  settings.hoursOrdinary = Math.max(0, Math.min(24, Number(document.getElementById("set-hoursOrd").value)||0));
+  settings.extraHourRate = Math.max(0, Number(document.getElementById("set-extraRate").value)||0);
+  const roleChecked = document.querySelector('#set-role-seg input[name="role"]:checked');
+  settings.role = roleChecked ? roleChecked.value : "auxiliar";
+  shifts = shifts.map(s => buildShift(s));
+  showToast("Ajustes guardados · cálculos actualizados", "success");
+  closeModal("modal-settings");
+  wireNewForm(); render();
+  // Disparar aviso legal SOLO si cambia rol o IRPF
+  if (settings.role !== prevRole || Number(settings.irpf) !== prevIrpf) {
+    setTimeout(() => openModal("modal-disclaimer"), 350);
+  }
+};
+
+// EDIT/QUICK/NEW
+let editingId = null;
+function openEdit(s) {
+  editingId = s.id;
+  formPendingFreeDays = (s.freeDays||[]).slice();
+  const form = document.getElementById("edit-form"); form.dataset.prefix = "edit";
+  wireForm(form, s, (data) => {
+    // Aplicar freeDays pendientes (si los tocaron desde modal)
+    if (data.restType === "worked" && data.compType === "days") data.freeDays = formPendingFreeDays || [];
+    formPendingFreeDays = null;
+    updateShift(editingId, data); closeModal("modal-edit");
+  }, "edit");
+  openModal("modal-edit");
+}
+function openQuickAdd(date) {
+  formPendingFreeDays = null;
+  document.getElementById("quick-date-label").innerText = "📅 " + date;
+  const form = document.getElementById("quick-form"); form.dataset.prefix = "quick";
+  wireForm(form, { date, origin: settings.baseStation, direction:"ida", serviceType: "activo", destType: "base", restType: "none" },
+    (data) => { createShift(data); closeModal("modal-quick"); }, "quick");
+  openModal("modal-quick");
+}
+function wireNewForm() {
+  formPendingFreeDays = null;
+  const form = document.getElementById("shift-form"); form.dataset.prefix = "new";
+  wireForm(form, { origin: settings.baseStation, direction:"ida", serviceType: "activo", destType: "base", restType: "none" },
+    (data) => { createShift(data); wireNewForm(); }, "new");
+}
+
+// NOTIFICATIONS
+const notifTimers = new Map();
+function scheduleNotifications() {
+  for (const t of notifTimers.values()) clearTimeout(t);
+  notifTimers.clear();
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const now = Date.now(); const maxWindow = 14*24*60*60*1000;
+  shifts.forEach(s => {
+    if (!s.workStart || s.restType==='enjoyed') return;
+    const [h,m] = s.workStart.split(":").map(Number);
+    const d = new Date(s.date+"T00:00:00"); d.setHours(h,m,0,0);
+    const trigger = d.getTime() - 60*60*1000; const delay = trigger - now;
+    if (delay <= 0 || delay > maxWindow) return;
+    const id = setTimeout(() => {
+      try { new Notification("Firma en 1h", { body: `${s.train||'Turno'} · ${s.workStart} (${(s.origin||'').split(' ')[0]} → ${(s.destination||'').split(' ')[0]})` }); } catch {}
+      notifTimers.delete(s.id);
+    }, delay);
+    notifTimers.set(s.id, id);
+  });
+  updateNotifBtn();
+}
+function updateNotifBtn() {
+  const b = document.getElementById("btn-notif");
+  if (!("Notification" in window)) { b.innerText = "🔕"; return; }
+  if (Notification.permission === "granted") b.innerText = "🔔✨";
+  else if (Notification.permission === "denied") b.innerText = "🔕";
+  else b.innerText = "🔔";
+}
+document.getElementById("btn-notif").onclick = async () => {
+  if (!("Notification" in window)) return showToast("Tu navegador no soporta notificaciones","error");
+  if (Notification.permission === "granted") { new Notification("TripulanteFlow", { body: "Notificaciones ya activadas ✅" }); return; }
+  if (Notification.permission === "denied") return showToast("Permiso denegado en el navegador","error");
+  const res = await Notification.requestPermission(); updateNotifBtn();
+  if (res === "granted") { new Notification("TripulanteFlow", { body: "Notificaciones activadas ✅" }); scheduleNotifications(); showToast("Notificaciones activadas", "success"); }
+  else { showToast("Permiso denegado","error"); }
+};
+
+// THEME — eliminado (Renfe palette permanente)
+document.getElementById("btn-settings").onclick = openSettings;
+document.getElementById("btn-quick").onclick = () => openQuickAdd(new Date().toISOString().slice(0,10));
+document.getElementById("btn-clear").onclick = clearAll;
+document.getElementById("btn-neto-card").onclick = openConceptosModal;
+
+// 🌗 THEME TOGGLE
+function applyTheme(t) {
+  document.documentElement.classList.toggle("theme-dark", t === "dark");
+  document.body.classList.toggle("theme-dark", t === "dark");
+}
+function toggleTheme() {
+  const next = settings.theme === "dark" ? "light" : "dark";
+  settings.theme = next; applyTheme(next); saveStore();
+  showToast(next === "dark" ? "🌙 Modo oscuro activado" : "☀️ Modo claro activado", "info");
+}
+document.getElementById("btn-theme").onclick = toggleTheme;
+
+// ✨ Touch ripple — feedback visual en cualquier botón/tarjeta
+document.addEventListener("pointerdown", (e) => {
+  const el = e.target.closest(".btn-primary, .btn-soft, .btn-accent, .btn-icon, .row-btn, .neto-card, .seg label, .toggle-row, .acc-head, .combo-cat, .combo-item, .free-chip");
+  if (!el) return;
+  el.classList.add("touch-press", "tap");
+  const r = el.getBoundingClientRect();
+  el.style.setProperty("--rx", ((e.clientX - r.left) / r.width * 100) + "%");
+  el.style.setProperty("--ry", ((e.clientY - r.top) / r.height * 100) + "%");
+  setTimeout(() => el.classList.remove("tap"), 320);
+});
+
+// 💸 Conceptos y Neto — modal con desglose detallado
+function cnRow(icon, label, value, sub, valueColor, klass) {
+  const c = valueColor || "var(--text)";
+  return `<div class="cn-row ${klass||''}">
+    <div class="flex items-center gap-3 min-w-0">
+      <span class="cn-icon">${icon}</span>
+      <div class="min-w-0">
+        <div class="cn-label">${label}</div>
+        ${sub?`<div class="cn-sub">${sub}</div>`:''}
+      </div>
+    </div>
+    <div class="cn-val" style="color:${c}">${value}</div>
+  </div>`;
+}
+function openConceptosModal() {
+  // Recalcular siempre (en caso de que no haya pasado por render())
+  const totalPluses = shifts.reduce((a,s)=>a+(s.income||0),0);
+  const hours = shifts.reduce((a,s)=>a+(s.hours||0),0);
+  const rests = shifts.reduce((a,s)=>a+(s.restChange||0),0);
+  const nightH = shifts.reduce((a,s)=>a+(s.nightHours||0),0);
+  const nightEUR = shifts.reduce((a,s)=>a+(s.plusNocturnidad||0),0);
+  const extraH = shifts.reduce((a,s)=>a+(s.extraHours||0),0);
+  const extraEUR = shifts.reduce((a,s)=>a+(s.plusExtra||0),0);
+  const restMoneyEUR = shifts.reduce((a,s)=>a+(s.plusRestWorked||0),0);
+  const restMoneyCount = shifts.filter(s => s.restType==="worked" && (s.compType==="money"||s.compType==="aux"||s.compType==="trip")).length;
+  const restDaysCount = shifts.filter(s => s.restType==="worked" && s.compType==="days").length;
+  const accumulatedDays = restDaysCount * 2;
+  const baseSalary = getBaseSalary();
+  const bruto = +(baseSalary + totalPluses).toFixed(2);
+  const irpfPct = Number(settings.irpf)||0;
+  const irpfAmount = +(bruto * irpfPct / 100).toFixed(2);
+  const neto = +(bruto - irpfAmount).toFixed(2);
+
+  let intCount=0, actCount=0, jtCount=0;
+  shifts.forEach(s => { if (s.plusInternational) intCount++; if (s.plusActivation) actCount++; if (s.plusJT) jtCount++; });
+  const intEUR = intCount * Number(settings.plusInternational||0);
+  const actEUR = actCount * Number(settings.plusActivation||0);
+  const jtEUR = jtCount * Number(settings.plusJT||0);
+  const roleLabel = getRoleLabel();
+
+  // Pills cabecera
+  document.getElementById("cn-role-pill").innerText = settings.role === "tripulante" ? "⭐ Tripulante" : "🧑‍✈️ Auxiliar de Tripulante";
+  document.getElementById("cn-hours-pill").innerText = `⏱️ ${hours.toFixed(1)}h trabajadas`;
+  const restsPill = document.getElementById("cn-rests-pill");
+  restsPill.innerText = `Δ Descansos: ${rests}`;
+  restsPill.style.color = rests>0?"var(--emerald)":rests<0?"var(--primary)":"";
+
+  const rows = [];
+  rows.push(cnRow("💼", `Sueldo base · ${roleLabel}`, baseSalary.toFixed(2)+"€", `Mensual según rol y antigüedad`, "var(--indigo)"));
+  if (nightEUR>0) rows.push(cnRow("🌙", "Plus Nocturnidad", "+"+nightEUR.toFixed(2)+"€", `${nightH.toFixed(2)}h × ${getNightRate().toFixed(2)}€/h (22:00–05:00)`, "var(--violet)"));
+  if (extraEUR>0) rows.push(cnRow("⏱️", "Horas Extra", "+"+extraEUR.toFixed(2)+"€", `${extraH.toFixed(2)}h × ${Number(settings.extraHourRate).toFixed(2)}€/h · incluye retrasos`, "var(--amber)"));
+  if (restMoneyEUR>0) rows.push(cnRow("💪", "Descanso Trabajado · Por Dinero", "+"+restMoneyEUR.toFixed(2)+"€", `${restMoneyCount} turno(s) × ${getRestWorkedPay().toFixed(2)}€ (rol ${roleLabel})`, "var(--emerald)"));
+  if (intEUR>0) rows.push(cnRow("🌍", "Plus Internacionalidad", "+"+intEUR.toFixed(2)+"€", `${intCount} turno(s) × ${Number(settings.plusInternational).toFixed(2)}€`, "var(--cyan)"));
+  if (actEUR>0) rows.push(cnRow("⚡", "Plus Activación", "+"+actEUR.toFixed(2)+"€", `${actCount} turno(s) × ${Number(settings.plusActivation).toFixed(2)}€`, "var(--amber)"));
+  if (jtEUR>0) rows.push(cnRow("🚄", "Plus JT", "+"+jtEUR.toFixed(2)+"€", `${jtCount} turno(s) × ${Number(settings.plusJT).toFixed(2)}€`, "var(--teal)"));
+  rows.push(cnRow("📊", "Bruto total", bruto.toFixed(2)+"€", "Base + todos los pluses", "var(--text)", "cn-total"));
+  rows.push(cnRow("📉", `Retención IRPF (${irpfPct}%)`, "−"+irpfAmount.toFixed(2)+"€", "Retención fiscal estimada", "var(--primary)", "cn-irpf"));
+
+  document.getElementById("conceptos-body").innerHTML = rows.join("");
+  document.getElementById("conceptos-neto").innerText = neto.toFixed(2)+"€";
+
+  // Aviso de días acumulados (Por Días 2x1)
+  const daysAlert = document.getElementById("cn-days-alert");
+  if (accumulatedDays > 0) {
+    daysAlert.style.display = "flex";
+    document.getElementById("cn-days-count").innerText = accumulatedDays;
+    document.getElementById("cn-days-sub").innerText = `${restDaysCount} descanso(s) trabajado(s) × 2 días · sin compensación económica`;
+  } else {
+    daysAlert.style.display = "none";
+  }
+  openModal("modal-conceptos");
+}
+
+document.addEventListener("mousemove", (e) => {
+  const btn = e.target.closest?.(".btn-accent"); if (!btn) return;
+  const r = btn.getBoundingClientRect();
+  btn.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100) + "%");
+  btn.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100) + "%");
+});
+
+// Delegación: editar/eliminar + clic en free-chip
+document.getElementById("history").addEventListener("click", (e) => {
+  const editId = e.target.closest("[data-edit]")?.dataset.edit;
+  const delId = e.target.closest("[data-del]")?.dataset.del;
+  const freeId = e.target.closest("[data-freedays]")?.dataset.freedays;
+  if (freeId) {
+    const s = shifts.find(x => x.id === freeId);
+    if (s) openFreeDaysModal({ shiftId: s.id, shiftDate: s.date });
+    return;
+  }
+  if (editId) { const s = shifts.find(x => x.id === editId); if (s) openEdit(s); }
+  else if (delId) deleteShift(delId);
+});
+
+function initCalendar() {
+  let lastClick = { date: null, time: 0, timer: null };
+  calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
+    initialView: "dayGridMonth", locale: "es", height: "auto", firstDay: 1, dayMaxEvents: 3,
+    headerToolbar: { left: "prev,next", center: "title", right: "today" },
+    buttonText: { today: "Hoy" },
+    events: buildEvents(),
+    dateClick: (info) => {
+      const now = Date.now();
+      if (lastClick.date === info.dateStr && now - lastClick.time < 350) {
+        if (lastClick.timer) clearTimeout(lastClick.timer);
+        lastClick = { date: null, time: 0, timer: null };
+        openQuickAdd(info.dateStr);
+      } else {
+        const timer = setTimeout(() => {
+          const form = document.getElementById("shift-form");
+          form.querySelector('[name="date"]').value = info.dateStr;
+          showToast("Fecha seleccionada", "info");
+          lastClick = { date: null, time: 0, timer: null };
+        }, 280);
+        lastClick = { date: info.dateStr, time: now, timer };
+      }
+    },
+    eventClick: (info) => {
+      const e = info.event.extendedProps;
+      if (e?.isFree) {
+        const parent = shifts.find(x => x.id === e.parentShiftId);
+        if (parent) openFreeDaysModal({ shiftId: parent.id, shiftDate: parent.date });
+        return;
+      }
+      if (e) openEdit(e);
+    },
+    eventContent: (arg) => {
+      const e = arg.event.extendedProps;
+      if (e?.isFree) return { html: `<div class="evt"><div class="evt-train">🌴 LIBRE</div><div class="evt-route">clic para editar</div></div>` };
+      const orig = (e.origin||'').split(' ')[0] || '—';
+      const dest = (e.destination||'').split(' ')[0] || '—';
+      const isVuelta = e.direction==='vuelta' || e.isReturn;
+      const icon = isVuelta?'↩':e.pernoctaFueraBase?'🌙':e.serviceType==='pasivo'?'🛌':'🚄';
+      const dm = e.delayed?' ⏰':'';
+      return { html: `<div class="evt"><div class="evt-train">${icon} ${e.train||'Turno'}${dm}</div><div class="evt-route">${orig} → ${dest}</div><div class="evt-hours">${e.depTime||'--:--'} - ${e.arrTime||'--:--'}</div></div>` };
+    }
+  });
+  calendar.render();
+
+  // Swipe para cambiar de mes (móvil)
+  const calEl = document.getElementById("calendar");
+  let touchStartX = 0, touchStartY = 0, swiping = false;
+  calEl.addEventListener("touchstart", (e) => {
+    if (e.changedTouches.length !== 1) return;
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+    swiping = true;
+  }, { passive: true });
+  calEl.addEventListener("touchend", (e) => {
+    if (!swiping) return; swiping = false;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx > 0) calendar.prev();
+    else calendar.next();
+  }, { passive: true });
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  loadStore();
+  applyTheme(settings.theme || "light");
+  shifts = shifts.map(s => buildShift(s));
+  initAllCombos(document);
+  initCalendar();
+  wireNewForm();
+  updateNotifBtn();
+  render();
+});
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"7f7b0fd8732c4326aae4b9d58d5c514a","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9faa0514fc6c0423',t:'MTc3ODU5NTE2Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
