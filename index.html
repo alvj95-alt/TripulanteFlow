@@ -304,6 +304,95 @@ form .btn-primary:hover { transform: translateY(-2px) scale(1.01); }
 .cn-label { font-weight: 600; font-size: 14px; color: var(--text); }
 .cn-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
 .cn-val { font-weight: 800; font-size: 17px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; flex-shrink: 0; }
+
+/* ===== Reserve toggle prominente ===== */
+.reserve-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 16px; cursor: pointer; background: color-mix(in srgb, var(--primary) 8%, var(--surface)); border: 1.5px dashed color-mix(in srgb, var(--primary) 35%, transparent); transition: all .25s; }
+.reserve-row:hover { background: color-mix(in srgb, var(--primary) 14%, transparent); border-style: solid; }
+.reserve-row.on { background: color-mix(in srgb, var(--primary) 18%, transparent); border-style: solid; border-color: var(--primary); box-shadow: 0 6px 18px color-mix(in srgb, var(--primary) 22%, transparent); }
+.reserve-row .res-ico { font-size: 22px; }
+.reserve-row .res-title { font-weight: 700; font-size: 14px; color: var(--text); }
+.reserve-row .res-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.reserve-row input { display: none; }
+
+/* ===== Historial compacto ===== */
+.shift-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 10px; transition: border-color .2s, box-shadow .25s, transform .2s; cursor: pointer; overflow: hidden; }
+.shift-card:hover { border-color: color-mix(in srgb, var(--primary) 35%, transparent); box-shadow: 0 8px 22px rgba(0,0,0,0.05); transform: translateY(-1px); }
+.shift-card.expanded { border-color: color-mix(in srgb, var(--primary) 45%, transparent); box-shadow: 0 14px 36px color-mix(in srgb, var(--primary) 18%, transparent); }
+.sc-row { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; padding: 12px 16px; }
+.sc-icon { width: 36px; height: 36px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary); flex-shrink: 0; }
+.sc-main { display: flex; flex-direction: column; min-width: 0; }
+.sc-train { font-weight: 700; font-size: 14px; color: var(--text); display: flex; align-items: center; gap: 6px; }
+.sc-route { font-size: 11px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sc-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.sc-eur { font-weight: 800; font-size: 14px; color: var(--amber); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+.sc-chev { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-3); transition: transform .3s; }
+.shift-card.expanded .sc-chev { transform: rotate(180deg); color: var(--primary); }
+.sc-body { max-height: 0; overflow: hidden; transition: max-height .4s cubic-bezier(.2,.8,.2,1); }
+.shift-card.expanded .sc-body { max-height: 900px; }
+.sc-body-inner { padding: 4px 16px 16px; border-top: 1px solid var(--border); }
+.sc-tag { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+
+/* ===== Banner de privacidad ===== */
+.privacy-banner { position: fixed; bottom: 16px; left: 16px; right: 16px; max-width: 720px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 14px 18px; box-shadow: 0 18px 48px rgba(0,0,0,0.18); display: flex; gap: 14px; align-items: center; z-index: 9000; transform: translateY(160%); transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+.privacy-banner.show { transform: translateY(0); }
+.privacy-banner .pv-ico { width: 38px; height: 38px; border-radius: 12px; background: color-mix(in srgb, var(--primary) 14%, transparent); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.privacy-banner .pv-txt { font-size: 12px; color: var(--text-2); line-height: 1.45; flex: 1; }
+.privacy-banner .pv-txt b { color: var(--text); }
+.privacy-banner .pv-btn { background: var(--primary); color: #fff; border: 0; padding: 9px 18px; font-weight: 700; font-size: 12px; border-radius: 10px; cursor: pointer; flex-shrink: 0; transition: background .2s, transform .15s; }
+.privacy-banner .pv-btn:hover { background: var(--primary-hover); }
+.privacy-banner .pv-btn:active { transform: scale(.95); }
+@media (max-width: 540px) {
+  .privacy-banner { flex-wrap: wrap; padding: 12px; }
+  .privacy-banner .pv-btn { width: 100%; }
+}
+
+/* ===== Modal confirm custom ===== */
+#modal-confirm .cc-icon { width: 56px; height: 56px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 12px; }
+#modal-confirm.cc-danger .cc-icon { background: color-mix(in srgb, #DC2626 18%, transparent); color: #DC2626; }
+#modal-confirm:not(.cc-danger) .cc-icon { background: color-mix(in srgb, var(--primary) 18%, transparent); color: var(--primary); }
+
+/* ===== Day-action buttons ===== */
+.day-action-btn { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); cursor: pointer; text-align: left; transition: border-color .2s, transform .15s, background .2s; }
+.day-action-btn:hover { border-color: color-mix(in srgb, var(--primary) 35%, transparent); background: color-mix(in srgb, var(--primary) 5%, var(--surface)); transform: translateX(2px); }
+.day-action-btn:active { transform: scale(.98); }
+.day-action-btn .da-ico { width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.day-action-btn .da-text { flex: 1; min-width: 0; }
+.day-action-btn .da-title { font-weight: 700; font-size: 14px; color: var(--text); }
+.day-action-btn .da-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.day-action-btn .da-chev { color: var(--text-3); font-size: 20px; }
+.day-shift-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--surface-2) 50%, transparent); border: 1px solid var(--border); cursor: pointer; transition: border-color .2s, background .2s; }
+.day-shift-item:hover { border-color: color-mix(in srgb, var(--primary) 40%, transparent); background: color-mix(in srgb, var(--primary) 6%, transparent); }
+.day-shift-item .dsi-ico { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.day-shift-item .dsi-main { flex: 1; min-width: 0; }
+.day-shift-item .dsi-title { font-weight: 600; font-size: 13px; color: var(--text); }
+.day-shift-item .dsi-sub { font-size: 10.5px; color: var(--text-3); margin-top: 1px; }
+.day-shift-item .dsi-eur { font-weight: 700; font-size: 12px; color: var(--amber); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; flex-shrink: 0; }
+
+/* Días marcados como descanso en el calendario */
+.fc-day.fc-day-off-marked { background: color-mix(in srgb, var(--teal) 8%, transparent) !important; position: relative; }
+.fc-day.fc-day-off-marked::before { content: "🌴"; position: absolute; top: 4px; right: 4px; font-size: 14px; opacity: 0.6; pointer-events: none; }
+
+/* ===== Vista Rápida (KPIs mensuales) ===== */
+.quick-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 720px) { .quick-stats { grid-template-columns: 1fr; } }
+.qs-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--border); transition: transform .25s, border-color .2s, box-shadow .3s; }
+.qs-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--primary) 25%, transparent); box-shadow: 0 8px 22px rgba(0,0,0,0.04); }
+.qs-ico { width: 42px; height: 42px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.qs-body { flex: 1; min-width: 0; }
+.qs-label { font-size: 10.5px; color: var(--text-3); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+.qs-value { font-size: 20px; font-weight: 800; color: var(--text); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.1; margin-top: 2px; transition: transform .3s; }
+.qs-card.flash .qs-value { animation: qsFlash .5s cubic-bezier(.2,.8,.2,1); }
+@keyframes qsFlash { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 100% { transform: scale(1); } }
+.qs-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+/* ===== Onboarding ===== */
+#modal-onboarding .ob-progress { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; }
+#modal-onboarding .ob-dot { width: 32px; height: 4px; border-radius: 999px; background: var(--border); transition: background .3s; }
+#modal-onboarding .ob-dot.active { background: var(--primary); }
+#modal-onboarding .ob-ico { font-size: 56px; margin: 8px 0 12px; line-height: 1; }
+#modal-onboarding .ob-slide { display: none; text-align: center; }
+#modal-onboarding .ob-slide.active { display: block; animation: obIn .3s ease; }
+@keyframes obIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
@@ -351,38 +440,55 @@ form .btn-primary:hover { transform: translateY(-2px) scale(1.01); }
         </div>
       </div>
     </button>
+
+    <!-- 📊 Vista Rápida del mes (KPIs automáticos) -->
+    <div class="quick-stats" data-testid="quick-stats">
+      <div class="qs-card">
+        <div class="qs-ico" style="background:color-mix(in srgb, var(--emerald) 14%, transparent); color:var(--emerald)">💪</div>
+        <div class="qs-body">
+          <div class="qs-label">Descansos trabajados</div>
+          <div class="qs-value" id="qs-rest-money">0.00€</div>
+          <div class="qs-sub" id="qs-rest-money-sub">0 turno(s) · este mes</div>
+        </div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-ico" style="background:color-mix(in srgb, var(--teal) 14%, transparent); color:var(--teal)">🌴</div>
+        <div class="qs-body">
+          <div class="qs-label">Días 2x1 pendientes</div>
+          <div class="qs-value" id="qs-days-2x1">0</div>
+          <div class="qs-sub" id="qs-days-2x1-sub">para el mes siguiente</div>
+        </div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-ico" style="background:color-mix(in srgb, var(--amber) 14%, transparent); color:var(--amber)">⏱️</div>
+        <div class="qs-body">
+          <div class="qs-label">Horas extra · deje</div>
+          <div class="qs-value" id="qs-extra-h">0.0h</div>
+          <div class="qs-sub" id="qs-extra-h-sub">0.00€ · este mes</div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="glass cal-card rounded-[32px] p-5 sm:p-6">
     <div class="flex justify-between items-center mb-4 px-2 flex-wrap gap-2">
       <h2 class="text-xl" style="font-weight:600">Calendario</h2>
-      <p class="text-xs" style="color:var(--text-3)">Doble clic = añadir turno · Desliza ⟷ para cambiar de mes</p>
+      <p class="text-xs" style="color:var(--text-3)">Toca un día para gestionarlo · Desliza ⟷ para cambiar de mes</p>
     </div>
     <div id="calendar"></div>
   </section>
 
-  <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-    <aside class="lg:col-span-4">
-      <div class="glass rounded-2xl p-6 lg:sticky lg:top-6">
-        <h2 class="text-2xl mb-1" style="font-weight:600">Nuevo Turno</h2>
-        <p class="text-sm mb-5" style="color:var(--text-2)">Organiza tu turno por pestañas. Solo fecha y nº de tren son obligatorios.</p>
-        <form id="shift-form" class="space-y-3"></form>
+  <section>
+    <div class="flex justify-between items-center mb-5 no-print flex-wrap gap-2">
+      <h2 class="text-3xl" style="font-weight:600">Historial</h2>
+      <div class="flex gap-2 flex-wrap">
+        <button id="btn-clear" class="btn-accent btn-clear">🗑️ Vaciar historial</button>
       </div>
-    </aside>
-
-    <section class="lg:col-span-8">
-      <div class="flex justify-between items-center mb-5 no-print flex-wrap gap-2">
-        <h2 class="text-3xl" style="font-weight:600">Historial</h2>
-        <div class="flex gap-2 flex-wrap">
-          <button id="btn-quick" class="btn-accent btn-add">➕ Añadir rápido</button>
-          <button id="btn-clear" class="btn-accent btn-clear">🗑️ Vaciar historial</button>
-        </div>
-      </div>
-      <div id="pdf-area">
-        <div id="empty-state" class="glass rounded-2xl p-16 text-center" style="color:var(--text-2)">No hay turnos registrados aún.</div>
-        <div id="history" class="space-y-4"></div>
-      </div>
-    </section>
+    </div>
+    <div id="pdf-area">
+      <div id="empty-state" class="glass rounded-2xl p-16 text-center" style="color:var(--text-2)">No hay turnos registrados aún. Toca un día del calendario para añadir el primero.</div>
+      <div id="history" class="space-y-4"></div>
+    </div>
   </section>
 
 </main>
@@ -507,14 +613,14 @@ form .btn-primary:hover { transform: translateY(-2px) scale(1.01); }
         </div></div>
       </div>
 
-      <!-- 💪 Descanso trabajado (Por Dinero) -->
+      <!-- ⏳ Tiempo de Deje (firma fin) -->
       <div class="acc" data-acc>
         <div class="acc-head">
           <div class="acc-left">
-            <span class="acc-icon">💪</span>
+            <span class="acc-icon">⏳</span>
             <div>
-              <div class="acc-title">Descanso Trabajado · Por Dinero</div>
-              <div class="acc-sub">Importe €/turno según rol</div>
+              <div class="acc-title">Tiempo de Deje (firma fin)</div>
+              <div class="acc-sub">Automático según destino vs base</div>
             </div>
           </div>
           <span class="acc-chev">▾</span>
@@ -522,15 +628,42 @@ form .btn-primary:hover { transform: translateY(-2px) scale(1.01); }
         <div class="acc-body"><div class="acc-body-inner space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="text-sm block mb-1" style="color:var(--text-2)">⭐ Tripulante (€/turno)</label>
+              <label class="text-sm block mb-1" style="color:var(--text-2)">🏠 Llega a Base (min)</label>
+              <input id="set-dejeBase" type="number" step="1" min="0" max="120" class="input"/>
+            </div>
+            <div>
+              <label class="text-sm block mb-1" style="color:var(--text-2)">🗺️ Fuera de Base (min)</label>
+              <input id="set-dejeOutside" type="number" step="1" min="0" max="120" class="input"/>
+            </div>
+          </div>
+          <p class="text-xs" style="color:var(--text-3)">El sistema detecta el destino final automáticamente. Si coincide con tu estación base, aplica el deje 'Base'; si no, aplica el 'Fuera de Base'.</p>
+        </div></div>
+      </div>
+
+      <!-- 💪 Descanso trabajado (Por Dinero) -->
+      <div class="acc" data-acc>
+        <div class="acc-head">
+          <div class="acc-left">
+            <span class="acc-icon">💪</span>
+            <div>
+              <div class="acc-title">Descanso Trabajado · Por Dinero</div>
+              <div class="acc-sub">Tarifa €/hora según rol</div>
+            </div>
+          </div>
+          <span class="acc-chev">▾</span>
+        </div>
+        <div class="acc-body"><div class="acc-body-inner space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm block mb-1" style="color:var(--text-2)">⭐ Tripulante (€/h)</label>
               <input id="set-restTri" type="number" step="0.01" min="0" class="input"/>
             </div>
             <div>
-              <label class="text-sm block mb-1" style="color:var(--text-2)">🧑‍✈️ Auxiliar (€/turno)</label>
+              <label class="text-sm block mb-1" style="color:var(--text-2)">🧑‍✈️ Auxiliar (€/h)</label>
               <input id="set-restAux" type="number" step="0.01" min="0" class="input"/>
             </div>
           </div>
-          <p class="text-xs" style="color:var(--text-3)">Se suma al bruto del mes y aplica IRPF. La opción "Por Días (2x1)" no suma dinero, solo acumula 2 días libres.</p>
+          <p class="text-xs" style="color:var(--text-3)">Pago = horas trabajadas × tarifa €/h del rol. Se suma al bruto del mes y aplica IRPF.</p>
         </div></div>
       </div>
 
@@ -682,6 +815,101 @@ form .btn-primary:hover { transform: translateY(-2px) scale(1.01); }
   </div>
 </div>
 
+<!-- 🧭 Onboarding (Asistente primera vez) -->
+<div id="modal-onboarding" class="modal" data-modal>
+  <div class="glass rounded-[28px] p-7 modal-content max-w-md" data-testid="modal-onboarding-content">
+    <div class="ob-progress">
+      <div class="ob-dot active"></div>
+      <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
+    </div>
+    <div class="ob-slide active" data-step="0">
+      <div class="ob-ico">📅</div>
+      <h3 class="text-2xl mb-2" style="font-weight:700">Tu calendario, tu base</h3>
+      <p class="text-sm mb-4" style="color:var(--text-2); line-height:1.6">Toca cualquier día para gestionarlo. Podrás <b>agregar turnos</b>, <b>marcar días de descanso</b> o <b>registrar trabajo en descanso</b>. Desliza ⟷ para cambiar de mes.</p>
+    </div>
+    <div class="ob-slide" data-step="1">
+      <div class="ob-ico">⚙️</div>
+      <h3 class="text-2xl mb-2" style="font-weight:700">Cálculos 100% automáticos</h3>
+      <p class="text-sm mb-4" style="color:var(--text-2); line-height:1.6">El sistema aplica solo: <b>firma +60 min</b> (activo) o <b>+30 min</b> (pasivo), <b>deje +20 min</b> (Base) o <b>+15 min</b> (fuera), y suma <b>retrasos como horas extra</b>. Solo introduces firma, llegada y nº de tren.</p>
+    </div>
+    <div class="ob-slide" data-step="2">
+      <div class="ob-ico">💪</div>
+      <h3 class="text-2xl mb-2" style="font-weight:700">Descansos: Dinero o 2x1</h3>
+      <p class="text-sm mb-4" style="color:var(--text-2); line-height:1.6"><b>Por Dinero</b>: se calcula horas × tarifa del rol (Auxiliar/Tripulante) automáticamente. <b>Por Días (2x1)</b>: acumula 2 días libres para el mes siguiente, sin sumar dinero.</p>
+    </div>
+    <div class="ob-slide" data-step="3">
+      <div class="ob-ico">⚙️</div>
+      <h3 class="text-2xl mb-2" style="font-weight:700">Personaliza tus Ajustes</h3>
+      <p class="text-sm mb-4" style="color:var(--text-2); line-height:1.6">Configura tu <b>rol</b>, sueldos, pluses, IRPF, tarifa €/h del descanso y tiempos de deje. Si cambias el rol, <b>todos tus turnos se recalculan al instante</b>.</p>
+    </div>
+    <div class="flex gap-2 mt-2">
+      <button id="ob-skip" class="btn-soft flex-1" data-testid="ob-skip">Saltar</button>
+      <button id="ob-next" class="btn-primary flex-1" data-testid="ob-next">Siguiente →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 📅 Acciones del día (calendario) -->
+<div id="modal-day" class="modal" data-modal>
+  <div class="glass rounded-[28px] p-7 modal-content max-w-md" data-testid="modal-day-content">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h2 class="text-xl flex items-center gap-2" style="font-weight:700">📅 <span id="modal-day-title">Día</span></h2>
+        <div id="modal-day-sub" class="text-xs mt-1" style="color:var(--text-3)">Elige una acción</div>
+      </div>
+      <button class="text-2xl opacity-60 hover:opacity-100" data-close="modal-day" data-testid="modal-day-close">×</button>
+    </div>
+    <div id="modal-day-shifts-list" style="display:none" class="mb-4 space-y-2"></div>
+    <div class="space-y-2">
+      <button id="day-view" class="day-action-btn" data-testid="day-action-view" style="display:none">
+        <div class="da-ico" style="background:color-mix(in srgb, var(--indigo) 14%, transparent); color:var(--indigo)">📋</div>
+        <div class="da-text"><div class="da-title">Ver / Modificar turnos</div><div class="da-sub"><span id="day-view-count">0</span> turno(s) registrado(s)</div></div>
+        <div class="da-chev">›</div>
+      </button>
+      <button id="day-add" class="day-action-btn" data-testid="day-action-add">
+        <div class="da-ico" style="background:color-mix(in srgb, var(--primary) 14%, transparent); color:var(--primary)">➕</div>
+        <div class="da-text"><div class="da-title">Agregar Turno</div><div class="da-sub">Crear un turno en este día</div></div>
+        <div class="da-chev">›</div>
+      </button>
+      <button id="day-mark-off" class="day-action-btn" data-testid="day-action-mark-off">
+        <div class="da-ico" style="background:color-mix(in srgb, var(--teal) 14%, transparent); color:var(--teal)">🌴</div>
+        <div class="da-text"><div class="da-title">Marcar como Descanso</div><div class="da-sub">Día libre · resta 1 al contador de descansos</div></div>
+        <div class="da-chev">›</div>
+      </button>
+      <button id="day-rest" class="day-action-btn" data-testid="day-action-rest">
+        <div class="da-ico" style="background:color-mix(in srgb, var(--emerald) 14%, transparent); color:var(--emerald)">💪</div>
+        <div class="da-text"><div class="da-title">Trabajo en Descanso</div><div class="da-sub">Por Dinero o Por Días (2x1)</div></div>
+        <div class="da-chev">›</div>
+      </button>
+    </div>
+    <button class="btn-soft w-full mt-4" data-close="modal-day" data-testid="modal-day-back">← Volver al calendario</button>
+  </div>
+</div>
+
+<!-- Modal confirm custom (sustituye confirm() y alert()) -->
+<div id="modal-confirm" class="modal" data-modal>
+  <div class="glass rounded-[28px] p-7 modal-content max-w-md text-center" data-testid="modal-confirm-content">
+    <div class="cc-icon" id="cc-icon">⚠️</div>
+    <h3 class="text-xl mb-2" id="cc-title" style="font-weight:700">Confirmar acción</h3>
+    <p id="cc-message" class="text-sm mb-5" style="color:var(--text-2); line-height:1.55"></p>
+    <div class="flex gap-2">
+      <button id="cc-cancel" class="btn-soft flex-1" data-testid="cc-cancel">Cancelar</button>
+      <button id="cc-confirm" class="btn-primary flex-1" data-testid="cc-confirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Banner de Privacidad (LocalStorage) -->
+<div id="privacy-banner" class="privacy-banner" data-testid="privacy-banner">
+  <div class="pv-ico">🔒</div>
+  <div class="pv-txt">
+    Esta app guarda <b>localmente en tu dispositivo</b> (localStorage) tus turnos y ajustes para que estén siempre disponibles. No enviamos datos a ningún servidor.
+  </div>
+  <button id="pv-accept" class="pv-btn" data-testid="pv-accept">Entendido</button>
+</div>
+
 <script>
 // ================= ESTACIONES =================
 const STATION_GROUPS = {
@@ -704,6 +932,7 @@ const DEFAULT_SETTINGS = {
   baseSalaryTripulante: 1614.15, baseSalaryAuxiliar: 1212.77,
   nightRateTripulante: 2.70, nightRateAuxiliar: 1.97,
   restWorkedPayTripulante: 19.72, restWorkedPayAuxiliar: 14.87,
+  dejeBase: 20, dejeOutside: 15,
   hoursOrdinary: 7.5, extraHourRate: 12,
   hourlyRate: 12,
   baseStation: "Madrid Puerta de Atocha-Almudena Grandes",
@@ -753,16 +982,30 @@ const toMin = (v) => { const [h,m] = v.split(":").map(Number); return h*60+m; };
 const fromMin = (m) => { m = ((m % 1440) + 1440) % 1440; return String(Math.floor(m/60)).padStart(2,"0") + ":" + String(m%60).padStart(2,"0"); };
 
 function calculateFirma(s) {
-  // Modelo: signTime = firma. depTime = signTime + 1h (salida tren auto). Retraso SIEMPRE se considera hora extra.
+  // Modo Reserva: firma 08:00 fija, 8h jornada, sin llegada de tren.
+  if (s.reserve) {
+    const signTime = s.signTime || "08:00";
+    const start = toMin(signTime);
+    const end = start + 8*60;
+    return { signTime, workStart: signTime, workEnd: fromMin(end), depTime: "", hours: 8, hoursBase: 8, delayHours: 0 };
+  }
+  // Modelo: signTime = firma. depTime depende del tipo de servicio:
+  // - Pasivo: depTime = signTime + 30min
+  // - Activo / Sin Servicio: depTime = signTime + 60min
+  // Retraso SIEMPRE se considera hora extra.
   let signTime = s.signTime || s.workStart || "";
   let depTime = s.depTime || "";
+  const pre = s.serviceType === "pasivo" ? 30 : 60;
   if (!signTime && depTime) {
-    const pre = s.serviceType === "pasivo" ? 30 : 60;
     signTime = fromMin(toMin(depTime) - pre);
   }
-  if (signTime) depTime = fromMin(toMin(signTime) + 60);
+  if (signTime) depTime = fromMin(toMin(signTime) + pre);
   if (!signTime || !s.arrTime) return { signTime: signTime||"", workStart: signTime||"", workEnd: "", depTime: depTime||"", hours: 0, hoursBase: 0, delayHours: 0 };
-  const post = s.destType === "base" ? 20 : 15;
+  // Tiempo de deje automático: si destino == baseStation → settings.dejeBase, si no → settings.dejeOutside
+  const destLooksBase = s.destination && settings.baseStation && (s.destination === settings.baseStation);
+  const dejeBase = Number(settings.dejeBase)||20;
+  const dejeOutside = Number(settings.dejeOutside)||15;
+  const post = destLooksBase ? dejeBase : dejeOutside;
   const delayMin = s.delayed ? (Number(s.delayMinutes)||0) : 0;
   const start = toMin(signTime);
   let endBase = toMin(s.arrTime) + post;
@@ -770,7 +1013,7 @@ function calculateFirma(s) {
   const hoursBase = (endBase - start) / 60;
   const delayHours = delayMin / 60;
   const end = endBase + delayMin;
-  return { signTime, workStart: signTime, workEnd: fromMin(end), depTime, hours: hoursBase + delayHours, hoursBase, delayHours };
+  return { signTime, workStart: signTime, workEnd: fromMin(end), depTime, hours: hoursBase + delayHours, hoursBase, delayHours, dejeMin: post, dejeAuto: destLooksBase, signPre: pre };
 }
 
 // Calcula horas dentro del tramo 22:00-05:00 (nocturnidad)
@@ -788,6 +1031,11 @@ function calcNightHours(workStart, workEnd) {
 }
 
 function buildShift(input) {
+  // 📋 Reserva: train fijo si está vacío, signTime 08:00 por defecto
+  if (input.reserve) {
+    if (!input.train) input.train = "RESERVA";
+    if (!input.signTime) input.signTime = "08:00";
+  }
   const firma = calculateFirma(input);
   let pluses = 0; const details = [];
   // Nocturnidad
@@ -811,14 +1059,18 @@ function buildShift(input) {
   let compType = input.compType;
   if (compType === "aux" || compType === "trip") compType = "money";
   let plusRestWorked = 0;
+  let restWorkedHours = 0;
   if (input.restType === "worked") {
     if (compType === "days") { restChange = 2; freeDays = (input.freeDays||[]).filter(Boolean); }
     else if (compType === "money") {
-      plusRestWorked = +getRestWorkedPay().toFixed(2);
-      if (plusRestWorked > 0) { pluses += plusRestWorked; details.push(`💰 Desc. trabajado (+${plusRestWorked.toFixed(2)}€)`); }
+      const pricePerHour = getRestWorkedPay();
+      // CÁLCULO AUTOMÁTICO: tiempo total real (firma → deje + retraso) sin input manual
+      restWorkedHours = +(firma.hours||0).toFixed(2);
+      plusRestWorked = +(restWorkedHours * pricePerHour).toFixed(2);
+      if (plusRestWorked > 0) { pluses += plusRestWorked; details.push(`💰 Desc. trabajado ${restWorkedHours.toFixed(2)}h × ${pricePerHour.toFixed(2)}€ (+${plusRestWorked.toFixed(2)}€)`); }
     }
   } else if (input.restType === "enjoyed") restChange = -1;
-  return { ...input, compType, base: settings.baseStation, ...firma, pluses, plusDetails: details, income: pluses, nightHours, plusNocturnidad, extraHours, plusExtra, plusRestWorked, restChange, freeDays };
+  return { ...input, compType, base: settings.baseStation, ...firma, pluses, plusDetails: details, income: pluses, nightHours, plusNocturnidad, extraHours, plusExtra, plusRestWorked, restWorkedHours, restChange, freeDays };
 }
 
 // Fecha del mes siguiente (primer día)
@@ -846,6 +1098,35 @@ function showToast(text, type="info") {
   t.classList.add("show");
   clearTimeout(showToast._t);
   showToast._t = setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+// ===== Modal Confirm Custom (sustituye confirm() y alert()) =====
+function showConfirm({ title="Confirmar acción", message="¿Estás seguro?", icon="⚠️", danger=false, confirmText="Confirmar", cancelText="Cancelar", onConfirm, onCancel } = {}) {
+  const modal = document.getElementById("modal-confirm");
+  document.getElementById("cc-title").innerText = title;
+  document.getElementById("cc-message").innerText = message;
+  document.getElementById("cc-icon").innerText = icon;
+  modal.classList.toggle("cc-danger", !!danger);
+  const confirmBtn = document.getElementById("cc-confirm");
+  const cancelBtn = document.getElementById("cc-cancel");
+  confirmBtn.innerText = confirmText;
+  cancelBtn.innerText = cancelText;
+  confirmBtn.style.background = danger ? "#DC2626" : "var(--primary)";
+  // Mostrar/ocultar cancelar (en modo alert, ocultar)
+  cancelBtn.style.display = onCancel === false ? "none" : "";
+  const cleanup = () => {
+    confirmBtn.removeEventListener("click", onYes);
+    cancelBtn.removeEventListener("click", onNo);
+    closeModal("modal-confirm");
+  };
+  const onYes = () => { cleanup(); if (typeof onConfirm === "function") onConfirm(); };
+  const onNo = () => { cleanup(); if (typeof onCancel === "function") onCancel(); };
+  confirmBtn.addEventListener("click", onYes);
+  cancelBtn.addEventListener("click", onNo);
+  openModal("modal-confirm");
+}
+function showAlert({ title="Aviso", message="", icon="ℹ️" } = {}) {
+  showConfirm({ title, message, icon, confirmText: "Entendido", danger: false, onCancel: false });
 }
 
 // ================= COMBOBOX =================
@@ -962,6 +1243,19 @@ function formTemplate(flavor, data) {
     <!-- SERVICIO -->
     <div class="tab-pane" data-pane="servicio">
       <div class="space-y-4">
+        <!-- 📋 Toggle Reserva (disponibilidad) -->
+        <label class="reserve-row ${d.reserve?'on':''}" data-toggle data-reserve>
+          <div class="flex items-center gap-3">
+            <span class="res-ico">📋</span>
+            <div>
+              <div class="res-title">Día de Reserva</div>
+              <div class="res-sub">Disponibilidad · firma 08:00 · 8h fijas</div>
+            </div>
+          </div>
+          <input type="checkbox" name="reserve" ${d.reserve?'checked':''}/>
+          <span class="toggle-pill"></span>
+        </label>
+
         ${showDirection ? `
           <div>
             <p class="label mb-2">Dirección</p>
@@ -995,32 +1289,23 @@ function formTemplate(flavor, data) {
 
         <div>
           <p class="label mb-2">Tipo de servicio</p>
-          <div class="seg seg-2" data-seg="serviceType" style="--accent: var(--cyan)">
+          <div class="seg seg-3" data-seg="serviceType" style="--accent: var(--cyan)">
             <label data-val="activo" class="${srv==='activo'?'checked':''}">
-              <span class="seg-ico">⚙️</span><span class="seg-title">Activo</span><span class="seg-sub">1h antes</span>
+              <span class="seg-ico">⚙️</span><span class="seg-title">Activo</span><span class="seg-sub">Firma 1h antes</span>
               <input type="radio" name="serviceType" value="activo" ${srv==='activo'?'checked':''}/>
             </label>
             <label data-val="pasivo" class="${srv==='pasivo'?'checked':''}">
-              <span class="seg-ico">🛌</span><span class="seg-title">Pasivo</span><span class="seg-sub">30 min antes</span>
+              <span class="seg-ico">🛌</span><span class="seg-title">Pasivo</span><span class="seg-sub">Firma 30 min antes</span>
               <input type="radio" name="serviceType" value="pasivo" ${srv==='pasivo'?'checked':''}/>
+            </label>
+            <label data-val="sinServicio" class="${srv==='sinServicio'?'checked':''}">
+              <span class="seg-ico">🚷</span><span class="seg-title">Sin Servicio</span><span class="seg-sub">Trayecto pasivo</span>
+              <input type="radio" name="serviceType" value="sinServicio" ${srv==='sinServicio'?'checked':''}/>
             </label>
           </div>
         </div>
 
-        <div class="desttype-block" style="display:${dirForm==='idavuelta'?'none':'block'}">
-          <p class="label mb-2">Destino del trayecto</p>
-          <div class="seg seg-2" data-seg="destType" style="--accent: var(--teal)">
-            <label data-val="base" class="${dst==='base'?'checked':''}">
-              <span class="seg-ico">🏠</span><span class="seg-title">Llega a Base</span><span class="seg-sub">+20 min firma</span>
-              <input type="radio" name="destType" value="base" ${dst==='base'?'checked':''}/>
-            </label>
-            <label data-val="outside" class="${dst==='outside'?'checked':''}">
-              <span class="seg-ico">🗺️</span><span class="seg-title">Fuera de Base</span><span class="seg-sub">+15 min firma</span>
-              <input type="radio" name="destType" value="outside" ${dst==='outside'?'checked':''}/>
-            </label>
-          </div>
-        </div>
-        <!-- Cuando dir==idavuelta, destType es fijo "outside" -->
+        <!-- destType automático (oculto, lo conserva el motor por retrocompat) -->
         <input type="hidden" class="desttype-hidden" name="destType_hidden" value="${dst}"/>
       </div>
     </div>
@@ -1073,7 +1358,7 @@ function formTemplate(flavor, data) {
           <div class="seg seg-2" data-seg="compType" style="--accent: var(--emerald)">
             <label data-val="money" class="${(d.compType==='money'||d.compType==='aux'||d.compType==='trip')?'checked':''}">
               <span class="seg-ico">💰</span><span class="seg-title">Por Dinero</span>
-              <span class="seg-sub">+€ al bruto (según rol)</span>
+              <span class="seg-sub">Horas × €/h del rol</span>
               <input type="radio" name="compType" value="money" ${(d.compType==='money'||d.compType==='aux'||d.compType==='trip')?'checked':''}/>
             </label>
             <label data-val="days" class="${d.compType==='days'?'checked':''}">
@@ -1082,7 +1367,20 @@ function formTemplate(flavor, data) {
               <input type="radio" name="compType" value="days" ${d.compType==='days'?'checked':''}/>
             </label>
           </div>
-          <p class="text-xs mt-3" style="color:var(--text-3)">💡 Los días libres se pueden editar después desde el calendario o el historial.</p>
+          <div class="rest-hours-row mt-3" style="display:${(d.compType==='money'||d.compType==='aux'||d.compType==='trip')?'block':'none'}">
+            <div class="mb-3 rounded-xl p-3" style="background:color-mix(in srgb, var(--emerald) 10%, transparent); border:1px solid color-mix(in srgb, var(--emerald) 25%, transparent)">
+              <div style="font-size:11px; color:var(--text-3); letter-spacing:0.08em; text-transform:uppercase">Tarifa automática (no editable)</div>
+              <div class="mt-1" style="font-size:13px; color:var(--text-2)">💰 Rol actual <b class="rh-role" style="color:var(--text)">—</b></div>
+              <div class="mt-1" style="font-size:22px; font-weight:800; color:var(--emerald); font-family:'Helvetica Neue',Helvetica,Arial,sans-serif"><span class="rh-rate">0.00€</span> <span style="font-size:13px; color:var(--text-3); font-weight:500">/ hora</span></div>
+            </div>
+            <div class="rh-preview rounded-xl p-3 text-center" style="background:color-mix(in srgb, var(--primary) 8%, transparent); border:1px solid color-mix(in srgb, var(--primary) 20%, transparent)">
+              <div style="font-size:11px; color:var(--text-3); letter-spacing:0.08em; text-transform:uppercase">💚 Total percibido</div>
+              <div class="rh-amount mt-1" style="font-size:22px; font-weight:800; color:var(--primary); font-family:'Helvetica Neue',Helvetica,Arial,sans-serif">— € (rellena firma/llegada)</div>
+              <div class="rh-detail mt-1" style="font-size:11px; color:var(--text-3)">Cálculo automático: firma → deje × tarifa</div>
+            </div>
+            <p class="text-xs mt-2" style="color:var(--text-3)">⚙️ El sistema calcula automáticamente el tiempo total (firma + 30/60 min pasivo/activo · deje 15/20 min auto). No es editable.</p>
+          </div>
+          <p class="text-xs mt-3" style="color:var(--text-3)">💡 Por Días: abre el calendario del mes siguiente para elegir los 2 días.</p>
         </div>
       </div>
     </div>
@@ -1107,14 +1405,11 @@ function formTemplate(flavor, data) {
 function getFormData(form) {
   const fd = new FormData(form); const data = {};
   for (const [k,v] of fd.entries()) data[k] = v;
-  ["plusInternational","plusActivation","plusJT","delayed"].forEach(k => { data[k] = form.querySelector(`[name="${k}"]`)?.checked || false; });
+  ["plusInternational","plusActivation","plusJT","delayed","reserve"].forEach(k => { data[k] = form.querySelector(`[name="${k}"]`)?.checked || false; });
   data.delayMinutes = Number(data.delayMinutes)||0;
-  // destType: si está oculto (idavuelta) lee del hidden, si no del visible
-  if (data.direction === "idavuelta") {
-    data.destType = "outside";
-  } else if (!data.destType) {
-    data.destType = form.querySelector('.desttype-hidden')?.value || "base";
-  }
+  if (data.restWorkedHours !== undefined && data.restWorkedHours !== "") data.restWorkedHours = Number(data.restWorkedHours)||0;
+  // destType ya no se elige manualmente; lo deriva el motor desde destination==baseStation
+  data.destType = (data.destination && settings.baseStation && data.destination === settings.baseStation) ? "base" : "outside";
   return data;
 }
 
@@ -1151,7 +1446,32 @@ function wireForm(form, defaults, onSubmit, flavor) {
 
   const updatePreview = () => {
     const d = getFormData(form);
-    const f = calculateFirma(d);
+
+    // 📋 Lógica de Reserva
+    const reserveEl = form.querySelector('[name="reserve"]');
+    const reserveRow = form.querySelector('[data-reserve]');
+    if (reserveEl && reserveRow) {
+      reserveRow.classList.toggle("on", reserveEl.checked);
+      if (reserveEl.checked && !reserveRow.dataset.applied) {
+        // Activar: rellenar train="RESERVA" y signTime="08:00" si están vacíos
+        const trainInp = form.querySelector('[name="train"]');
+        const signInp = form.querySelector('[name="signTime"]');
+        if (trainInp && (!trainInp.value || trainInp.dataset.prevTrain !== undefined)) {
+          trainInp.dataset.prevTrain = trainInp.value || "";
+          trainInp.value = "RESERVA";
+        }
+        if (signInp && !signInp.value) signInp.value = "08:00";
+        reserveRow.dataset.applied = "1";
+      } else if (!reserveEl.checked && reserveRow.dataset.applied) {
+        // Desactivar: si el train sigue siendo "RESERVA", limpiarlo para entrada manual. signTime se mantiene.
+        const trainInp = form.querySelector('[name="train"]');
+        if (trainInp && trainInp.value === "RESERVA") trainInp.value = trainInp.dataset.prevTrain || "";
+        delete trainInp.dataset.prevTrain;
+        delete reserveRow.dataset.applied;
+      }
+    }
+
+    const f = calculateFirma({ ...d, reserve: !!reserveEl?.checked });
     const prev = form.querySelector(".firma-preview");
     if (f.workStart) { prev.style.display = "block"; prev.querySelector(".firma-text").innerText = `${f.workStart} – ${f.workEnd} (${f.hours.toFixed(1)}h)`; }
     else prev.style.display = "none";
@@ -1160,7 +1480,7 @@ function wireForm(form, defaults, onSubmit, flavor) {
     const signVal = form.querySelector('[name="signTime"]')?.value;
     const autoBlock = form.querySelector('.auto-dep');
     const depAuto = form.querySelector('.dep-auto');
-    if (signVal && autoBlock && depAuto) {
+    if (signVal && autoBlock && depAuto && !reserveEl?.checked) {
       autoBlock.style.display = "block";
       depAuto.innerText = fromMin(toMin(signVal) + 60);
     } else if (autoBlock) {
@@ -1173,19 +1493,7 @@ function wireForm(form, defaults, onSubmit, flavor) {
     const retBlock = form.querySelector(".return-mode-block");
     if (retBlock) retBlock.style.display = direction === "idavuelta" ? "block" : "none";
 
-    // Ocultar destType cuando direction=idavuelta (fijo a outside)
-    const destBlock = form.querySelector(".desttype-block");
-    if (destBlock) {
-      const isCombo = direction === "idavuelta";
-      destBlock.style.display = isCombo ? "none" : "block";
-      if (isCombo) {
-        const out = form.querySelector('[name="destType"][value="outside"]');
-        if (out && !out.checked) {
-          out.checked = true;
-          out.dispatchEvent(new Event("change", { bubbles: true }));
-        }
-      }
-    }
+    // destType ya NO es visible. El motor lo deriva automáticamente del destino vs baseStation.
 
     const delayed = form.querySelector('[name="delayed"]')?.checked;
     const delayInput = form.querySelector(".delay-min-row");
@@ -1198,6 +1506,31 @@ function wireForm(form, defaults, onSubmit, flavor) {
     if (restType !== "worked") {
       // Desmarcar radios de compType cuando no es descanso trabajado
       form.querySelectorAll('[name="compType"]').forEach(r => { r.checked = false; r.closest("label")?.classList.remove("checked"); });
+    }
+    // Toggle restWorkedHours visible solo si compType === "money"
+    const compChecked = form.querySelector('[name="compType"]:checked');
+    const showRestHours = restType === "worked" && compChecked?.value === "money";
+    const restHoursRow = form.querySelector(".rest-hours-row");
+    if (restHoursRow) restHoursRow.style.display = showRestHours ? "block" : "none";
+    if (showRestHours) {
+      // Cálculo 100% automático: tiempo real de jornada × tarifa €/h del rol
+      const rate = getRestWorkedPay();
+      const hours = +(f.hours||0).toFixed(2);
+      const amount = +(hours * rate).toFixed(2);
+      const roleEl = form.querySelector('.rh-role');
+      const rateEl = form.querySelector('.rh-rate');
+      const amountEl = form.querySelector('.rh-amount');
+      const detailEl = form.querySelector('.rh-detail');
+      if (roleEl) roleEl.innerText = settings.role === "tripulante" ? "Tripulante" : "Auxiliar";
+      if (rateEl) rateEl.innerText = rate.toFixed(2) + "€";
+      if (amountEl) {
+        if (hours > 0) amountEl.innerText = amount.toFixed(2) + "€";
+        else amountEl.innerText = "— € (rellena firma/llegada)";
+      }
+      if (detailEl) {
+        if (hours > 0) detailEl.innerText = `${hours.toFixed(2)}h × ${rate.toFixed(2)}€/h · firma ${f.workStart||''} → deje ${f.workEnd||''}`;
+        else detailEl.innerText = "Cálculo automático: firma → deje × tarifa";
+      }
     }
 
     let t = 0;
@@ -1291,23 +1624,29 @@ document.getElementById("fd-save").onclick = () => {
 };
 
 document.getElementById("fd-delete").onclick = () => {
-  if (!confirm("¿Eliminar los dos días libres? Volverá a 'sin compensación de días'.")) return;
-  if (freeDaysState.mode === "shift") {
-    const s = shifts.find(x => x.id === freeDaysState.shiftId);
-    if (s) {
-      s.freeDays = []; s.compType = "none"; s.restChange = 0;
-      const rebuilt = buildShift(s);
-      const idx = shifts.findIndex(x => x.id === s.id);
-      shifts[idx] = rebuilt; saveStore(); render();
-      showToast("Días libres eliminados", "success");
+  showConfirm({
+    title: "Eliminar días libres",
+    message: "¿Eliminar los dos días libres? Volverá a 'sin compensación de días'.",
+    icon: "🗑️", danger: true, confirmText: "Eliminar",
+    onConfirm: () => {
+      if (freeDaysState.mode === "shift") {
+        const s = shifts.find(x => x.id === freeDaysState.shiftId);
+        if (s) {
+          s.freeDays = []; s.compType = "none"; s.restChange = 0;
+          const rebuilt = buildShift(s);
+          const idx = shifts.findIndex(x => x.id === s.id);
+          shifts[idx] = rebuilt; saveStore(); render();
+          showToast("Días libres eliminados", "success");
+        }
+      } else {
+        formPendingFreeDays = [];
+        const form = freeDaysState.tempForm;
+        form.querySelectorAll('[name="compType"]').forEach(r => { r.checked = false; r.closest("label")?.classList.remove("checked"); });
+        showToast("Días eliminados del turno", "success");
+      }
+      closeFreeDaysModal();
     }
-  } else {
-    formPendingFreeDays = [];
-    const form = freeDaysState.tempForm;
-    form.querySelectorAll('[name="compType"]').forEach(r => { r.checked = false; r.closest("label")?.classList.remove("checked"); });
-    showToast("Días eliminados del turno", "success");
-  }
-  closeFreeDaysModal();
+  });
 };
 
 function convertFreeDaysTo(/* legacy ignored */) {
@@ -1375,12 +1714,15 @@ function render() {
   render._lastCalc = { totalPluses, hours, rests, nightH, nightEUR, extraH, extraEUR, baseSalary, bruto, irpfPct, irpfAmount, neto };
 
   shifts.sort((a,b)=> a.date<b.date?1:-1);
+  recomputePernoctaLinks();
+  updateQuickStats();
   const hist = document.getElementById("history");
   hist.innerHTML = "";
-  document.getElementById("empty-state").style.display = shifts.length?"none":"block";
-  shifts.forEach((s) => hist.appendChild(renderCard(s)));
+  const visibleShifts = shifts.filter(s => !s.dayOff);
+  document.getElementById("empty-state").style.display = visibleShifts.length?"none":"block";
+  visibleShifts.forEach((s) => hist.appendChild(renderCard(s)));
 
-  if (calendar) { calendar.removeAllEvents(); buildEvents().forEach(e => calendar.addEvent(e)); }
+  if (calendar) { calendar.removeAllEvents(); buildEvents().forEach(e => calendar.addEvent(e)); paintDayOffCells(); }
   scheduleNotifications();
   saveStore();
 }
@@ -1388,10 +1730,33 @@ function render() {
 function renderCard(s) {
   const div = document.createElement("div");
   const isVuelta = s.direction === "vuelta" || s.isReturn;
-  const borderColor = s.restChange>0?"var(--emerald)":s.restChange<0?"var(--primary)":isVuelta?"var(--violet)":"var(--indigo)";
-  div.className = "glass rounded-[28px] p-6";
+  const isReserve = !!s.reserve;
+  const borderColor = s.restChange>0?"var(--emerald)":s.restChange<0?"var(--primary)":isReserve?"var(--cyan)":isVuelta?"var(--violet)":"var(--indigo)";
+  div.className = "shift-card";
   div.style.borderLeft = `4px solid ${borderColor}`;
-  // Free days chips
+
+  // Cabecera compacta: icon | nº tren | ruta corta | €
+  const icon = isReserve ? "📋" : isVuelta ? "↩" : s.pernoctaFueraBase ? "🌙" : s.serviceType === "pasivo" ? "🛌" : "🚄";
+  const orig = (s.origin||'').split(' ')[0] || '—';
+  const dest = (s.destination||'').split(' ')[0] || '—';
+  const routeShort = isReserve ? "Reserva · 8h disponibilidad" : `${orig} → ${dest}`;
+  const pluses = (s.income||0);
+
+  // Tags
+  const tags = [];
+  if (isReserve) tags.push(`<span class="sc-tag" style="background:color-mix(in srgb, var(--cyan) 18%, transparent); color:var(--cyan)">📋 RESERVA</span>`);
+  else if (isVuelta) tags.push(`<span class="sc-tag" style="background:color-mix(in srgb, var(--violet) 18%, transparent); color:var(--violet)">↩ VUELTA</span>`);
+  else tags.push(`<span class="sc-tag" style="background:color-mix(in srgb, var(--indigo) 18%, transparent); color:var(--indigo)">➡ IDA</span>`);
+  if (s.serviceType === "pasivo") tags.push(`<span class="sc-tag" style="background:color-mix(in srgb, var(--cyan) 18%, transparent); color:var(--cyan)">🛌 PASIVO</span>`);
+  if (s.serviceType === "sinServicio") tags.push(`<span class="sc-tag" style="background:color-mix(in srgb, var(--text-3) 22%, transparent); color:var(--text-2)">🚷 SIN SERVICIO</span>`);
+  if (s.pernoctaFueraBase) tags.push(`<span class="sc-tag" style="background:color-mix(in srgb, var(--violet) 18%, transparent); color:var(--violet)">🌙 PERNOCTA</span>`);
+  if (s.pernoctaType === "enlace") tags.push(`<span class="sc-tag" style="background:color-mix(in srgb, var(--amber) 18%, transparent); color:var(--amber)">⚙️ ENLACE ${(s.pernoctaGap||0).toFixed(1)}h</span>`);
+  if (s.pernoctaType === "escala") tags.push(`<span class="sc-tag" style="background:color-mix(in srgb, var(--teal) 18%, transparent); color:var(--teal)">🅿️ ESCALA ${(s.pernoctaGap||0).toFixed(1)}h</span>`);
+  if (s.delayed) tags.push(`<span class="sc-tag" style="background:color-mix(in srgb, var(--amber) 18%, transparent); color:var(--amber)">⏰ +${s.delayMinutes||0}min</span>`);
+  if (s.restType==='worked') tags.push(`<span class="sc-tag" style="background:color-mix(in srgb, var(--emerald) 18%, transparent); color:var(--emerald)">💪 DESC. TRABAJADO</span>`);
+  if (s.restType==='enjoyed') tags.push(`<span class="sc-tag" style="background:color-mix(in srgb, var(--primary) 18%, transparent); color:var(--primary)">🌴 DISFRUTE</span>`);
+
+  // Free days chips (en el body expandido)
   let freeChips = "";
   if (s.restType === "worked" && s.compType === "days") {
     const days = (s.freeDays||["",""]).slice(0,2);
@@ -1405,58 +1770,82 @@ function renderCard(s) {
     const restPay = +(s.plusRestWorked||0).toFixed(2);
     freeChips = `<div class="mt-3 flex items-center gap-2"><span class="badge" style="background:color-mix(in srgb, var(--emerald) 15%, transparent); border:1px solid color-mix(in srgb, var(--emerald) 30%, transparent); color:var(--emerald)">💰 Por Dinero +${restPay.toFixed(2)}€</span></div>`;
   }
+
+  // Deje feedback
+  const dejeMin = s.dejeMin || ((s.destination && settings.baseStation && s.destination === settings.baseStation) ? (Number(settings.dejeBase)||20) : (Number(settings.dejeOutside)||15));
+  const dejeLabel = (s.dejeAuto || (s.destination && s.destination === settings.baseStation)) ? `${dejeMin}m · Base` : `${dejeMin}m · Externo`;
+  const signPre = s.signPre || (s.serviceType === "pasivo" ? 30 : 60);
+
   div.innerHTML = `
-    <div class="flex justify-between gap-4 flex-wrap">
-      <div class="flex-1 min-w-0">
-        <div class="label mb-2 flex items-center gap-2 flex-wrap">
-          <span>${s.date}</span>
-          ${isVuelta ? '<span class="tag" style="background:color-mix(in srgb, var(--violet) 22%, transparent);color:var(--violet)">↩ VUELTA</span>':'<span class="tag" style="background:color-mix(in srgb, var(--indigo) 22%, transparent);color:var(--indigo)">➡ IDA</span>'}
-          ${s.pernoctaFueraBase ? '<span class="tag" style="background:color-mix(in srgb, var(--violet) 22%, transparent);color:var(--violet)">🌙 PERNOCTA</span>':''}
-          ${s.serviceType==='pasivo' ? '<span class="tag" style="background:color-mix(in srgb, var(--cyan) 22%, transparent);color:var(--cyan)">PASIVO</span>':'<span class="tag" style="background:color-mix(in srgb, var(--teal) 22%, transparent);color:var(--teal)">ACTIVO</span>'}
-          ${s.delayed ? `<span class="tag" style="background:color-mix(in srgb, var(--amber) 22%, transparent);color:var(--amber)">⏰ +${s.delayMinutes||0}min</span>`:''}
-          ${s.restType==='worked' ? '<span class="tag" style="background:color-mix(in srgb, var(--emerald) 22%, transparent);color:var(--emerald)">💪 DESC. TRABAJADO</span>':''}
-          ${s.restType==='enjoyed' ? '<span class="tag" style="background:color-mix(in srgb, var(--primary) 22%, transparent);color:var(--primary)">🌴 DISFRUTE</span>':''}
-        </div>
-        <h3 class="text-xl sm:text-2xl" style="font-weight:600">🚄 ${escape(s.train||'Sin número')}</h3>
-        <p class="text-sm mt-1" style="color:var(--text-2)">${escape(s.origin||'—')} <span style="color:var(--primary)">→</span> ${escape(s.destination||'—')}</p>
-        <div class="flex flex-wrap gap-2 mt-3">
-          <span class="badge badge-default">🏠 ${escape(s.base)}</span>
-          <span class="badge badge-default">⏱️ ${(s.hours||0).toFixed(1)}h</span>
-          ${s.destType==='outside' ? '<span class="badge badge-default">🗺️ Fuera base</span>':''}
-        </div>
-        ${s.plusDetails?.length ? `<div class="flex flex-wrap gap-2 mt-3">${s.plusDetails.map(p=>`<span class="badge badge-plus">${p}</span>`).join('')}</div>`:''}
-        <div class="grid grid-cols-2 gap-3 mt-4">
-          <div class="rounded-2xl p-3" style="background:color-mix(in srgb, var(--surface-2) 60%, transparent); border:1px solid var(--border)">
-            <div class="label">Tren</div>
-            <div class="font-semibold mt-1 text-sm">${s.depTime||'—'} – ${s.arrTime||'—'}</div>
-          </div>
-          <div class="rounded-2xl p-3" style="background:color-mix(in srgb, var(--primary) 10%, transparent); border:1px solid color-mix(in srgb, var(--primary) 30%, transparent)">
-            <div class="label" style="color:var(--primary)">Firma</div>
-            <div class="font-semibold mt-1 text-sm" style="color:var(--primary)">${s.workStart||'—'} – ${s.workEnd||'—'}</div>
-          </div>
-        </div>
-        ${freeChips}
+    <div class="sc-row">
+      <div class="sc-icon">${icon}</div>
+      <div class="sc-main">
+        <div class="sc-train">${escape(s.train||'Sin nº')} <span style="font-size:10px; color:var(--text-3); font-weight:500">· ${s.date||''}</span></div>
+        <div class="sc-route">${routeShort}</div>
       </div>
-      <div class="text-right flex flex-col items-end gap-2 no-print">
-        <div class="flex gap-1">
-          <button data-edit="${s.id}" class="row-btn" title="Editar">✏️</button>
-          <button data-del="${s.id}" class="row-btn danger" title="Eliminar">🗑️</button>
-        </div>
-        <div class="rounded-2xl p-3 text-right" style="background:color-mix(in srgb, var(--amber) 10%, transparent); border:1px solid color-mix(in srgb, var(--amber) 28%, transparent); min-width:140px">
-          <div class="label" style="color:var(--amber)">Pluses del turno</div>
-          <div class="font-medium mt-1" style="color:var(--amber); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size:20px">+${(s.income||0).toFixed(2)}€</div>
-          ${s.plusNocturnidad>0?`<div class="text-xs mt-1" style="color:var(--text-3)">de los cuales 🌙 ${(s.plusNocturnidad||0).toFixed(2)}€</div>`:''}
-        </div>
+      <div class="sc-right">
+        ${pluses>0 ? `<div class="sc-eur">+${pluses.toFixed(2)}€</div>` : `<div class="sc-eur" style="color:var(--text-3)">0€</div>`}
+        <div class="sc-chev">▾</div>
       </div>
     </div>
+    <div class="sc-body"><div class="sc-body-inner">
+      <div class="flex flex-wrap gap-1.5 mb-3">${tags.join('')}</div>
+      <p class="text-sm mb-2" style="color:var(--text-2)">${escape(s.origin||'—')} <span style="color:var(--primary)">→</span> ${escape(s.destination||'—')}</p>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span class="badge badge-default">🏠 ${escape(s.base||settings.baseStation)}</span>
+        <span class="badge badge-default">⏱️ ${(s.hours||0).toFixed(2)}h reales</span>
+        <span class="badge badge-default">⏳ Deje aplicado: ${dejeLabel}</span>
+        ${!isReserve?`<span class="badge badge-default">📝 Firma ${signPre}min antes${s.serviceType==='pasivo'?' (pasivo)':''}</span>`:''}
+        ${s.delayed?`<span class="badge badge-default" style="color:var(--amber)">⏰ Retraso ${s.delayMinutes||0}min</span>`:''}
+      </div>
+      ${s.plusDetails?.length ? `<div class="flex flex-wrap gap-2 mb-3">${s.plusDetails.map(p=>`<span class="badge badge-plus">${p}</span>`).join('')}</div>`:''}
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="rounded-xl p-3" style="background:color-mix(in srgb, var(--surface-2) 60%, transparent); border:1px solid var(--border)">
+          <div class="label">${isReserve?'Reserva':'Tren'}</div>
+          <div class="font-semibold mt-1 text-sm">${isReserve?'08:00 – 16:00':(s.depTime||'—')+' – '+(s.arrTime||'—')}</div>
+        </div>
+        <div class="rounded-xl p-3" style="background:color-mix(in srgb, var(--primary) 10%, transparent); border:1px solid color-mix(in srgb, var(--primary) 30%, transparent)">
+          <div class="label" style="color:var(--primary)">Firma</div>
+          <div class="font-semibold mt-1 text-sm" style="color:var(--primary)">${s.workStart||'—'} – ${s.workEnd||'—'}</div>
+        </div>
+      </div>
+      ${freeChips}
+      <div class="flex justify-end gap-2 pt-2 sc-actions">
+        <button data-edit="${s.id}" class="btn-soft text-xs">✏️ Editar</button>
+        <button data-del="${s.id}" class="btn-soft text-xs" style="color:var(--primary)">🗑️ Eliminar</button>
+      </div>
+    </div></div>
   `;
+  // Click handler: expand/collapse (excepto en botones internos)
+  div.addEventListener("click", (e) => {
+    if (e.target.closest("[data-edit], [data-del], [data-freedays]")) return;
+    div.classList.toggle("expanded");
+  });
   return div;
 }
 function escape(s){ return String(s||"").replace(/[<>&"']/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'})[c]); }
 
+// 🔗 Recomputar pernocta enlace/escala (8h regla)
+function recomputePernoctaLinks() {
+  shifts.forEach(s => { s.pernoctaType = null; s.pernoctaGap = 0; });
+  shifts.forEach(s => {
+    if (!s.linkedReturnId) return;
+    const ret = shifts.find(x => x.id === s.linkedReturnId);
+    if (!ret || !s.arrTime || !ret.signTime) return;
+    const dateIda = new Date((s.date||"")+"T"+(s.arrTime||"00:00")+":00");
+    const dateVta = new Date((ret.date||s.date||"")+"T"+(ret.signTime||"00:00")+":00");
+    const gapH = (dateVta.getTime() - dateIda.getTime()) / 3600000;
+    if (gapH <= 0 || gapH > 48) return;
+    const type = gapH < 8 ? "enlace" : "escala";
+    s.pernoctaType = type; s.pernoctaGap = gapH;
+    ret.pernoctaType = type; ret.pernoctaGap = gapH;
+  });
+}
+
 function buildEvents() {
   const events = [];
   shifts.forEach((s) => {
+    if (s.dayOff) return; // descansos NO se renderizan como evento, solo como tinte de celda
     const isVuelta = s.direction === "vuelta" || s.isReturn;
     const color = s.restChange>0?"#FBBF24":s.restChange<0?"#F43F5E":isVuelta?"#A855F7":s.serviceType==='pasivo'?"#06B6D4":"#6366F1";
     events.push({ id: s.id, title: s.train||'Turno', start: s.date, backgroundColor: color, borderColor: color, extendedProps: s });
@@ -1465,6 +1854,16 @@ function buildEvents() {
     });
   });
   return events;
+}
+
+// Pinta visualmente los días marcados como descanso en el calendario
+function paintDayOffCells() {
+  document.querySelectorAll('.fc-day.fc-day-off-marked').forEach(el => el.classList.remove('fc-day-off-marked'));
+  const offDates = new Set(shifts.filter(s => s.dayOff).map(s => s.date));
+  offDates.forEach(dateStr => {
+    const cell = document.querySelector(`.fc-day[data-date="${dateStr}"]`);
+    if (cell) cell.classList.add('fc-day-off-marked');
+  });
 }
 
 // ================= CRUD =================
@@ -1500,27 +1899,42 @@ function updateShift(id, input) {
   const existingFree = shifts[i].freeDays;
   if (input.restType === "worked" && input.compType === "days" && !input.freeDays) input.freeDays = existingFree;
   shifts[i] = buildShift({ ...shifts[i], ...input });
+  saveStore();
   showToast("Turno actualizado", "success");
   render();
 }
 function deleteShift(id) {
-  if (!confirm("¿Eliminar este turno?")) return;
-  // Si es ida y tiene vuelta vinculada, preguntar
   const s = shifts.find(x => x.id === id);
-  if (s && s.linkedReturnId) {
-    const ret = shifts.find(x => x.id === s.linkedReturnId);
-    if (ret && confirm("Este turno tiene una vuelta vinculada. ¿Eliminar también la vuelta?")) {
-      shifts = shifts.filter(x => x.id !== s.linkedReturnId);
+  const doDelete = (deleteReturn) => {
+    if (deleteReturn && s.linkedReturnId) shifts = shifts.filter(x => x.id !== s.linkedReturnId);
+    shifts = shifts.filter(x => x.id !== id);
+    showToast("Turno eliminado", "success"); render();
+  };
+  showConfirm({
+    title: "Eliminar turno",
+    message: `¿Eliminar el turno ${s?.train ? s.train + " del " + s.date : ""}?`,
+    icon: "🗑️", danger: true, confirmText: "Eliminar",
+    onConfirm: () => {
+      if (s && s.linkedReturnId && shifts.find(x => x.id === s.linkedReturnId)) {
+        showConfirm({
+          title: "Vuelta vinculada",
+          message: "Este turno tiene una vuelta vinculada. ¿Eliminar también la vuelta?",
+          icon: "↩", danger: true, confirmText: "Sí, ambos", cancelText: "Solo este",
+          onConfirm: () => doDelete(true),
+          onCancel: () => doDelete(false)
+        });
+      } else doDelete(false);
     }
-  }
-  shifts = shifts.filter(x => x.id !== id);
-  showToast("Turno eliminado", "success");
-  render();
+  });
 }
 function clearAll() {
   if (shifts.length === 0) return showToast("El historial ya está vacío");
-  if (!confirm(`¿Eliminar TODOS los turnos (${shifts.length})? Esta acción no se puede deshacer.`)) return;
-  shifts = []; render(); showToast("Historial eliminado", "success");
+  showConfirm({
+    title: "Vaciar historial",
+    message: `¿Eliminar TODOS los turnos (${shifts.length})? Esta acción no se puede deshacer.`,
+    icon: "🗑️", danger: true, confirmText: `Eliminar ${shifts.length} turnos`,
+    onConfirm: () => { shifts = []; render(); showToast("Historial eliminado", "success"); }
+  });
 }
 
 // ================= RETURN POPUP =================
@@ -1575,6 +1989,8 @@ function openSettings() {
   document.getElementById("set-nightAux").value = settings.nightRateAuxiliar;
   document.getElementById("set-restTri").value = settings.restWorkedPayTripulante;
   document.getElementById("set-restAux").value = settings.restWorkedPayAuxiliar;
+  document.getElementById("set-dejeBase").value = settings.dejeBase;
+  document.getElementById("set-dejeOutside").value = settings.dejeOutside;
   document.getElementById("set-irpf").value = settings.irpf;
   document.getElementById("set-hoursOrd").value = settings.hoursOrdinary;
   document.getElementById("set-extraRate").value = settings.extraHourRate;
@@ -1639,13 +2055,16 @@ document.getElementById("set-save").onclick = () => {
   settings.nightRateAuxiliar = Number(document.getElementById("set-nightAux").value)||0;
   settings.restWorkedPayTripulante = Number(document.getElementById("set-restTri").value)||0;
   settings.restWorkedPayAuxiliar = Number(document.getElementById("set-restAux").value)||0;
+  settings.dejeBase = Math.max(0, Math.min(120, Number(document.getElementById("set-dejeBase").value)||0));
+  settings.dejeOutside = Math.max(0, Math.min(120, Number(document.getElementById("set-dejeOutside").value)||0));
   settings.irpf = Math.max(0, Math.min(60, Number(document.getElementById("set-irpf").value)||0));
   settings.hoursOrdinary = Math.max(0, Math.min(24, Number(document.getElementById("set-hoursOrd").value)||0));
   settings.extraHourRate = Math.max(0, Number(document.getElementById("set-extraRate").value)||0);
   const roleChecked = document.querySelector('#set-role-seg input[name="role"]:checked');
   settings.role = roleChecked ? roleChecked.value : "auxiliar";
   shifts = shifts.map(s => buildShift(s));
-  showToast("Ajustes guardados · cálculos actualizados", "success");
+  const roleChanged = settings.role !== prevRole;
+  showToast(roleChanged ? `🔄 Rol actualizado: ${settings.role==='tripulante'?'Tripulante':'Auxiliar'} · turnos recalculados` : "Ajustes guardados · cálculos actualizados", "success");
   closeModal("modal-settings");
   wireNewForm(); render();
   // Disparar aviso legal SOLO si cambia rol o IRPF
@@ -1668,20 +2087,162 @@ function openEdit(s) {
   }, "edit");
   openModal("modal-edit");
 }
-function openQuickAdd(date) {
+// 📅 ACCIONES DEL DÍA (calendario)
+function openDayActions(dateStr) {
+  const dayShifts = shifts.filter(s => s.date === dateStr);
+  const dayOffShift = dayShifts.find(s => s.dayOff);
+  const realShifts = dayShifts.filter(s => !s.dayOff);
+  // Formato bonito
+  const d = new Date(dateStr + "T00:00:00");
+  const fmt = d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+  document.getElementById("modal-day-title").innerText = fmt.charAt(0).toUpperCase() + fmt.slice(1);
+  let subTxt;
+  if (dayOffShift) subTxt = realShifts.length>0 ? `🌴 Día de Descanso · ${realShifts.length} turno(s) extra registrados` : "🌴 Marcado como Día de Descanso";
+  else if (realShifts.length>0) subTxt = `${realShifts.length} turno(s) registrados · elige una acción`;
+  else subTxt = "Día vacío · elige una acción";
+  document.getElementById("modal-day-sub").innerText = subTxt;
+
+  const viewBtn = document.getElementById("day-view");
+  const addBtn = document.getElementById("day-add");
+  const restBtn = document.getElementById("day-rest");
+  const offBtn = document.getElementById("day-mark-off");
+
+  // Ver/Modificar
+  viewBtn.style.display = realShifts.length > 0 ? "flex" : "none";
+  document.getElementById("day-view-count").innerText = realShifts.length;
+  viewBtn.onclick = () => renderDayShiftsList(dateStr, realShifts);
+
+  // Añadir turno: si día es Descanso → preguntar Dinero/2x1
+  addBtn.style.display = "flex";
+  addBtn.onclick = () => {
+    closeModal("modal-day");
+    if (dayOffShift) {
+      // Día ya marcado descanso → preguntar compensación
+      askCompensationType(dateStr);
+    } else {
+      openQuickAdd(dateStr);
+    }
+  };
+
+  // Marcar como Descanso (botón solo si no hay turnos y no es ya descanso)
+  if (offBtn) {
+    if (!dayOffShift && realShifts.length === 0) {
+      offBtn.style.display = "flex";
+      offBtn.onclick = () => { closeModal("modal-day"); markDayAsRest(dateStr); };
+    } else if (dayOffShift) {
+      offBtn.style.display = "flex";
+      offBtn.querySelector(".da-title").innerText = "Quitar Día de Descanso";
+      offBtn.querySelector(".da-sub").innerText = "Volver a día normal";
+      offBtn.onclick = () => {
+        closeModal("modal-day");
+        showConfirm({
+          title: "Quitar Día de Descanso",
+          message: "Este día dejará de estar marcado como descanso. ¿Continuar?",
+          icon: "🗑️", danger: false, confirmText: "Quitar",
+          onConfirm: () => {
+            shifts = shifts.filter(s => !(s.date === dateStr && s.dayOff));
+            saveStore(); render();
+            showToast("Día de descanso eliminado", "success");
+          }
+        });
+      };
+    } else {
+      offBtn.style.display = "none";
+    }
+  }
+
+  // Descanso trabajado (solo visible si NO hay descanso marcado todavía)
+  restBtn.style.display = dayOffShift ? "none" : "flex";
+  restBtn.onclick = () => { closeModal("modal-day"); openQuickAdd(dateStr, { restType: "worked", compType: "money", openTab: "jornada" }); };
+
+  // Reset lista
+  document.getElementById("modal-day-shifts-list").style.display = "none";
+  openModal("modal-day");
+}
+
+// Marcar día completo como descanso
+function markDayAsRest(dateStr) {
+  const id = "rest-" + dateStr;
+  if (shifts.find(s => s.id === id)) return;
+  shifts.push({
+    id, date: dateStr, dayOff: true, train: "DESCANSO",
+    restType: "enjoyed", hours: 0, income: 0, plusDetails: [],
+    base: settings.baseStation, restChange: -1,
+    pluses: 0, plusNocturnidad: 0, nightHours: 0, extraHours: 0, plusExtra: 0, plusRestWorked: 0
+  });
+  saveStore(); render();
+  showToast("🌴 Día marcado como descanso", "success");
+}
+
+// Preguntar tipo de compensación al añadir turno en día de descanso
+function askCompensationType(dateStr) {
+  showConfirm({
+    title: "Trabajar en día de descanso",
+    message: "¿Cómo quieres cobrar este turno?",
+    icon: "💪",
+    confirmText: "💰 Por Dinero",
+    cancelText: "🌴 Por 2 Días (2x1)",
+    onConfirm: () => openQuickAdd(dateStr, { restType: "worked", compType: "money", openTab: "jornada" }),
+    onCancel: () => openQuickAdd(dateStr, { restType: "worked", compType: "days", openTab: "jornada" })
+  });
+}
+function renderDayShiftsList(dateStr, dayShifts) {
+  const list = document.getElementById("modal-day-shifts-list");
+  list.style.display = "block";
+  list.innerHTML = `<div class="text-xs mb-2" style="color:var(--text-3); letter-spacing:.08em; text-transform:uppercase">📋 Turnos del día (toca para editar)</div>` +
+    dayShifts.map((s, i) => {
+      const icon = s.reserve ? "📋" : (s.direction === "vuelta" || s.isReturn) ? "↩" : "🚄";
+      const route = s.reserve ? "RESERVA · 8h" : `${(s.origin||'').split(' ')[0]} → ${(s.destination||'').split(' ')[0]}`;
+      const pluses = (s.income||0);
+      return `<div class="day-shift-item" data-edit-shift="${s.id}">
+        <div class="dsi-ico">${icon}</div>
+        <div class="dsi-main">
+          <div class="dsi-title">Turno ${i+1}: ${escape(s.train||'Sin nº')}</div>
+          <div class="dsi-sub">${escape(route)} · ${s.workStart||'—'} – ${s.workEnd||'—'}</div>
+        </div>
+        <div class="dsi-eur">+${pluses.toFixed(2)}€</div>
+      </div>`;
+    }).join("");
+  list.querySelectorAll("[data-edit-shift]").forEach(el => {
+    el.addEventListener("click", () => {
+      const id = el.dataset.editShift;
+      const s = shifts.find(x => x.id === id);
+      if (!s) return;
+      closeModal("modal-day");
+      openQuickAdd(s.date, { editShift: s });
+    });
+  });
+}
+
+function openQuickAdd(date, opts = {}) {
   formPendingFreeDays = null;
   document.getElementById("quick-date-label").innerText = "📅 " + date;
   const form = document.getElementById("quick-form"); form.dataset.prefix = "quick";
-  wireForm(form, { date, origin: settings.baseStation, direction:"ida", serviceType: "activo", destType: "base", restType: "none" },
-    (data) => { createShift(data); closeModal("modal-quick"); }, "quick");
+  let initial;
+  if (opts.editShift) {
+    initial = { ...opts.editShift };
+    form.dataset.editId = opts.editShift.id;
+    document.getElementById("quick-date-label").innerText = "✏️ Editar · " + date;
+  } else {
+    delete form.dataset.editId;
+    initial = { date, origin: settings.baseStation, direction:"ida", serviceType: "activo", destType: "base", restType: opts.restType || "none", compType: opts.compType || "" };
+  }
+  wireForm(form, initial,
+    (data) => {
+      if (opts.editShift) updateShift(opts.editShift.id, data);
+      else createShift(data);
+      closeModal("modal-quick");
+    }, "quick");
   openModal("modal-quick");
+  // Abrir tab específica si se solicitó
+  if (opts.openTab) {
+    setTimeout(() => {
+      const tb = form.querySelector(`button.tab-btn[data-tab="${opts.openTab}"]`);
+      if (tb) tb.click();
+    }, 100);
+  }
 }
-function wireNewForm() {
-  formPendingFreeDays = null;
-  const form = document.getElementById("shift-form"); form.dataset.prefix = "new";
-  wireForm(form, { origin: settings.baseStation, direction:"ida", serviceType: "activo", destType: "base", restType: "none" },
-    (data) => { createShift(data); wireNewForm(); }, "new");
-}
+function wireNewForm() { /* removed: form persistente eliminado, solo se usa modal-quick */ }
 
 // NOTIFICATIONS
 const notifTimers = new Map();
@@ -1691,16 +2252,48 @@ function scheduleNotifications() {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
   const now = Date.now(); const maxWindow = 14*24*60*60*1000;
   shifts.forEach(s => {
-    if (!s.workStart || s.restType==='enjoyed') return;
-    const [h,m] = s.workStart.split(":").map(Number);
-    const d = new Date(s.date+"T00:00:00"); d.setHours(h,m,0,0);
-    const trigger = d.getTime() - 60*60*1000; const delay = trigger - now;
-    if (delay <= 0 || delay > maxWindow) return;
-    const id = setTimeout(() => {
-      try { new Notification("Firma en 1h", { body: `${s.train||'Turno'} · ${s.workStart} (${(s.origin||'').split(' ')[0]} → ${(s.destination||'').split(' ')[0]})` }); } catch {}
-      notifTimers.delete(s.id);
-    }, delay);
-    notifTimers.set(s.id, id);
+    if (s.dayOff || s.restType==='enjoyed') return;
+    // 1) Firma 1h antes
+    if (s.workStart) {
+      const [h,m] = s.workStart.split(":").map(Number);
+      const d = new Date(s.date+"T00:00:00"); d.setHours(h,m,0,0);
+      const trigger = d.getTime() - 60*60*1000; const delay = trigger - now;
+      if (delay > 0 && delay <= maxWindow) {
+        const id = setTimeout(() => {
+          try { new Notification("Firma en 1h", { body: `${s.train||'Turno'} · ${s.workStart} (${(s.origin||'').split(' ')[0]} → ${(s.destination||'').split(' ')[0]})` }); } catch {}
+          notifTimers.delete("pre-" + s.id);
+        }, delay);
+        notifTimers.set("pre-" + s.id, id);
+      }
+    }
+    // 2) Fin de jornada (workEnd) — alerta de deje/retraso
+    if (s.workEnd) {
+      const [eh, em] = s.workEnd.split(":").map(Number);
+      const startMin = s.workStart ? (Number(s.workStart.split(":")[0])*60 + Number(s.workStart.split(":")[1])) : 0;
+      const endMin = eh*60 + em;
+      const de = new Date(s.date+"T00:00:00");
+      // Si workEnd < workStart, la jornada cruza medianoche
+      if (endMin < startMin) de.setDate(de.getDate() + 1);
+      de.setHours(eh, em, 0, 0);
+      const delayE = de.getTime() - now;
+      if (delayE > 0 && delayE <= maxWindow) {
+        const id = setTimeout(() => {
+          try {
+            const notif = new Notification("Tu jornada ha finalizado 🏁", {
+              body: `${s.train||'Turno'} · ¿Hubo algún retraso o cambio en el deje?`,
+              tag: "end-" + s.id, requireInteraction: true
+            });
+            notif.onclick = () => {
+              window.focus();
+              openQuickAdd(s.date, { editShift: s, openTab: "extras" });
+              notif.close();
+            };
+          } catch {}
+          notifTimers.delete("end-" + s.id);
+        }, delayE);
+        notifTimers.set("end-" + s.id, id);
+      }
+    }
   });
   updateNotifBtn();
 }
@@ -1722,9 +2315,74 @@ document.getElementById("btn-notif").onclick = async () => {
 
 // THEME — eliminado (Renfe palette permanente)
 document.getElementById("btn-settings").onclick = openSettings;
-document.getElementById("btn-quick").onclick = () => openQuickAdd(new Date().toISOString().slice(0,10));
 document.getElementById("btn-clear").onclick = clearAll;
 document.getElementById("btn-neto-card").onclick = openConceptosModal;
+
+// 📊 Widget Vista Rápida — KPIs del mes actual
+let lastQuickStats = {};
+function updateQuickStats() {
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  const inThisMonth = (dateStr) => {
+    if (!dateStr) return false;
+    const d = new Date(dateStr + "T00:00:00");
+    return d.getFullYear() === y && d.getMonth() === m;
+  };
+  const monthShifts = shifts.filter(s => inThisMonth(s.date) && !s.dayOff);
+  // Descansos trabajados por dinero
+  const restMoney = monthShifts.filter(s => s.restType === "worked" && (s.compType === "money" || s.compType === "aux" || s.compType === "trip"));
+  const restMoneySum = restMoney.reduce((a,s) => a + (Number(s.plusRestWorked)||0), 0);
+  // Días 2x1 pendientes (turnos del mes con compType=days → 2 días cada uno)
+  const days2x1 = monthShifts.filter(s => s.restType === "worked" && s.compType === "days").length * 2;
+  // Horas extra (incluye deje superior a jornada y retrasos)
+  const extraH = monthShifts.reduce((a,s) => a + (Number(s.extraHours)||0), 0);
+  const extraEUR = monthShifts.reduce((a,s) => a + (Number(s.plusExtra)||0), 0);
+
+  const ms = document.getElementById("qs-rest-money");
+  if (ms) {
+    ms.innerText = restMoneySum.toFixed(2) + "€";
+    document.getElementById("qs-rest-money-sub").innerText = `${restMoney.length} turno(s) · este mes`;
+    if (lastQuickStats.restMoney !== undefined && lastQuickStats.restMoney !== restMoneySum) flashQs(ms);
+  }
+  const d2 = document.getElementById("qs-days-2x1");
+  if (d2) {
+    d2.innerText = days2x1;
+    document.getElementById("qs-days-2x1-sub").innerText = `${days2x1>0?'libres':'sin descansos 2x1'} para el mes siguiente`;
+    if (lastQuickStats.days2x1 !== undefined && lastQuickStats.days2x1 !== days2x1) flashQs(d2);
+  }
+  const eh = document.getElementById("qs-extra-h");
+  if (eh) {
+    eh.innerText = extraH.toFixed(1) + "h";
+    document.getElementById("qs-extra-h-sub").innerText = `${extraEUR.toFixed(2)}€ · este mes`;
+    if (lastQuickStats.extraH !== undefined && lastQuickStats.extraH !== extraH) flashQs(eh);
+  }
+  lastQuickStats = { restMoney: restMoneySum, days2x1, extraH };
+}
+function flashQs(valEl) {
+  const card = valEl.closest(".qs-card");
+  if (!card) return;
+  card.classList.remove("flash"); void card.offsetWidth; card.classList.add("flash");
+}
+
+// 🧭 Onboarding (Asistente primera vez)
+let obStep = 0;
+function setObStep(n) {
+  obStep = Math.max(0, Math.min(3, n));
+  document.querySelectorAll('#modal-onboarding .ob-slide').forEach(el => el.classList.toggle("active", Number(el.dataset.step) === obStep));
+  document.querySelectorAll('#modal-onboarding .ob-dot').forEach((el, i) => el.classList.toggle("active", i <= obStep));
+  document.getElementById("ob-next").innerText = obStep === 3 ? "✅ Empezar" : "Siguiente →";
+}
+function startOnboarding() { setObStep(0); openModal("modal-onboarding"); }
+function finishOnboarding() {
+  localStorage.setItem("tf_onboarded_v1", "1");
+  closeModal("modal-onboarding");
+  showToast("¡Listo! Toca un día del calendario para empezar 🚀", "success");
+}
+document.getElementById("ob-next").onclick = () => {
+  if (obStep === 3) finishOnboarding();
+  else setObStep(obStep + 1);
+};
+document.getElementById("ob-skip").onclick = finishOnboarding;
 
 // 🌗 THEME TOGGLE
 function applyTheme(t) {
@@ -1773,6 +2431,7 @@ function openConceptosModal() {
   const extraH = shifts.reduce((a,s)=>a+(s.extraHours||0),0);
   const extraEUR = shifts.reduce((a,s)=>a+(s.plusExtra||0),0);
   const restMoneyEUR = shifts.reduce((a,s)=>a+(s.plusRestWorked||0),0);
+  const restMoneyHours = shifts.reduce((a,s)=>a+(Number(s.restWorkedHours)||0),0);
   const restMoneyCount = shifts.filter(s => s.restType==="worked" && (s.compType==="money"||s.compType==="aux"||s.compType==="trip")).length;
   const restDaysCount = shifts.filter(s => s.restType==="worked" && s.compType==="days").length;
   const accumulatedDays = restDaysCount * 2;
@@ -1800,7 +2459,7 @@ function openConceptosModal() {
   rows.push(cnRow("💼", `Sueldo base · ${roleLabel}`, baseSalary.toFixed(2)+"€", `Mensual según rol y antigüedad`, "var(--indigo)"));
   if (nightEUR>0) rows.push(cnRow("🌙", "Plus Nocturnidad", "+"+nightEUR.toFixed(2)+"€", `${nightH.toFixed(2)}h × ${getNightRate().toFixed(2)}€/h (22:00–05:00)`, "var(--violet)"));
   if (extraEUR>0) rows.push(cnRow("⏱️", "Horas Extra", "+"+extraEUR.toFixed(2)+"€", `${extraH.toFixed(2)}h × ${Number(settings.extraHourRate).toFixed(2)}€/h · incluye retrasos`, "var(--amber)"));
-  if (restMoneyEUR>0) rows.push(cnRow("💪", "Descanso Trabajado · Por Dinero", "+"+restMoneyEUR.toFixed(2)+"€", `${restMoneyCount} turno(s) × ${getRestWorkedPay().toFixed(2)}€ (rol ${roleLabel})`, "var(--emerald)"));
+  if (restMoneyEUR>0) rows.push(cnRow("💪", "Descanso Trabajado · Por Dinero", "+"+restMoneyEUR.toFixed(2)+"€", `${restMoneyHours.toFixed(2)}h × ${getRestWorkedPay().toFixed(2)}€/h · ${restMoneyCount} descanso(s) (${roleLabel})`, "var(--emerald)"));
   if (intEUR>0) rows.push(cnRow("🌍", "Plus Internacionalidad", "+"+intEUR.toFixed(2)+"€", `${intCount} turno(s) × ${Number(settings.plusInternational).toFixed(2)}€`, "var(--cyan)"));
   if (actEUR>0) rows.push(cnRow("⚡", "Plus Activación", "+"+actEUR.toFixed(2)+"€", `${actCount} turno(s) × ${Number(settings.plusActivation).toFixed(2)}€`, "var(--amber)"));
   if (jtEUR>0) rows.push(cnRow("🚄", "Plus JT", "+"+jtEUR.toFixed(2)+"€", `${jtCount} turno(s) × ${Number(settings.plusJT).toFixed(2)}€`, "var(--teal)"));
@@ -1851,20 +2510,7 @@ function initCalendar() {
     buttonText: { today: "Hoy" },
     events: buildEvents(),
     dateClick: (info) => {
-      const now = Date.now();
-      if (lastClick.date === info.dateStr && now - lastClick.time < 350) {
-        if (lastClick.timer) clearTimeout(lastClick.timer);
-        lastClick = { date: null, time: 0, timer: null };
-        openQuickAdd(info.dateStr);
-      } else {
-        const timer = setTimeout(() => {
-          const form = document.getElementById("shift-form");
-          form.querySelector('[name="date"]').value = info.dateStr;
-          showToast("Fecha seleccionada", "info");
-          lastClick = { date: null, time: 0, timer: null };
-        }, 280);
-        lastClick = { date: info.dateStr, time: now, timer };
-      }
+      openDayActions(info.dateStr);
     },
     eventClick: (info) => {
       const e = info.event.extendedProps;
@@ -1873,7 +2519,9 @@ function initCalendar() {
         if (parent) openFreeDaysModal({ shiftId: parent.id, shiftDate: parent.date });
         return;
       }
-      if (e) openEdit(e);
+      // Abrir modal de acciones del día (no editar directo)
+      const dateStr = info.event.startStr || (e && e.date);
+      if (dateStr) openDayActions(dateStr);
     },
     eventContent: (arg) => {
       const e = arg.event.extendedProps;
@@ -1884,7 +2532,8 @@ function initCalendar() {
       const icon = isVuelta?'↩':e.pernoctaFueraBase?'🌙':e.serviceType==='pasivo'?'🛌':'🚄';
       const dm = e.delayed?' ⏰':'';
       return { html: `<div class="evt"><div class="evt-train">${icon} ${e.train||'Turno'}${dm}</div><div class="evt-route">${orig} → ${dest}</div><div class="evt-hours">${e.depTime||'--:--'} - ${e.arrTime||'--:--'}</div></div>` };
-    }
+    },
+    datesSet: () => { setTimeout(paintDayOffCells, 50); }
   });
   calendar.render();
 
@@ -1916,8 +2565,24 @@ window.addEventListener("DOMContentLoaded", () => {
   wireNewForm();
   updateNotifBtn();
   render();
+  // 🔒 Banner privacidad
+  const accepted = localStorage.getItem("tf_privacy_v1");
+  if (!accepted) {
+    setTimeout(() => document.getElementById("privacy-banner").classList.add("show"), 600);
+  }
+  document.getElementById("pv-accept").addEventListener("click", () => {
+    localStorage.setItem("tf_privacy_v1", "1");
+    document.getElementById("privacy-banner").classList.remove("show");
+    showToast("Preferencia guardada · gracias", "success");
+    // Tras aceptar privacidad, mostrar onboarding si no se ha visto
+    if (!localStorage.getItem("tf_onboarded_v1")) setTimeout(startOnboarding, 350);
+  });
+  // Si privacidad ya estaba aceptada pero onboarding no se ha visto → arrancar onboarding
+  if (accepted && !localStorage.getItem("tf_onboarded_v1")) {
+    setTimeout(startOnboarding, 600);
+  }
 });
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"7f7b0fd8732c4326aae4b9d58d5c514a","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9faa0514fc6c0423',t:'MTc3ODU5NTE2Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fb8bd09c9b0ecae',t:'MTc3ODc0OTQ5Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
