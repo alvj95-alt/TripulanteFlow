@@ -424,12 +424,27 @@ background: var(--bg);
 .cmp-card-head { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
 .cmp-card-avatar { width: 36px; height: 36px; border-radius: 10px; background: color-mix(in srgb, var(--primary) 12%, transparent); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
 .cmp-card-info { flex: 1; min-width: 0; }
-.cmp-card-name { font-weight: 700; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp-card-name { font-weight: 700; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; padding: 0; background: transparent; border: 0; }
+.cmp-name-btn { cursor: pointer; transition: color .2s; text-decoration: none; display: block; width: 100%; }
+.cmp-name-btn:hover { color: var(--primary); text-decoration: underline; }
 .cmp-card-mat { font-size: 10px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; letter-spacing: .04em; }
 .cmp-card-action { background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-size: 11px; font-weight: 600; color: var(--text-3); cursor: pointer; transition: all .2s; }
 .cmp-card-action:hover { color: #DC2626; border-color: #DC2626; background: color-mix(in srgb, #DC2626 8%, transparent); }
-.cmp-card-strip { width: 100%; display: block; background: var(--surface-2); }
+.cmp-card-strip { width: 100%; display: block; background: var(--surface-2); border: 0; padding: 0; cursor: default; position: relative; }
 .cmp-card-strip img { width: 100%; display: block; }
+.cmp-strip-btn { cursor: zoom-in; transition: filter .2s; }
+.cmp-strip-btn:hover { filter: brightness(1.04); }
+.cmp-zoom-hint { position: absolute; top: 6px; right: 8px; background: rgba(0,0,0,0.72); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: .04em; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.cmp-strip-btn:hover .cmp-zoom-hint { opacity: 1; }
+
+/* ===== Header de fecha (1-31 + L M X J V S D) ===== */
+.cmp-date-header { position: relative; height: 26px; background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 10%, var(--surface)), color-mix(in srgb, var(--primary) 4%, var(--surface))); border-top: 1px solid var(--border); border-bottom: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border)); overflow: hidden; }
+.cmp-dh-cell { position: absolute; top: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; padding: 2px 0; box-sizing: border-box; }
+.cmp-dh-cell.weekend { background: color-mix(in srgb, var(--amber) 12%, transparent); }
+.cmp-dh-day { font-size: 9px; font-weight: 800; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+.cmp-dh-wd { font-size: 7.5px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .04em; margin-top: 1px; }
+.cmp-dh-cell.weekend .cmp-dh-wd { color: var(--amber); }
+
 .cmp-card-dayinfo { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; font-size: 12px; background: color-mix(in srgb, var(--surface-2) 50%, transparent); }
 .cmp-card-day-code { font-weight: 800; color: var(--primary); font-size: 14px; padding: 4px 10px; border-radius: 8px; background: color-mix(in srgb, var(--primary) 10%, transparent); font-family: 'JetBrains Mono', monospace; }
 .cmp-card-day-code.free { color: var(--emerald); background: color-mix(in srgb, var(--emerald) 12%, transparent); }
@@ -441,6 +456,48 @@ background: var(--bg);
 .cmp-storage-info b { color: var(--text); }
 .cmp-clear-btn { margin-left: auto; background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 5px 12px; font-size: 11px; font-weight: 600; color: var(--text-3); cursor: pointer; transition: all .2s; }
 .cmp-clear-btn:hover { color: #DC2626; border-color: #DC2626; }
+
+/* ===== ☁️ Cloud sync ===== */
+.cmp-cloud-section { margin-top: 18px; padding: 16px; border-radius: 14px; background: color-mix(in srgb, var(--primary) 5%, var(--surface)); border: 1px dashed color-mix(in srgb, var(--primary) 22%, transparent); }
+.cmp-cloud-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.cmp-cloud-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.cmp-cloud-status { font-size: 11px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
+.cmp-cloud-status.ok { color: var(--emerald); }
+.cmp-cloud-status.err { color: #DC2626; }
+.cmp-cloud-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.cmp-cloud-btn { flex: 1; min-width: 180px; font-size: 13px; padding: 11px 14px; }
+.cmp-admin-panel { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); }
+.cmp-admin-hint { font-size: 11px; color: var(--text-3); margin: 0 0 10px; }
+.cmp-admin-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.cmp-admin-pin-input { flex: 1; min-width: 120px; padding: 11px 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: .15em; font-size: 14px; }
+.cmp-admin-publish { flex-shrink: 0; }
+.cmp-admin-feedback { font-size: 11px; margin-top: 8px; min-height: 14px; color: var(--text-2); }
+.cmp-admin-feedback.ok { color: var(--emerald); }
+.cmp-admin-feedback.err { color: #DC2626; }
+
+/* ===== 🎓 Onboarding tour ===== */
+#tour-overlay { position: fixed; inset: 0; z-index: 9990; pointer-events: none; display: none; }
+#tour-overlay.show { display: block; }
+.tour-mask { position: absolute; inset: 0; background: rgba(8,10,18,0.72); pointer-events: auto; transition: clip-path .35s cubic-bezier(.2,.8,.2,1); }
+.tour-spotlight { position: absolute; border-radius: 18px; box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 80%, #fff 20%), 0 0 0 9999px rgba(8,10,18,0.72); transition: all .35s cubic-bezier(.2,.8,.2,1); pointer-events: none; z-index: 9991; }
+.tour-tip { position: absolute; max-width: 340px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 18px 18px 14px; box-shadow: 0 20px 60px rgba(0,0,0,.28); z-index: 9992; pointer-events: auto; transition: all .35s cubic-bezier(.2,.8,.2,1); }
+.tour-tip-step { font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--primary); text-transform: uppercase; }
+.tour-tip-title { font-size: 17px; font-weight: 700; margin: 4px 0 6px; color: var(--text); }
+.tour-tip-body { font-size: 13px; line-height: 1.5; color: var(--text-2); margin: 0; }
+.tour-tip-actions { display: flex; gap: 8px; margin-top: 14px; justify-content: space-between; align-items: center; }
+.tour-skip { background: transparent; border: 0; color: var(--text-3); font-size: 12px; cursor: pointer; padding: 6px 10px; border-radius: 8px; }
+.tour-skip:hover { color: var(--text); background: var(--surface-2); }
+.tour-next { background: var(--primary); color: #fff; border: 0; padding: 9px 18px; font-weight: 700; font-size: 13px; border-radius: 999px; cursor: pointer; transition: background .2s, transform .15s; }
+.tour-next:hover { background: var(--primary-hover); }
+.tour-next:active { transform: scale(.96); }
+.tour-dots { display: flex; gap: 5px; }
+.tour-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); transition: background .25s, transform .25s; }
+.tour-dot.active { background: var(--primary); transform: scale(1.4); }
+
+/* ===== ⚡ Instant-save feedback ===== */
+.btn-primary.is-saving { background: var(--emerald) !important; transition: background .15s; }
+.btn-primary.is-saving::before { content: "✓ "; font-weight: 800; animation: tfSaveCheck .35s cubic-bezier(.2,.8,.2,1); }
+@keyframes tfSaveCheck { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 /* Search */
 .cmp-search-wrap { position: relative; margin-bottom: 16px; }
@@ -463,6 +520,49 @@ background: var(--bg);
 .cmp-day-col-title.cmp-working { color: var(--primary); border-bottom-color: color-mix(in srgb, var(--primary) 30%, transparent); }
 .cmp-day-col-title.cmp-free { color: var(--emerald); border-bottom-color: color-mix(in srgb, var(--emerald) 30%, transparent); }
 .cmp-badge { font-size: 10px; padding: 3px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); font-weight: 700; }
+
+/* ===== Modal HD (zoom) ===== */
+.cmp-hd-content { max-width: 1400px !important; display: flex !important; flex-direction: column; padding: 0 !important; }
+.cmp-hd-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); gap: 14px; flex-shrink: 0; }
+.cmp-hd-titles { min-width: 0; flex: 1; }
+.cmp-hd-name { font-size: 16px; font-weight: 700; color: var(--text); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp-hd-meta { font-size: 11px; color: var(--text-3); margin: 2px 0 0; letter-spacing: .02em; }
+.cmp-hd-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.cmp-hd-zbtn { width: 38px; height: 38px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: 18px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all .15s; }
+.cmp-hd-zbtn:hover { background: color-mix(in srgb, var(--primary) 10%, var(--surface)); border-color: var(--primary); color: var(--primary); }
+.cmp-hd-zbtn:active { transform: scale(.94); }
+.cmp-hd-zlevel { min-width: 52px; text-align: center; font-size: 12px; font-weight: 700; color: var(--text-2); padding: 0 4px; font-family: 'JetBrains Mono', monospace; }
+.cmp-hd-reset { font-size: 16px; }
+.cmp-hd-stage { flex: 1; overflow: auto; background: color-mix(in srgb, var(--surface-2) 60%, var(--bg)); position: relative; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; }
+/* Sticky header dentro del stage que contiene tanto la regla como la imagen */
+.cmp-hd-track { display: inline-block; vertical-align: top; min-width: 100%; }
+.cmp-hd-dateheader { position: sticky; top: 0; height: 30px; background: var(--surface); border-bottom: 1px solid var(--border); z-index: 2; box-shadow: 0 2px 6px rgba(0,0,0,.04); transform-origin: 0 0; }
+.cmp-hd-dateheader .cmp-dh-cell { height: 30px; box-sizing: border-box; border-right: 1px dashed color-mix(in srgb, var(--border) 60%, transparent); }
+.cmp-hd-dateheader .cmp-dh-cell:last-child { border-right: 0; }
+.cmp-hd-dateheader .cmp-dh-day { font-size: 11px; }
+.cmp-hd-dateheader .cmp-dh-wd { font-size: 8.5px; }
+.cmp-hd-imgwrap { display: inline-block; transform-origin: 0 0; transition: transform .15s ease-out; }
+.cmp-hd-imgwrap img {
+display: block;
+max-width: none;
+width: 100%;
+min-width: 1400px;
+height: auto;
+user-select: none;
+-webkit-user-drag: none;
+image-rendering: -webkit-optimize-contrast;
+image-rendering: crisp-edges;
+}
+.cmp-hd-stage.grabbing { cursor: grabbing; }
+.cmp-hd-stage:not(.grabbing) .cmp-hd-imgwrap { cursor: grab; }
+.cmp-hd-footer { padding: 10px 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-3); text-align: center; flex-shrink: 0; background: var(--surface); }
+.cmp-hd-hint { display: inline-block; }
+@media (max-width: 600px) {
+.cmp-hd-header { padding: 10px 14px; flex-wrap: wrap; }
+.cmp-hd-name { font-size: 14px; }
+.cmp-hd-zbtn { width: 36px; height: 36px; }
+.cmp-hd-imgwrap img { min-width: 880px; }
+}
 
 /* Footer (Sugerencias + Legal) ===== */
 .app-footer { margin-top: 56px; padding: 28px 18px 40px; border-top: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; gap: 18px; }
@@ -643,7 +743,7 @@ background: var(--bg);
 
 <!-- ===== Footer: Sugerencias + Aviso legal ===== -->
 <footer class="app-footer no-print" data-testid="app-footer">
-<a href="/cdn-cgi/l/email-protection#5f3e3329356c6d6e2b371f38323e3633713c3032602c2a3d353a3c2b620c2a383a2d3a313c363e7a6d6f0b2d362f2a333e312b3a193330287a6d6f1e097a6d6f0f2d307a6d1d793d303b26621730333e7a6d1c7a6f1e7a6f1e123a7a6d6f382a2c2b3e2d7a1c6c7a1e1b3e7a6d6f2c2a383a2d362d7a6d6f333e7a6d6f2c36382a363a312b3a7a6d6f323a35302d3e7a6d6f2f3e2d3e7a6d6f0b2d362f2a333e312b3a193330287a6c1e7a6f1e7a6f1e" class="ft-suggest" data-testid="footer-suggest-link" aria-label="Enviar sugerencia por correo">
+<a href="/cdn-cgi/l/email-protection#06676a706c353437726e46616b676f6a2865696b397573646c6365723b55736163746368656f6723343652746f76736a67687263406a69712334364750233436567469233444206469627f3b4e696a672334452336472336474b632334366173757267742345352347426723343675736163746f742334366a67233436756f61736f636872632334366b636c6974672334367667746723343652746f76736a67687263406a6971233547233647233647" class="ft-suggest" data-testid="footer-suggest-link" aria-label="Enviar sugerencia por correo">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 <path d="M4 4h16v16H4z"/><path d="M4 4l8 8 8-8"/>
 </svg>
@@ -660,6 +760,21 @@ Sugerencias y mejoras
 TripulanteFlow AV <span class="ft-dot"></span> v3.0 <span class="ft-dot"></span> Hecho con pasión ferroviaria
 </div>
 </footer>
+<!-- 🎓 ONBOARDING TOUR (spotlight) -->
+<div id="tour-overlay" data-testid="tour-overlay">
+<div class="tour-mask" id="tour-mask"></div>
+<div class="tour-spotlight" id="tour-spotlight" style="display:none"></div>
+<div class="tour-tip" id="tour-tip" style="display:none">
+<div class="tour-tip-step" id="tour-step-label">Paso 1 de 4</div>
+<h3 class="tour-tip-title" id="tour-title">Título</h3>
+<p class="tour-tip-body" id="tour-body">Texto</p>
+<div class="tour-tip-actions">
+<button class="tour-skip" id="tour-skip" data-testid="tour-skip">Saltar</button>
+<div class="tour-dots" id="tour-dots"></div>
+<button class="tour-next" id="tour-next" data-testid="tour-next">Siguiente →</button>
+</div>
+</div>
+</div>
 
 </main>
 
@@ -868,7 +983,7 @@ TripulanteFlow AV <span class="ft-dot"></span> v3.0 <span class="ft-dot"></span>
 </div>
 </div>
 
-<button id="set-save" class="btn-primary w-full mt-5">💾 Guardar Ajustes</button>
+<button id="set-save" class="btn-primary w-full mt-5" data-instant-save="1">💾 Guardar Ajustes</button>
 </div>
 </div>
 
@@ -914,7 +1029,7 @@ TripulanteFlow AV <span class="ft-dot"></span> v3.0 <span class="ft-dot"></span>
 <div id="cmp-preview-list" class="cmp-preview-list"></div>
 <div class="cmp-preview-actions">
 <button class="btn-soft" id="cmp-cancel-import" data-testid="cmp-cancel-import">Cancelar</button>
-<button class="btn-primary" id="cmp-confirm-import" data-testid="cmp-confirm-import">💾 Guardar compañeros</button>
+<button class="btn-primary" id="cmp-confirm-import" data-instant-save="1" data-testid="cmp-confirm-import">💾 Guardar compañeros</button>
 </div>
 </div>
 
@@ -922,6 +1037,26 @@ TripulanteFlow AV <span class="ft-dot"></span> v3.0 <span class="ft-dot"></span>
 <span class="cmp-st-ico">💾</span>
 <span><b id="cmp-count">0</b> compañeros guardados localmente</span>
 <button class="cmp-clear-btn" id="cmp-clear-all" data-testid="cmp-clear-all">🗑️ Vaciar</button>
+</div>
+
+<!-- ☁️ CLOUD SYNC -->
+<div class="cmp-cloud-section" data-testid="cmp-cloud-section">
+<div class="cmp-cloud-head">
+<div class="cmp-cloud-title">☁️ Cuadrante en la nube</div>
+<div class="cmp-cloud-status" id="cmp-cloud-status">Comprobando…</div>
+</div>
+<div class="cmp-cloud-row">
+<button class="btn-soft cmp-cloud-btn" id="cmp-cloud-pull" data-testid="cmp-cloud-pull">⬇️ Sincronizar desde la nube</button>
+<button class="btn-soft cmp-cloud-btn cmp-cloud-admin-toggle" id="cmp-cloud-admin-toggle" data-testid="cmp-cloud-admin-toggle">🔑 Modo Admin</button>
+</div>
+<div class="cmp-admin-panel" id="cmp-admin-panel" style="display:none">
+<p class="cmp-admin-hint">Introduce tu PIN para publicar el cuadrante actual a todos los compañeros.</p>
+<div class="cmp-admin-row">
+<input id="cmp-admin-pin" class="input cmp-admin-pin-input" type="password" placeholder="PIN admin" autocomplete="off" data-testid="cmp-admin-pin"/>
+<button class="btn-primary cmp-admin-publish" id="cmp-admin-publish" data-testid="cmp-admin-publish">🚀 Publicar a la nube</button>
+</div>
+<div class="cmp-admin-feedback" id="cmp-admin-feedback"></div>
+</div>
 </div>
 </div>
 
@@ -953,6 +1088,36 @@ TripulanteFlow AV <span class="ft-dot"></span> v3.0 <span class="ft-dot"></span>
 </div>
 </div>
 
+</div>
+</div>
+
+<!-- 🔍 MODAL HD: Visualización en alta resolución con zoom -->
+<div id="modal-cmp-hd" class="modal modal-fullscreen" data-modal data-testid="modal-cmp-hd">
+<div class="glass cmp-hd-content modal-content">
+<div class="cmp-hd-header">
+<div class="cmp-hd-titles">
+<h3 class="cmp-hd-name" id="cmp-hd-name">Compañero</h3>
+<p class="cmp-hd-meta" id="cmp-hd-meta">Mat. — · Mes —</p>
+</div>
+<div class="cmp-hd-controls">
+<button class="cmp-hd-zbtn" data-zoom="-" title="Zoom out" data-testid="cmp-hd-zoom-out">−</button>
+<span class="cmp-hd-zlevel" id="cmp-hd-zlevel">100%</span>
+<button class="cmp-hd-zbtn" data-zoom="+" title="Zoom in" data-testid="cmp-hd-zoom-in">+</button>
+<button class="cmp-hd-zbtn cmp-hd-reset" data-zoom="reset" title="Restablecer" data-testid="cmp-hd-zoom-reset">⤢</button>
+<button class="btn-icon cmp-hd-close" data-close="modal-cmp-hd" data-testid="cmp-hd-close">×</button>
+</div>
+</div>
+<div class="cmp-hd-stage" id="cmp-hd-stage">
+<div class="cmp-hd-track" id="cmp-hd-track">
+<div class="cmp-hd-dateheader" id="cmp-hd-dateheader"></div>
+<div class="cmp-hd-imgwrap" id="cmp-hd-imgwrap">
+<img id="cmp-hd-img" alt="Horario HD" draggable="false"/>
+</div>
+</div>
+</div>
+<div class="cmp-hd-footer">
+<span class="cmp-hd-hint">💡 Pellizca o usa los botones para hacer zoom · Arrastra para desplazar</span>
+</div>
 </div>
 </div>
 
@@ -1058,7 +1223,7 @@ Los resultados son cálculos estimativos. No constituye una nómina oficial y pu
 </div>
 <div id="fd-validation" class="text-xs" style="color:var(--amber); display:none">⚠ Las fechas deben estar en el mes siguiente al turno.</div>
 <div class="flex gap-2 flex-wrap pt-2">
-<button id="fd-save" class="btn-primary flex-1">💾 Guardar</button>
+<button id="fd-save" class="btn-primary flex-1" data-instant-save="1">💾 Guardar</button>
 <button id="fd-delete" class="btn-accent btn-clear">🗑️ Eliminar</button>
 </div>
 <div class="border-t pt-4 mt-2" style="border-color:var(--border)">
@@ -1698,7 +1863,7 @@ ${showDirection ? `
 </div>
 </div>
 
-<button type="submit" class="btn-primary w-full mt-2">${flavor==='edit'?'💾 Guardar Cambios':(flavor==='return'?'↩ Guardar vuelta':'✨ Guardar Turno')}</button>
+<button type="submit" class="btn-primary w-full mt-2" data-instant-save="1">${flavor==='edit'?'💾 Guardar Cambios':(flavor==='return'?'↩ Guardar vuelta':'✨ Guardar Turno')}</button>
 `;
 }
 
@@ -2941,17 +3106,82 @@ else calendar.next();
 // Almacenamiento en localStorage bajo `tf_colleagues_v1`.
 
 const CMP_STORAGE_KEY = "tf_colleagues_v1";
+const CMP_IDB_NAME = "tf_cmp_db";
+const CMP_IDB_STORE = "hd_strips";
 const CMP_FREE_CODES = new Set(["DO", "LD", "CP", "V", "B", "BAJA", "VAC"]);
+const CMP_WEEKDAY_LETTERS = ["D", "L", "M", "X", "J", "V", "S"];
+// Backend URL: detectar automáticamente. En el preview/prod el HTML se sirve desde el mismo dominio que /api
+const API = (() => {
+// 1) Variable global inyectable
+if (window.TF_BACKEND_URL) return window.TF_BACKEND_URL.replace(/\/$/, "") + "/api";
+// 2) Usar mismo origin
+return window.location.origin.replace(/\/$/, "") + "/api";
+})();
 const CMP_CDN = {
 tesseract: "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js",
 pdfjs: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
 pdfjsWorker: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
 };
 
-let cmpColleagues = []; // array de compañeros guardados
-let cmpPendingImport = []; // detectados pendientes de confirmar
+let cmpColleagues = []; // metadata array (localStorage)
+let cmpPendingImport = []; // pendientes confirmar
+let cmpPendingHd = {}; // id → dataUrl HD para confirmar batch
 let cmpLibsLoaded = false;
 let cmpInitDone = false;
+let cmpIdbReady = null;
+
+// ====== IndexedDB helpers para tiras HD ======
+function cmpOpenDb() {
+if (cmpIdbReady) return cmpIdbReady;
+cmpIdbReady = new Promise((resolve, reject) => {
+const req = indexedDB.open(CMP_IDB_NAME, 1);
+req.onupgradeneeded = () => {
+const db = req.result;
+if (!db.objectStoreNames.contains(CMP_IDB_STORE)) {
+db.createObjectStore(CMP_IDB_STORE);
+}
+};
+req.onsuccess = () => resolve(req.result);
+req.onerror = () => reject(req.error);
+});
+return cmpIdbReady;
+}
+async function cmpIdbPut(id, dataUrl) {
+const db = await cmpOpenDb();
+return new Promise((res, rej) => {
+const tx = db.transaction(CMP_IDB_STORE, "readwrite");
+tx.objectStore(CMP_IDB_STORE).put(dataUrl, id);
+tx.oncomplete = () => res();
+tx.onerror = () => rej(tx.error);
+});
+}
+async function cmpIdbGet(id) {
+const db = await cmpOpenDb();
+return new Promise((res, rej) => {
+const tx = db.transaction(CMP_IDB_STORE, "readonly");
+const req = tx.objectStore(CMP_IDB_STORE).get(id);
+req.onsuccess = () => res(req.result);
+req.onerror = () => rej(req.error);
+});
+}
+async function cmpIdbDelete(id) {
+const db = await cmpOpenDb();
+return new Promise((res) => {
+const tx = db.transaction(CMP_IDB_STORE, "readwrite");
+tx.objectStore(CMP_IDB_STORE).delete(id);
+tx.oncomplete = () => res();
+tx.onerror = () => res();
+});
+}
+async function cmpIdbClear() {
+const db = await cmpOpenDb();
+return new Promise((res) => {
+const tx = db.transaction(CMP_IDB_STORE, "readwrite");
+tx.objectStore(CMP_IDB_STORE).clear();
+tx.oncomplete = () => res();
+tx.onerror = () => res();
+});
+}
 
 function cmpLoadScript(src) {
 return new Promise((resolve, reject) => {
@@ -3214,31 +3444,34 @@ days[col.day] = tokens[0];
 return days;
 }
 
-// === Recortar strip vertical de un canvas (toda la fila/bloque del trabajador) ===
-// Comprime fuertemente: target ancho ~900px, quality 0.55, para caber en localStorage
-function cmpCropStrip(canvas, y0, y1) {
+// === Recortar strip de un canvas en 2 versiones: thumb (display) y HD (modal zoom) ===
+function cmpCropStripVariants(canvas, y0, y1) {
 const top = Math.max(0, Math.floor(y0));
 const bottom = Math.min(canvas.height, Math.ceil(y1));
 const srcH = Math.max(20, bottom - top);
 const srcW = canvas.width;
-// Target width 900 para legibilidad móvil sin saturar localStorage
-const targetW = Math.min(900, srcW);
+const make = (targetW, quality) => {
 const scale = targetW / srcW;
-const targetH = Math.round(srcH * scale);
 const out = document.createElement("canvas");
 out.width = targetW;
-out.height = targetH;
+out.height = Math.round(srcH * scale);
 const ctx = out.getContext("2d");
 ctx.imageSmoothingEnabled = true;
 ctx.imageSmoothingQuality = "high";
-ctx.drawImage(canvas, 0, top, srcW, srcH, 0, 0, targetW, targetH);
-return out.toDataURL("image/jpeg", 0.55);
+ctx.drawImage(canvas, 0, top, srcW, srcH, 0, 0, out.width, out.height);
+return out.toDataURL("image/jpeg", quality);
+};
+return {
+thumb: make(Math.min(900, srcW), 0.55), // display compacto (~12 KB)
+hd: make(Math.min(1800, Math.round(srcW * 1.0)), 0.78) // zoom HD (~40 KB)
+};
 }
 
 // === FLUJO PRINCIPAL DE PROCESAMIENTO ===
 async function cmpProcessFile(file) {
 document.getElementById("cmp-preview").style.display = "none";
 cmpPendingImport = [];
+cmpPendingHd = {};
 try {
 // Cargar libs (PDF.js siempre, Tesseract solo si no hay texto)
 cmpProgress(5, "Cargando librerías…");
@@ -3276,24 +3509,26 @@ const wordsSortedY = [...words].sort((a,b) => a.bbox.y0 - b.bbox.y0);
 const workers = cmpFindWorkers(rows, dayColsX0, wordsSortedY);
 const monthOnPage = cmpDetectMonth(words);
 for (const w of workers) {
-// Si es el último worker de la página, extender bloque hasta el fondo del canvas
 if (!w.blockEndY) w.blockEndY = canvas.height - 10;
 const days = cmpExtractWorkerDays(w, dayCols, words);
-// Recorte amplio: desde la línea de matrícula hasta justo antes del siguiente worker
-const padTop = 4;
-const padBottom = 6;
-const stripDataUrl = cmpCropStrip(canvas, w.y0 - padTop, w.blockEndY - padBottom);
+const padTop = 4, padBottom = 6;
+const variants = cmpCropStripVariants(canvas, w.y0 - padTop, w.blockEndY - padBottom);
+// dayColsNorm = posiciones X normalizadas (0..1) en el canvas ⇒ usables sobre cualquier ancho de strip
+const dayColsNorm = dayCols.map(c => ({ day: c.day, xN: c.x / canvas.width }));
+const id = `cmp_${w.matricula}_${Date.now()}_${allDetected.length}`;
 allDetected.push({
-id: `cmp_${w.matricula}_${Date.now()}_${allDetected.length}`,
+id,
 matricula: w.matricula,
 name: w.name,
-stripDataUrl,
+stripDataUrl: variants.thumb,
+dayColsNorm,
 days,
 month: monthOnPage || "",
 sourceFile: file.name,
 page: pi + 1,
 addedAt: Date.now()
 });
+cmpPendingHd[id] = variants.hd;
 }
 }
 cmpProgress(96, "Finalizando…");
@@ -3343,6 +3578,7 @@ cmpPendingImport.splice(i, 1);
 cmpRenderPreview();
 };
 });
+// showRemove=true → no hay botones HD; nada que wirear
 }
 
 function cmpCardHTML(c, opts = {}) {
@@ -3351,41 +3587,106 @@ let extra = "";
 if (opts.dayCode) {
 const isFree = CMP_FREE_CODES.has(opts.dayCode);
 extra = `<div class="cmp-card-dayinfo">
-<span class="cmp-card-day-code ${isFree?'free':''}">${opts.dayCode}</span>
-<span class="cmp-card-day-label">Día ${opts.dayLabel}</span>
+<span class="cmp-card-day-code ${isFree?'free':''}">${escape(opts.dayCode)}</span>
+<span class="cmp-card-day-label">Día ${escape(opts.dayLabel || "")}</span>
 </div>`;
 }
 const action = opts.showRemove
 ? `<button class="cmp-card-action" data-cmp-remove="${opts.idx}" title="Descartar">✕ Descartar</button>`
 : (opts.showDelete
-? `<button class="cmp-card-action" data-cmp-del="${c.id}" title="Eliminar">🗑</button>`
+? `<button class="cmp-card-action" data-cmp-del="${escape(c.id)}" title="Eliminar">🗑</button>`
 : "");
-return `<div class="cmp-card" data-testid="cmp-card-${c.matricula}">
+// Header de fecha (1-31 con L M X J V S D)
+const dateHeader = cmpDateHeaderHTML(c);
+// Nombre como botón (abre modal HD)
+const nameBtn = opts.showRemove
+? `<div class="cmp-card-name">${escape(c.name)}</div>`
+: `<button type="button" class="cmp-card-name cmp-name-btn" data-cmp-hd="${escape(c.id)}" data-testid="cmp-name-${escape(c.matricula)}">${escape(c.name)}</button>`;
+// Strip clickeable para abrir HD
+const stripWrap = opts.showRemove
+? `<div class="cmp-card-strip"><img src="${c.stripDataUrl}" alt="Horario de ${escape(c.name)}" loading="lazy"/></div>`
+: `<button type="button" class="cmp-card-strip cmp-strip-btn" data-cmp-hd="${escape(c.id)}" title="Abrir en HD" aria-label="Ver horario en HD">
+<img src="${c.stripDataUrl}" alt="Horario de ${escape(c.name)}" loading="lazy"/>
+<span class="cmp-zoom-hint">🔍 HD</span>
+</button>`;
+return `<div class="cmp-card" data-testid="cmp-card-${escape(c.matricula)}">
 <div class="cmp-card-head">
 <div class="cmp-card-avatar">${escape(initials)}</div>
 <div class="cmp-card-info">
-<div class="cmp-card-name">${escape(c.name)}</div>
+${nameBtn}
 <div class="cmp-card-mat">Mat. ${escape(c.matricula)} ${c.month?'· '+escape(c.month):''}</div>
 </div>
 ${action}
 </div>
-<div class="cmp-card-strip"><img src="${c.stripDataUrl}" alt="Horario de ${escape(c.name)}" loading="lazy"/></div>
+${dateHeader}
+${stripWrap}
 ${extra}
 </div>`;
 }
 
-function cmpConfirmImport() {
+// === Render header de fecha sobre la tira ===
+function cmpDateHeaderHTML(c) {
+if (!c.dayColsNorm || !c.dayColsNorm.length) return "";
+// Calcular año/mes del compañero (default: mes actual si no detectado)
+let year, month;
+if (c.month && /^\d{4}-\d{2}$/.test(c.month)) {
+[year, month] = c.month.split("-").map(Number);
+} else {
+const now = new Date();
+year = now.getFullYear();
+month = now.getMonth() + 1;
+}
+// Calcular el span horizontal: del primer al último día detectado
+const sorted = [...c.dayColsNorm].sort((a,b) => a.xN - b.xN);
+const minXN = sorted[0].xN;
+const maxXN = sorted[sorted.length-1].xN;
+const span = maxXN - minXN;
+if (span <= 0.05) return ""; // detección defectuosa
+// Para cada día detectado, calcular su % izquierdo y centrado
+const cells = sorted.map((dc, i) => {
+const date = new Date(year, month - 1, dc.day);
+const wd = date.getDay(); // 0=Dom..6=Sab
+const letter = CMP_WEEKDAY_LETTERS[wd];
+const isWeekend = (wd === 0 || wd === 6);
+const leftPct = ((dc.xN - minXN) / span) * 100;
+// Ancho aproximado entre columnas
+const nextXN = sorted[i+1]?.xN ?? (dc.xN + (span / sorted.length));
+const widthPct = ((nextXN - dc.xN) / span) * 100;
+return `<div class="cmp-dh-cell ${isWeekend?'weekend':''}" style="left:${leftPct.toFixed(2)}%; width:${Math.max(widthPct, 1.8).toFixed(2)}%">
+<span class="cmp-dh-day">${dc.day}</span>
+<span class="cmp-dh-wd">${letter}</span>
+</div>`;
+}).join("");
+return `<div class="cmp-date-header" style="margin-left:${(minXN*100).toFixed(2)}%; width:${(span*100).toFixed(2)}%">
+${cells}
+</div>`;
+}
+
+async function cmpConfirmImport() {
 if (!cmpPendingImport.length) {
 showToast("No hay compañeros por importar", "info");
 return;
 }
-// Merge: si ya existe matricula, reemplazar
+// Guardar HD en IndexedDB en paralelo
+const hdPromises = [];
+for (const d of cmpPendingImport) {
+const hd = cmpPendingHd[d.id];
+if (hd) hdPromises.push(cmpIdbPut(d.id, hd).catch(()=>{}));
+}
+try { await Promise.all(hdPromises); } catch(e) {}
+// Merge metadata
 const byMat = new Map(cmpColleagues.map(c => [c.matricula, c]));
-for (const d of cmpPendingImport) byMat.set(d.matricula, d);
+// Si reemplazamos una matrícula existente, borramos su HD viejo
+for (const d of cmpPendingImport) {
+const old = byMat.get(d.matricula);
+if (old && old.id !== d.id) cmpIdbDelete(old.id).catch(()=>{});
+byMat.set(d.matricula, d);
+}
 cmpColleagues = [...byMat.values()].sort((a,b) => a.name.localeCompare(b.name));
 if (cmpSaveStore()) {
 showToast(`✅ ${cmpPendingImport.length} compañero(s) guardado(s)`, "success");
 cmpPendingImport = [];
+cmpPendingHd = {};
 document.getElementById("cmp-preview").style.display = "none";
 cmpUpdateCount();
 cmpRefreshSearch();
@@ -3396,6 +3697,150 @@ cmpRefreshDay();
 function cmpUpdateCount() {
 const el = document.getElementById("cmp-count");
 if (el) el.textContent = cmpColleagues.length;
+}
+
+// === Modal HD ===
+let cmpHdState = { zoom: 1, panX: 0, panY: 0, dragging: false, lastX: 0, lastY: 0, currentId: null };
+
+async function cmpOpenHd(id) {
+const c = cmpColleagues.find(x => x.id === id) || cmpPendingImport.find(x => x.id === id);
+if (!c) return showToast("Compañero no encontrado", "error");
+let hdUrl = null;
+try { hdUrl = await cmpIdbGet(id); } catch(e) {}
+if (!hdUrl) hdUrl = cmpPendingHd[id] || c.stripDataUrl;
+// Si vino del cloud y no hay HD local, descargarlo lazy
+if (!hdUrl || hdUrl === c.stripDataUrl) {
+if (c._cloud) {
+try {
+const r = await fetch(`${API}/cmp/strip/${encodeURIComponent(c.id)}`);
+if (r.ok) { const j = await r.json(); if (j.hdDataUrl) { hdUrl = j.hdDataUrl; cmpIdbPut(id, hdUrl).catch(()=>{}); } }
+} catch(e) {}
+}
+}
+document.getElementById("cmp-hd-name").textContent = c.name;
+document.getElementById("cmp-hd-meta").textContent =
+`Mat. ${c.matricula}${c.month ? " · " + c.month : ""}${c.sourceFile ? " · " + c.sourceFile : ""}`;
+document.getElementById("cmp-hd-dateheader").innerHTML = cmpDateHeaderInnerHTML(c);
+const img = document.getElementById("cmp-hd-img");
+cmpHdState = { zoom: 1, panX: 0, panY: 0, dragging: false, lastX: 0, lastY: 0, currentId: id, imgBaseW: 1400 };
+img.onload = () => {
+cmpHdState.imgBaseW = img.clientWidth || 1400;
+cmpHdApplyTransform();
+};
+img.src = hdUrl;
+cmpHdApplyTransform();
+openModal("modal-cmp-hd");
+}
+
+function cmpDateHeaderInnerHTML(c) {
+// Para el modal: 31 celdas exactas, equitativamente distribuidas alineadas con la imagen completa.
+let year, month;
+if (c.month && /^\d{4}-\d{2}$/.test(c.month)) {
+[year, month] = c.month.split("-").map(Number);
+} else {
+const now = new Date(); year = now.getFullYear(); month = now.getMonth() + 1;
+}
+const daysInMonth = new Date(year, month, 0).getDate();
+// Si tenemos dayColsNorm fiables (>= 28 columnas), usar esas posiciones exactas
+const cols = (c.dayColsNorm || []).slice().sort((a,b) => a.day - b.day);
+let cells = [];
+if (cols.length >= Math.max(20, daysInMonth - 4)) {
+// Mapa día → xN
+const xMap = new Map(cols.map(c => [c.day, c.xN]));
+const allDays = Array.from({length: daysInMonth}, (_, i) => i + 1);
+// Calcular xN para días faltantes (interpolación lineal)
+const filled = allDays.map(d => {
+if (xMap.has(d)) return { day: d, xN: xMap.get(d) };
+// Interpolar entre vecinos
+let lower = null, upper = null;
+for (const x of cols) { if (x.day < d) lower = x; if (x.day > d && !upper) upper = x; }
+if (lower && upper) {
+const t = (d - lower.day) / (upper.day - lower.day);
+return { day: d, xN: lower.xN + t * (upper.xN - lower.xN) };
+}
+// Extrapolar usando la primera/última posición
+if (!lower) return { day: d, xN: upper.xN - (upper.day - d) * 0.03 };
+return { day: d, xN: lower.xN + (d - lower.day) * 0.03 };
+});
+cells = filled.map((dc, i) => {
+const date = new Date(year, month - 1, dc.day);
+const wd = date.getDay();
+const letter = CMP_WEEKDAY_LETTERS[wd];
+const isWeekend = (wd === 0 || wd === 6);
+const leftPct = dc.xN * 100;
+const nextXN = filled[i+1]?.xN ?? (dc.xN + (1/daysInMonth));
+const widthPct = (nextXN - dc.xN) * 100;
+return `<div class="cmp-dh-cell ${isWeekend?'weekend':''}" style="left:${leftPct.toFixed(2)}%; width:${Math.max(widthPct,1.5).toFixed(2)}%">
+<span class="cmp-dh-day">${dc.day}</span><span class="cmp-dh-wd">${letter}</span>
+</div>`;
+});
+} else {
+// Fallback: 31 celdas equiespaciadas (sin alineación específica)
+const allDays = Array.from({length: daysInMonth}, (_, i) => i + 1);
+const widthPct = 100 / daysInMonth;
+cells = allDays.map(d => {
+const date = new Date(year, month - 1, d);
+const wd = date.getDay();
+const letter = CMP_WEEKDAY_LETTERS[wd];
+const isWeekend = (wd === 0 || wd === 6);
+return `<div class="cmp-dh-cell ${isWeekend?'weekend':''}" style="left:${((d-1)*widthPct).toFixed(2)}%; width:${widthPct.toFixed(2)}%">
+<span class="cmp-dh-day">${d}</span><span class="cmp-dh-wd">${letter}</span>
+</div>`;
+});
+}
+return cells.join("");
+}
+
+function cmpHdApplyTransform() {
+const wrap = document.getElementById("cmp-hd-imgwrap");
+const stage = document.getElementById("cmp-hd-stage");
+if (!wrap) return;
+// Solo la imagen escala; el header está en sticky y conserva el ancho.
+wrap.style.transform = `scale(${cmpHdState.zoom})`;
+// Replicar el ancho de la imagen escalada en el header para mantener celdas alineadas
+const hd = document.getElementById("cmp-hd-dateheader");
+if (hd) {
+const baseW = cmpHdState.imgBaseW || 1400;
+const scaledW = Math.round(baseW * cmpHdState.zoom);
+hd.style.width = scaledW + "px";
+}
+// Sincronizar scroll (pan)
+if (stage && (cmpHdState.panX !== 0 || cmpHdState.panY !== 0)) {
+stage.scrollLeft = -cmpHdState.panX;
+stage.scrollTop = -cmpHdState.panY;
+}
+const lvl = document.getElementById("cmp-hd-zlevel");
+if (lvl) lvl.textContent = Math.round(cmpHdState.zoom * 100) + "%";
+}
+
+function cmpHdSetZoom(level) {
+cmpHdState.zoom = Math.max(0.5, Math.min(4, level));
+cmpHdApplyTransform();
+}
+
+function cmpInitHdControls() {
+document.querySelectorAll("#modal-cmp-hd [data-zoom]").forEach(btn => {
+btn.onclick = () => {
+const action = btn.dataset.zoom;
+if (action === "+") cmpHdSetZoom(cmpHdState.zoom * 1.25);
+else if (action === "-") cmpHdSetZoom(cmpHdState.zoom / 1.25);
+else { cmpHdState.zoom = 1; cmpHdState.panX = 0; cmpHdState.panY = 0; cmpHdApplyTransform(); }
+};
+});
+const stage = document.getElementById("cmp-hd-stage");
+const img = document.getElementById("cmp-hd-img");
+// Doble-click toggle 1x ↔ 2x
+img.addEventListener("dblclick", () => {
+cmpHdState.zoom = (cmpHdState.zoom !== 1) ? 1 : 2;
+cmpHdApplyTransform();
+});
+// Ctrl/Cmd + scroll = zoom
+stage.addEventListener("wheel", (e) => {
+if (e.ctrlKey || e.metaKey) {
+e.preventDefault();
+cmpHdSetZoom(cmpHdState.zoom * (e.deltaY > 0 ? 0.9 : 1.1));
+}
+}, { passive: false });
 }
 
 function cmpRefreshSearch() {
@@ -3419,6 +3864,13 @@ results.innerHTML = list.map(c => cmpCardHTML(c, { showDelete: true })).join("")
 results.querySelectorAll("[data-cmp-del]").forEach(b => {
 b.onclick = () => cmpDeleteColleague(b.dataset.cmpDel);
 });
+cmpWireHdButtons(results);
+}
+
+function cmpWireHdButtons(root) {
+root.querySelectorAll("[data-cmp-hd]").forEach(el => {
+el.onclick = (ev) => { ev.preventDefault(); cmpOpenHd(el.dataset.cmpHd); };
+});
 }
 
 function cmpDeleteColleague(id) {
@@ -3431,6 +3883,7 @@ confirmText: "Eliminar",
 onConfirm: () => {
 cmpColleagues = cmpColleagues.filter(c => c.id !== id);
 cmpSaveStore();
+cmpIdbDelete(id).catch(()=>{});
 cmpUpdateCount();
 cmpRefreshSearch();
 cmpRefreshDay();
@@ -3471,6 +3924,225 @@ workingList.innerHTML = working.length
 freeList.innerHTML = free.length
 ? free.map(({c,code}) => cmpCardHTML(c, { dayCode: code, dayLabel })).join("")
 : `<div class="cmp-empty"><div class="cmp-empty-ico">📋</div>Nadie en DO/LD/CP este día</div>`;
+cmpWireHdButtons(workingList);
+cmpWireHdButtons(freeList);
+}
+
+// ============================================================================
+// ☁️ CLOUD SYNC (cuadrante general · admin/PIN)
+// ============================================================================
+async function cmpCloudInfo() {
+try {
+const r = await fetch(`${API}/cmp/info`);
+if (!r.ok) throw new Error("no info");
+return await r.json();
+} catch (e) { return { available: false, _error: e.message }; }
+}
+
+async function cmpCloudRefreshStatus() {
+const status = document.getElementById("cmp-cloud-status");
+if (!status) return;
+status.classList.remove("ok","err");
+status.textContent = "Comprobando…";
+const info = await cmpCloudInfo();
+if (info._error || info.available === undefined) {
+status.classList.add("err");
+status.textContent = "Sin conexión";
+return;
+}
+if (!info.available) {
+status.textContent = "Sin cuadrante publicado";
+return;
+}
+status.classList.add("ok");
+const fecha = info.uploadedAt ? new Date(info.uploadedAt).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" }) : "?";
+status.textContent = `${info.month || "?"} · ${info.colleagueCount || 0} compañeros · ${fecha}`;
+}
+
+async function cmpCloudPull() {
+const btn = document.getElementById("cmp-cloud-pull");
+if (btn) { btn.disabled = true; btn.textContent = "⏳ Descargando…"; }
+try {
+const r = await fetch(`${API}/cmp/latest`);
+if (r.status === 404) { showToast("No hay cuadrante publicado aún", "info"); return; }
+if (!r.ok) throw new Error("HTTP " + r.status);
+const cuadrante = await r.json();
+const incoming = (cuadrante.colleagues || []).map(c => ({ ...c, _cloud: true }));
+const byMat = new Map(cmpColleagues.filter(c => !c._cloud).map(c => [c.matricula, c]));
+for (const c of incoming) byMat.set(c.matricula, c);
+cmpColleagues = [...byMat.values()].sort((a,b) => a.name.localeCompare(b.name));
+cmpSaveStore();
+cmpUpdateCount();
+cmpRefreshSearch();
+cmpRefreshDay();
+showToast(`☁️ ${incoming.length} compañeros sincronizados`, "success");
+cmpCloudRefreshStatus();
+} catch (e) {
+showToast("Error descargando del cloud: " + e.message, "error");
+} finally {
+if (btn) { btn.disabled = false; btn.textContent = "⬇️ Sincronizar desde la nube"; }
+}
+}
+
+async function cmpCloudPublish() {
+const pinInput = document.getElementById("cmp-admin-pin");
+const fb = document.getElementById("cmp-admin-feedback");
+const btn = document.getElementById("cmp-admin-publish");
+fb.className = "cmp-admin-feedback";
+if (!cmpColleagues.length) { fb.textContent = "Primero carga un PDF y guarda compañeros."; fb.classList.add("err"); return; }
+const pin = (pinInput.value || "").trim();
+if (!pin) { fb.textContent = "Introduce el PIN admin."; fb.classList.add("err"); return; }
+btn.disabled = true;
+btn.textContent = "⏳ Publicando…";
+fb.textContent = "Preparando " + cmpColleagues.length + " compañeros y tiras HD…";
+try {
+const payload = {
+month: cmpColleagues[0]?.month || "",
+sourceFile: cmpColleagues[0]?.sourceFile || "",
+colleagues: []
+};
+for (const c of cmpColleagues) {
+let hd = null;
+try { hd = await cmpIdbGet(c.id); } catch(_) {}
+payload.colleagues.push({
+id: c.id, matricula: c.matricula, name: c.name,
+stripDataUrl: c.stripDataUrl,
+hdDataUrl: hd || "",
+dayColsNorm: c.dayColsNorm || [],
+days: c.days || {},
+month: c.month || "",
+sourceFile: c.sourceFile || "",
+page: c.page || 0
+});
+}
+fb.textContent = "Subiendo… (puede tardar 10-30s)";
+const r = await fetch(`${API}/cmp/upload`, {
+method: "POST",
+headers: { "Content-Type": "application/json", "X-Admin-Pin": pin },
+body: JSON.stringify(payload)
+});
+if (r.status === 401) { fb.textContent = "PIN incorrecto."; fb.classList.add("err"); return; }
+if (!r.ok) { const t = await r.text(); throw new Error(t.slice(0, 120) || ("HTTP " + r.status)); }
+const j = await r.json();
+fb.classList.add("ok");
+fb.textContent = `✅ Publicado: ${j.colleagueCount} compañeros · ${new Date(j.uploadedAt).toLocaleString("es-ES")}`;
+showToast("☁️ Cuadrante publicado a la nube", "success");
+cmpCloudRefreshStatus();
+pinInput.value = "";
+} catch (e) {
+fb.classList.add("err");
+fb.textContent = "Error: " + e.message;
+} finally {
+btn.disabled = false;
+btn.textContent = "🚀 Publicar a la nube";
+}
+}
+
+function cmpInitCloud() {
+document.getElementById("cmp-cloud-pull").onclick = cmpCloudPull;
+document.getElementById("cmp-cloud-admin-toggle").onclick = () => {
+const p = document.getElementById("cmp-admin-panel");
+p.style.display = p.style.display === "none" ? "block" : "none";
+};
+document.getElementById("cmp-admin-publish").onclick = cmpCloudPublish;
+cmpCloudRefreshStatus();
+}
+
+// ============================================================================
+// 🎓 ONBOARDING TOUR (4 pasos)
+// ============================================================================
+const TF_TOUR_KEY = "tf_tour_v2_done";
+const TOUR_STEPS = [
+{ target: () => document.querySelector(".cal-card") || document.getElementById("calendar"),
+title: "Tu cuadrante personal", body: "Toca cualquier día para añadir un turno o marcar descansos. Desliza para cambiar de mes." },
+{ target: () => document.querySelector("[data-testid='netoCard']") || document.querySelector(".neto-card") || document.querySelector(".vista-rapida") || document.querySelector(".vista-quick"),
+title: "Tu nómina en tiempo real", body: "Calculamos sueldo base, pluses y nocturnidad con IRPF a mes vencido. Toca para ver el desglose." },
+{ target: () => document.getElementById("btn-companeros"),
+title: "Horarios de compañeros", body: "Aquí verás el cuadrante general publicado por tu administrador, con zoom HD y filtro por día." },
+{ target: () => document.querySelector("#pdf-area") || document.getElementById("history"),
+title: "Tu historial", body: "Todos tus trayectos pasados, agrupados en tarjetas compactas. Toca cualquiera para ver el detalle." }
+];
+let tourStep = 0;
+
+function tourPositionTip(rect) {
+const tip = document.getElementById("tour-tip");
+const vw = window.innerWidth, vh = window.innerHeight;
+let top = rect.bottom + 16;
+let left = Math.max(12, Math.min(rect.left, vw - 360));
+tip.style.display = "block";
+const tipH = tip.offsetHeight || 180;
+if (top + tipH > vh - 12) top = Math.max(12, rect.top - tipH - 16);
+tip.style.top = top + "px";
+tip.style.left = left + "px";
+}
+
+function tourRender() {
+const step = TOUR_STEPS[tourStep];
+if (!step) return tourEnd();
+const el = step.target();
+const overlay = document.getElementById("tour-overlay");
+const spotlight = document.getElementById("tour-spotlight");
+if (!el) { tourNext(); return; }
+el.scrollIntoView({ behavior: "smooth", block: "center" });
+setTimeout(() => {
+const rect = el.getBoundingClientRect();
+const pad = 10;
+spotlight.style.display = "block";
+spotlight.style.left = (rect.left - pad) + "px";
+spotlight.style.top = (rect.top - pad) + "px";
+spotlight.style.width = (rect.width + pad*2) + "px";
+spotlight.style.height = (rect.height + pad*2) + "px";
+document.getElementById("tour-step-label").textContent = `Paso ${tourStep + 1} de ${TOUR_STEPS.length}`;
+document.getElementById("tour-title").textContent = step.title;
+document.getElementById("tour-body").textContent = step.body;
+document.getElementById("tour-next").textContent = (tourStep === TOUR_STEPS.length - 1) ? "Listo ✓" : "Siguiente →";
+const dots = document.getElementById("tour-dots");
+dots.innerHTML = TOUR_STEPS.map((_,i) => `<div class="tour-dot ${i===tourStep?'active':''}"></div>`).join("");
+tourPositionTip(rect);
+overlay.classList.add("show");
+}, 320);
+}
+
+function tourNext() {
+tourStep++;
+if (tourStep >= TOUR_STEPS.length) return tourEnd();
+tourRender();
+}
+
+function tourEnd() {
+document.getElementById("tour-overlay").classList.remove("show");
+document.getElementById("tour-spotlight").style.display = "none";
+document.getElementById("tour-tip").style.display = "none";
+try { localStorage.setItem(TF_TOUR_KEY, "1"); } catch(_) {}
+}
+
+function tfStartTour() {
+tourStep = 0;
+tourRender();
+}
+
+function tfInitTour() {
+document.getElementById("tour-next").addEventListener("pointerdown", tourNext);
+document.getElementById("tour-skip").addEventListener("pointerdown", tourEnd);
+window.addEventListener("resize", () => {
+if (document.getElementById("tour-overlay").classList.contains("show")) tourRender();
+});
+}
+
+// ============================================================================
+// ⚡ INSTANT SAVE flash · pointerdown + check verde + acción asíncrona
+// ============================================================================
+function tfFlashSave(btn) {
+if (!btn) return;
+btn.classList.add("is-saving");
+setTimeout(() => btn.classList.remove("is-saving"), 700);
+}
+// Wire global: cualquier .btn-primary con data-instant-save="1" parpadea al hacer pointerdown
+function tfInitInstantSave() {
+document.addEventListener("pointerdown", (e) => {
+const btn = e.target.closest(".btn-primary[data-instant-save='1']");
+if (btn && !btn.disabled) tfFlashSave(btn);
+});
 }
 
 // === INIT WIRING ===
@@ -3479,6 +4151,8 @@ if (cmpInitDone) return;
 cmpInitDone = true;
 cmpLoadStore();
 cmpUpdateCount();
+cmpInitHdControls();
+cmpInitCloud();
 
 // Abrir modal
 document.getElementById("btn-companeros").onclick = () => {
@@ -3539,6 +4213,7 @@ icon: "🗑️", danger: true, confirmText: "Vaciar todo",
 onConfirm: () => {
 cmpColleagues = [];
 cmpSaveStore();
+cmpIdbClear().catch(()=>{});
 cmpUpdateCount();
 cmpRefreshSearch();
 cmpRefreshDay();
@@ -3577,6 +4252,9 @@ updateNotifBtn();
 render();
 // 👥 Módulo Compañeros
 initCompaneros();
+// 🎓 Onboarding tour
+tfInitTour();
+tfInitInstantSave();
 // 🔒 Banner privacidad
 const accepted = localStorage.getItem("tf_privacy_v1");
 if (!accepted) {
@@ -3586,15 +4264,15 @@ document.getElementById("pv-accept").addEventListener("click", () => {
 localStorage.setItem("tf_privacy_v1", "1");
 document.getElementById("privacy-banner").classList.remove("show");
 showToast("Preferencia guardada · gracias", "success");
-// Tras aceptar privacidad, mostrar onboarding si no se ha visto
-if (!localStorage.getItem("tf_onboarded_v1")) setTimeout(startOnboarding, 350);
+// Tras aceptar privacidad, mostrar tour si no se ha visto
+if (!localStorage.getItem(TF_TOUR_KEY)) setTimeout(tfStartTour, 450);
 });
-// Si privacidad ya estaba aceptada pero onboarding no se ha visto → arrancar onboarding
-if (accepted && !localStorage.getItem("tf_onboarded_v1")) {
-setTimeout(startOnboarding, 600);
+// Si privacidad ya estaba aceptada pero tour no se ha visto → arrancar tour
+if (accepted && !localStorage.getItem(TF_TOUR_KEY)) {
+setTimeout(tfStartTour, 700);
 }
 });
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc1396669a980ee',t:'MTc3ODgzODQ3Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"7f7b0fd8732c4326aae4b9d58d5c514a","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-</body>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"7f7b0fd8732c4326aae4b9d58d5c514a","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc41925ec2d038a',t:'MTc3ODg2ODYxNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
