@@ -375,7 +375,96 @@ opacity: 0; pointer-events: none; transition: opacity .35s;
 .sc-body-inner { padding: 4px 16px 16px; border-top: 1px solid var(--border); }
 .sc-tag { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
 
-/* ===== Footer (Sugerencias + Legal) ===== */
+/* ===== 👥 MÓDULO COMPAÑEROS · Visibilidad de Cuadrantes ===== */
+.modal-fullscreen { padding: 0; align-items: stretch; }
+.modal-fullscreen .modal-content.companeros-content {
+max-width: 1100px; width: 100%; max-height: 100vh; height: 100vh;
+border-radius: 0; padding: 0; display: flex; flex-direction: column;
+background: var(--bg);
+}
+@media (min-width: 760px) {
+.modal-fullscreen { padding: 24px; }
+.modal-fullscreen .modal-content.companeros-content { border-radius: 28px; height: auto; max-height: 92vh; }
+}
+.cmp-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.cmp-header-ico { width: 44px; height: 44px; border-radius: 14px; background: color-mix(in srgb, var(--primary) 14%, transparent); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; font-size: 22px; }
+.cmp-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; letter-spacing: .02em; }
+
+.cmp-tabs { display: flex; gap: 6px; padding: 12px 22px 0; border-bottom: 1px solid var(--border); overflow-x: auto; flex-shrink: 0; }
+.cmp-tab { background: transparent; border: 0; padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--text-3); cursor: pointer; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; white-space: nowrap; }
+.cmp-tab:hover { color: var(--text-2); }
+.cmp-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+.cmp-panel { padding: 22px; overflow-y: auto; flex: 1; min-height: 0; }
+
+/* Dropzone */
+.cmp-dropzone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 38px 20px; border: 2px dashed color-mix(in srgb, var(--primary) 30%, transparent); border-radius: 22px; background: color-mix(in srgb, var(--primary) 4%, transparent); cursor: pointer; transition: border-color .2s, background .2s, transform .15s; text-align: center; }
+.cmp-dropzone:hover { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, transparent); }
+.cmp-dropzone.dragging { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, transparent); transform: scale(1.01); }
+.cmp-dz-ico { font-size: 38px; opacity: .85; }
+.cmp-dz-title { font-weight: 700; font-size: 15px; color: var(--text); }
+.cmp-dz-sub { font-size: 11px; color: var(--text-3); }
+
+/* Progress */
+.cmp-progress { margin-top: 18px; }
+.cmp-progress-bar { height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden; border: 1px solid var(--border); }
+.cmp-progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-hover)); width: 0%; border-radius: 999px; transition: width .35s ease; }
+.cmp-progress-text { font-size: 12px; color: var(--text-2); margin-top: 8px; text-align: center; font-weight: 500; }
+
+/* Preview */
+.cmp-preview { margin-top: 22px; }
+.cmp-section-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.cmp-section-hint { font-size: 11px; color: var(--text-3); margin-bottom: 14px; }
+.cmp-preview-list { display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; padding-right: 4px; }
+.cmp-preview-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+
+/* Colleague row card */
+.cmp-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+.cmp-card:hover { border-color: color-mix(in srgb, var(--primary) 30%, transparent); box-shadow: 0 6px 18px rgba(0,0,0,.05); }
+.cmp-card-head { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.cmp-card-avatar { width: 36px; height: 36px; border-radius: 10px; background: color-mix(in srgb, var(--primary) 12%, transparent); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.cmp-card-info { flex: 1; min-width: 0; }
+.cmp-card-name { font-weight: 700; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp-card-mat { font-size: 10px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; letter-spacing: .04em; }
+.cmp-card-action { background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-size: 11px; font-weight: 600; color: var(--text-3); cursor: pointer; transition: all .2s; }
+.cmp-card-action:hover { color: #DC2626; border-color: #DC2626; background: color-mix(in srgb, #DC2626 8%, transparent); }
+.cmp-card-strip { width: 100%; display: block; background: var(--surface-2); }
+.cmp-card-strip img { width: 100%; display: block; }
+.cmp-card-dayinfo { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; font-size: 12px; background: color-mix(in srgb, var(--surface-2) 50%, transparent); }
+.cmp-card-day-code { font-weight: 800; color: var(--primary); font-size: 14px; padding: 4px 10px; border-radius: 8px; background: color-mix(in srgb, var(--primary) 10%, transparent); font-family: 'JetBrains Mono', monospace; }
+.cmp-card-day-code.free { color: var(--emerald); background: color-mix(in srgb, var(--emerald) 12%, transparent); }
+.cmp-card-day-label { font-size: 11px; color: var(--text-3); }
+
+/* Storage info */
+.cmp-storage-info { margin-top: 24px; padding: 12px 16px; background: color-mix(in srgb, var(--surface-2) 60%, transparent); border-radius: 12px; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-2); border: 1px solid var(--border); }
+.cmp-st-ico { font-size: 16px; }
+.cmp-storage-info b { color: var(--text); }
+.cmp-clear-btn { margin-left: auto; background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 5px 12px; font-size: 11px; font-weight: 600; color: var(--text-3); cursor: pointer; transition: all .2s; }
+.cmp-clear-btn:hover { color: #DC2626; border-color: #DC2626; }
+
+/* Search */
+.cmp-search-wrap { position: relative; margin-bottom: 16px; }
+.cmp-search-ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-3); font-size: 16px; pointer-events: none; }
+.cmp-search-input { width: 100%; padding: 14px 44px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; font-size: 14px; color: var(--text); transition: border-color .2s; font-family: inherit; }
+.cmp-search-input:focus { outline: 0; border-color: var(--primary); }
+.cmp-search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: 0; color: var(--text-3); font-size: 22px; cursor: pointer; width: 28px; height: 28px; display: none; align-items: center; justify-content: center; border-radius: 6px; }
+.cmp-search-clear:hover { color: var(--primary); background: var(--surface-2); }
+.cmp-search-wrap.has-value .cmp-search-clear { display: inline-flex; }
+
+.cmp-results { display: flex; flex-direction: column; gap: 10px; }
+.cmp-empty { padding: 40px 16px; text-align: center; color: var(--text-3); font-size: 13px; }
+.cmp-empty-ico { font-size: 32px; opacity: .5; margin-bottom: 10px; }
+
+/* Day view */
+.cmp-day-picker { margin-bottom: 16px; }
+.cmp-day-results { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 760px) { .cmp-day-results { grid-template-columns: 1fr 1fr; } }
+.cmp-day-col-title { font-size: 13px; font-weight: 700; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.cmp-day-col-title.cmp-working { color: var(--primary); border-bottom-color: color-mix(in srgb, var(--primary) 30%, transparent); }
+.cmp-day-col-title.cmp-free { color: var(--emerald); border-bottom-color: color-mix(in srgb, var(--emerald) 30%, transparent); }
+.cmp-badge { font-size: 10px; padding: 3px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); font-weight: 700; }
+
+/* Footer (Sugerencias + Legal) ===== */
 .app-footer { margin-top: 56px; padding: 28px 18px 40px; border-top: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .app-footer .ft-suggest { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; background: color-mix(in srgb, var(--primary) 8%, transparent); color: var(--primary); border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent); font-size: 12px; font-weight: 600; text-decoration: none; letter-spacing: .02em; transition: background .2s, transform .15s, border-color .2s; cursor: pointer; }
 .app-footer .ft-suggest:hover { background: color-mix(in srgb, var(--primary) 14%, transparent); border-color: color-mix(in srgb, var(--primary) 36%, transparent); }
@@ -473,6 +562,7 @@ opacity: 0; pointer-events: none; transition: opacity .35s;
 <span class="ico-sun">☀️</span><span class="ico-moon">🌙</span>
 </button>
 <button id="btn-notif" class="btn-icon" title="Notificaciones 1h antes de firma">🔔</button>
+<button id="btn-companeros" class="btn-icon" title="Cargar Horario · Visibilidad de Compañeros" data-testid="btn-open-companeros">👥</button>
 <button id="btn-settings" class="btn-icon" title="Ajustes">⚙️</button>
 </div>
 </div>
@@ -553,7 +643,7 @@ opacity: 0; pointer-events: none; transition: opacity .35s;
 
 <!-- ===== Footer: Sugerencias + Aviso legal ===== -->
 <footer class="app-footer no-print" data-testid="app-footer">
-<a href="/cdn-cgi/l/email-protection#0f6e6379653c3d3e7b674f68626e6663216c6062307c7a6d656a6c7b325c7a686a7d6a616c666e2a3d3f5b7d667f7a636e617b6a496360782a3d3f4e592a3d3f5f7d602a3d4d296d606b76324760636e2a3d4c2a3f4e2a3f4e426a2a3d3f687a7c7b6e7d2a4c3c2a4e4b6e2a3d3f7c7a686a7d667d2a3d3f636e2a3d3f7c66687a666a617b6a2a3d3f626a65607d6e2a3d3f7f6e7d6e2a3d3f5b7d667f7a636e617b6a496360782a3c4e2a3f4e2a3f4e" class="ft-suggest" data-testid="footer-suggest-link" aria-label="Enviar sugerencia por correo">
+<a href="/cdn-cgi/l/email-protection#5f3e3329356c6d6e2b371f38323e3633713c3032602c2a3d353a3c2b620c2a383a2d3a313c363e7a6d6f0b2d362f2a333e312b3a193330287a6d6f1e097a6d6f0f2d307a6d1d793d303b26621730333e7a6d1c7a6f1e7a6f1e123a7a6d6f382a2c2b3e2d7a1c6c7a1e1b3e7a6d6f2c2a383a2d362d7a6d6f333e7a6d6f2c36382a363a312b3a7a6d6f323a35302d3e7a6d6f2f3e2d3e7a6d6f0b2d362f2a333e312b3a193330287a6c1e7a6f1e7a6f1e" class="ft-suggest" data-testid="footer-suggest-link" aria-label="Enviar sugerencia por correo">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 <path d="M4 4h16v16H4z"/><path d="M4 4l8 8 8-8"/>
 </svg>
@@ -779,6 +869,90 @@ TripulanteFlow AV <span class="ft-dot"></span> v3.0 <span class="ft-dot"></span>
 </div>
 
 <button id="set-save" class="btn-primary w-full mt-5">💾 Guardar Ajustes</button>
+</div>
+</div>
+
+<!-- 👥 MODAL: Visibilidad de Compañeros (Cargar Horario) -->
+<div id="modal-companeros" class="modal modal-fullscreen" data-modal data-testid="modal-companeros">
+<div class="glass companeros-content rounded-[28px] modal-content">
+<!-- Header del modal -->
+<div class="cmp-header">
+<div class="flex items-center gap-3">
+<div class="cmp-header-ico">👥</div>
+<div>
+<h2 class="text-2xl" style="font-weight:600">Cargar Horario</h2>
+<p class="cmp-sub">Visibilidad de compañeros · Sube un cuadrante PDF/imagen</p>
+</div>
+</div>
+<button class="text-2xl opacity-60 hover:opacity-100 btn-icon" data-close="modal-companeros" data-testid="btn-close-companeros">×</button>
+</div>
+
+<!-- TABS -->
+<div class="cmp-tabs">
+<button class="cmp-tab active" data-cmptab="upload" data-testid="cmp-tab-upload">📤 Subir</button>
+<button class="cmp-tab" data-cmptab="search" data-testid="cmp-tab-search">🔍 Buscar</button>
+<button class="cmp-tab" data-cmptab="day" data-testid="cmp-tab-day">📅 Por día</button>
+</div>
+
+<!-- PANEL: Upload -->
+<div class="cmp-panel" data-cmppanel="upload">
+<label for="cmp-file-input" class="cmp-dropzone" id="cmp-dropzone" data-testid="cmp-dropzone">
+<div class="cmp-dz-ico">📄</div>
+<div class="cmp-dz-title">Pulsa o arrastra aquí</div>
+<div class="cmp-dz-sub">Acepta PDF, JPG, PNG · Cuadrante Serveo / Base</div>
+<input id="cmp-file-input" type="file" accept="image/*,application/pdf" style="display:none" data-testid="cmp-file-input"/>
+</label>
+
+<div class="cmp-progress" id="cmp-progress" style="display:none">
+<div class="cmp-progress-bar"><div class="cmp-progress-fill" id="cmp-progress-fill"></div></div>
+<div class="cmp-progress-text" id="cmp-progress-text">Iniciando…</div>
+</div>
+
+<div id="cmp-preview" class="cmp-preview" style="display:none">
+<h3 class="cmp-section-title">📋 Compañeros detectados</h3>
+<p class="cmp-section-hint">Revisa y confirma. Puedes descartar filas falsas antes de guardar.</p>
+<div id="cmp-preview-list" class="cmp-preview-list"></div>
+<div class="cmp-preview-actions">
+<button class="btn-soft" id="cmp-cancel-import" data-testid="cmp-cancel-import">Cancelar</button>
+<button class="btn-primary" id="cmp-confirm-import" data-testid="cmp-confirm-import">💾 Guardar compañeros</button>
+</div>
+</div>
+
+<div class="cmp-storage-info" id="cmp-storage-info">
+<span class="cmp-st-ico">💾</span>
+<span><b id="cmp-count">0</b> compañeros guardados localmente</span>
+<button class="cmp-clear-btn" id="cmp-clear-all" data-testid="cmp-clear-all">🗑️ Vaciar</button>
+</div>
+</div>
+
+<!-- PANEL: Search -->
+<div class="cmp-panel" data-cmppanel="search" style="display:none">
+<div class="cmp-search-wrap">
+<span class="cmp-search-ico">🔍</span>
+<input id="cmp-search-input" class="cmp-search-input" placeholder="Nombre o matrícula…" autocomplete="off" data-testid="cmp-search-input"/>
+<button class="cmp-search-clear" id="cmp-search-clear">×</button>
+</div>
+<div id="cmp-search-results" class="cmp-results" data-testid="cmp-search-results"></div>
+</div>
+
+<!-- PANEL: Day -->
+<div class="cmp-panel" data-cmppanel="day" style="display:none">
+<div class="cmp-day-picker">
+<label class="label" style="margin-bottom:6px; display:block">📅 Selecciona día</label>
+<input id="cmp-day-input" class="input" type="date" data-testid="cmp-day-input"/>
+</div>
+<div class="cmp-day-results" data-testid="cmp-day-results">
+<div class="cmp-day-col">
+<h3 class="cmp-day-col-title cmp-working">🚄 Trabajan <span id="cmp-working-count" class="cmp-badge">0</span></h3>
+<div id="cmp-working-list" class="cmp-results"></div>
+</div>
+<div class="cmp-day-col">
+<h3 class="cmp-day-col-title cmp-free">🌴 Libres (DO/LD/CP) <span id="cmp-free-count" class="cmp-badge">0</span></h3>
+<div id="cmp-free-list" class="cmp-results"></div>
+</div>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -2760,6 +2934,638 @@ else calendar.next();
 }, { passive: true });
 }
 
+// ============================================================================
+// 👥 MÓDULO COMPAÑEROS · Visibilidad de Cuadrantes
+// ============================================================================
+// Detección OCR 100% local con Tesseract.js + PDF.js (privacidad RGPD).
+// Almacenamiento en localStorage bajo `tf_colleagues_v1`.
+
+const CMP_STORAGE_KEY = "tf_colleagues_v1";
+const CMP_FREE_CODES = new Set(["DO", "LD", "CP", "V", "B", "BAJA", "VAC"]);
+const CMP_CDN = {
+tesseract: "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js",
+pdfjs: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+pdfjsWorker: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
+};
+
+let cmpColleagues = []; // array de compañeros guardados
+let cmpPendingImport = []; // detectados pendientes de confirmar
+let cmpLibsLoaded = false;
+let cmpInitDone = false;
+
+function cmpLoadScript(src) {
+return new Promise((resolve, reject) => {
+if ([...document.scripts].some(s => s.src === src)) return resolve();
+const sc = document.createElement("script");
+sc.src = src;
+sc.onload = () => resolve();
+sc.onerror = () => reject(new Error("No se pudo cargar " + src));
+document.head.appendChild(sc);
+});
+}
+
+async function cmpEnsureLibs() {
+// Solo carga Tesseract; PDF.js ya se carga upfront en processFile
+if (cmpLibsLoaded) return;
+await cmpLoadScript(CMP_CDN.tesseract);
+cmpLibsLoaded = true;
+}
+
+function cmpLoadStore() {
+try { cmpColleagues = JSON.parse(localStorage.getItem(CMP_STORAGE_KEY) || "[]"); }
+catch { cmpColleagues = []; }
+}
+function cmpSaveStore() {
+try {
+localStorage.setItem(CMP_STORAGE_KEY, JSON.stringify(cmpColleagues));
+return true;
+} catch (e) {
+showToast("⚠️ Sin espacio en localStorage. Limpia compañeros antiguos.", "error");
+return false;
+}
+}
+
+function cmpProgress(pct, text) {
+const wrap = document.getElementById("cmp-progress");
+const fill = document.getElementById("cmp-progress-fill");
+const txt = document.getElementById("cmp-progress-text");
+if (!wrap) return;
+if (pct == null) { wrap.style.display = "none"; return; }
+wrap.style.display = "block";
+fill.style.width = Math.max(0, Math.min(100, pct)) + "%";
+txt.textContent = text || "Procesando…";
+}
+
+// === Renderizar imagen o PDF a canvas + extraer texto (si es PDF) ===
+async function cmpFileToPages(file) {
+// Returns: [{ canvas, words (or null), hasText }]
+if (file.type === "application/pdf") {
+const buf = await file.arrayBuffer();
+const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+const pages = [];
+for (let i = 1; i <= pdf.numPages; i++) {
+const page = await pdf.getPage(i);
+const viewport = page.getViewport({ scale: 2.0 });
+const canvas = document.createElement("canvas");
+canvas.width = viewport.width;
+canvas.height = viewport.height;
+await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+// Intentar extraer texto con posiciones (rápido si PDF es text-extractable)
+let words = null;
+try {
+const tc = await page.getTextContent();
+if (tc.items && tc.items.length > 20) {
+words = tc.items.filter(it => it.str && it.str.trim()).map(item => {
+// Convertir transform PDF a coords de canvas
+const tx = window.pdfjsLib.Util.transform(viewport.transform, item.transform);
+const x = tx[4];
+const yBase = tx[5];
+const fontH = Math.abs(tx[3]) || 12;
+const w = (item.width || (item.str.length * fontH * 0.5)) * viewport.scale;
+return {
+text: item.str.trim(),
+bbox: { x0: x, y0: yBase - fontH, x1: x + w, y1: yBase },
+confidence: 95
+};
+});
+}
+} catch (e) { /* fallback to OCR */ }
+pages.push({ canvas, words, hasText: !!words });
+}
+return pages;
+} else {
+const url = URL.createObjectURL(file);
+const img = await new Promise((resolve, reject) => {
+const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = url;
+});
+const canvas = document.createElement("canvas");
+canvas.width = img.naturalWidth;
+canvas.height = img.naturalHeight;
+canvas.getContext("2d").drawImage(img, 0, 0);
+URL.revokeObjectURL(url);
+return [{ canvas, words: null, hasText: false }];
+}
+}
+
+// === OCR de un canvas → palabras con bounding boxes ===
+async function cmpOcrCanvas(canvas, onProgress) {
+const result = await window.Tesseract.recognize(canvas, "spa+eng", {
+logger: m => { if (m.status === "recognizing text" && onProgress) onProgress(m.progress); }
+});
+// result.data.words: [{ text, confidence, bbox:{x0,y0,x1,y1} }, ...]
+return result.data.words || [];
+}
+
+// === Detectar filas de compañeros ===
+// Algoritmo:
+// 1. Clusteriza palabras por Y para formar filas
+// 2. En cada fila busca un número de 6-8 dígitos (matrícula)
+// 3. Asocia el resto de la fila (texto en mayúsculas con espacios o coma) como nombre
+// 4. Para cada fila válida, calcula su Y range y recorta el strip horizontal
+function cmpClusterRows(words, canvasH) {
+if (!words.length) return [];
+// Ordenar por Y
+const sorted = [...words].sort((a,b) => a.bbox.y0 - b.bbox.y0);
+// Tolerancia: ~1% del alto del canvas o 8px (lo que sea mayor)
+const tol = Math.max(8, canvasH * 0.012);
+const rows = [];
+for (const w of sorted) {
+const yCenter = (w.bbox.y0 + w.bbox.y1) / 2;
+let placed = false;
+for (const row of rows) {
+if (Math.abs(yCenter - row.yCenter) < tol) {
+row.words.push(w);
+// Recompute yCenter as mean
+row.yCenter = (row.yCenter * (row.words.length-1) + yCenter) / row.words.length;
+row.y0 = Math.min(row.y0, w.bbox.y0);
+row.y1 = Math.max(row.y1, w.bbox.y1);
+placed = true;
+break;
+}
+}
+if (!placed) {
+rows.push({ yCenter, y0: w.bbox.y0, y1: w.bbox.y1, words: [w] });
+}
+}
+// Ordenar palabras de cada fila por X
+rows.forEach(r => r.words.sort((a,b) => a.bbox.x0 - b.bbox.x0));
+return rows.sort((a,b) => a.y0 - b.y0);
+}
+
+function cmpFindWorkers(rows, dayColsX0, allWordsSortedY) {
+// Layout Serveo (cada bloque de trabajador):
+// Y matrícula: "MATRICULA" en x≈40 + shift codes para días 1-31 (X>200)
+// Y matrícula+~35: APELLIDOS en x≈40 (a veces solo apellidos)
+// Y matrícula+~47: ",NOMBRE" en x≈40 (a veces unido en la línea anterior)
+// Y matrícula+~85: "Horas Totales" + valor 127,96
+// Más abajo: filas de shift codes (multi-line celdas)
+// Siguiente matrícula ≈ +130-200 px abajo
+const workers = [];
+// 1) Encontrar matriculas en allWordsSortedY (más fiable que rows)
+const matriculas = [];
+for (const w of allWordsSortedY) {
+if (/^\d{7}$/.test(w.text.replace(/\D/g, ""))) {
+// Filtrar matrículas con X razonable (no items aislados del header etc)
+if (w.bbox.x0 < 200) {
+matriculas.push({ matricula: w.text.replace(/\D/g, ""), y: w.bbox.y0, x: w.bbox.x0, w });
+}
+}
+}
+// 2) Para cada matrícula, buscar nombre en items debajo, x cerca de la matrícula
+for (let mi = 0; mi < matriculas.length; mi++) {
+const m = matriculas[mi];
+const nextY = (mi + 1 < matriculas.length) ? matriculas[mi+1].y : Infinity;
+// Items entre m.y+5 y nextY-5, con X cerca de la matrícula
+const candidates = allWordsSortedY.filter(w =>
+w.bbox.y0 > m.y + 2 &&
+w.bbox.y0 < nextY - 2 &&
+Math.abs(w.bbox.x0 - m.x) < 70
+);
+// Procesar hasta encontrar "Horas" o número
+const nameParts = [];
+for (const w of candidates) {
+const raw = w.text.trim();
+if (/^Horas\b/i.test(raw)) break;
+if (/^\d/.test(raw)) break; // valor numérico (127,96 o 163,00)
+if (raw.length > 80) break; // texto largo (footer)
+// Aceptar tokens con letras
+if (/[A-ZÁÉÍÓÚÑÜ]/.test(raw.toUpperCase())) {
+nameParts.push(raw);
+} else if (nameParts.length > 0) {
+break;
+}
+// Limitar a ~3 items consecutivos para evitar capturar comentarios
+if (nameParts.length >= 4) break;
+}
+let name = nameParts.join(" ")
+.replace(/\s+,/g, ",")
+.replace(/,(?=[A-ZÁÉÍÓÚÑÜ])/g, ", ")
+.replace(/\s+/g, " ")
+.trim();
+if (!name) name = "(sin nombre)";
+workers.push({
+matricula: m.matricula,
+name,
+y0: m.y - 2,
+y1: m.y + 12,
+blockEndY: (nextY === Infinity ? null : nextY - 3)
+});
+}
+return workers;
+}
+
+// === Detectar encabezado de columnas (días 1-31) ===
+function cmpDetectDayColumns(rows, canvasW) {
+// Buscar la fila con más números 1-31 secuenciales
+let best = { row: null, hits: 0, cols: [] };
+for (const r of rows) {
+const dayWords = r.words.filter(w => /^([1-9]|[12]\d|3[01])$/.test(w.text.trim()));
+if (dayWords.length >= 10 && dayWords.length > best.hits) {
+// Verificar que son consecutivos (al menos en su mayoría)
+const nums = dayWords.map(w => parseInt(w.text)).sort((a,b)=>a-b);
+const consecutive = nums.filter((n,i) => i === 0 || n === nums[i-1] + 1).length;
+if (consecutive < 10) continue;
+best = { row: r, hits: dayWords.length, cols: dayWords.map(w => ({ day: parseInt(w.text), x: (w.bbox.x0 + w.bbox.x1) / 2 })) };
+}
+}
+return best.cols.sort((a,b) => a.x - b.x);
+}
+
+// === Códigos válidos. Días libres son DO/LD/CP/V/B (cell content), no confundir con cabecera de día ===
+const CMP_NOISE_TOKENS = new Set(["HORAS","TOTALES","EF","PR","JOR","PRORR","CI","CO","TURNOS","PUB","BASE","MAYO","ENERO","FEBRERO","MARZO","ABRIL","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE","DOM","LUN","MIE","MIÉ","JUE","SAB","SÁB","ATENCIÓN","ATENCION"]);
+// Nota: "MAR" y "VIE" coinciden con día de la semana PERO también podrían ser parte de códigos. Filtro por Y luego.
+// "DO" / "LD" / "CP" SON códigos válidos de celda (descansos), NO los filtramos.
+
+// === Para cada worker, extraer códigos por día ===
+function cmpExtractWorkerDays(worker, dayCols, allWords) {
+const days = {};
+if (!dayCols.length) return days;
+const blockTop = worker.y0 - 1;
+const blockBottom = worker.blockEndY || (worker.y1 + 400);
+// Incluye TODA la banda del worker (la matrícula está en la misma fila que el día 1)
+const blockWords = allWords.filter(w => {
+const yc = (w.bbox.y0 + w.bbox.y1) / 2;
+return yc >= blockTop && yc < blockBottom;
+});
+const colWidth = dayCols.length >= 2 ? (dayCols[1].x - dayCols[0].x) : 30;
+for (const col of dayCols) {
+const left = col.x - colWidth * 0.55;
+const right = col.x + colWidth * 0.55;
+const cellWords = blockWords.filter(w => {
+const xc = (w.bbox.x0 + w.bbox.x1) / 2;
+return xc >= left && xc <= right;
+}).sort((a,b) => a.bbox.y0 - b.bbox.y0);
+const tokens = [];
+for (const w of cellWords) {
+const raw = w.text.trim().toUpperCase();
+// Quitar guiones finales y limpiar
+const cleaned = raw.replace(/[^A-Z0-9\-\/]/g, "");
+if (!cleaned) continue;
+if (cleaned.length > 14) continue;
+if (CMP_NOISE_TOKENS.has(cleaned)) continue;
+// Saltar la matrícula misma
+if (/^\d{7}$/.test(cleaned)) continue;
+tokens.push(cleaned);
+}
+if (!tokens.length) continue;
+// El primer token = código principal (DO, LD, CP, número de tren, ruta...)
+days[col.day] = tokens[0];
+}
+return days;
+}
+
+// === Recortar strip vertical de un canvas (toda la fila/bloque del trabajador) ===
+// Comprime fuertemente: target ancho ~900px, quality 0.55, para caber en localStorage
+function cmpCropStrip(canvas, y0, y1) {
+const top = Math.max(0, Math.floor(y0));
+const bottom = Math.min(canvas.height, Math.ceil(y1));
+const srcH = Math.max(20, bottom - top);
+const srcW = canvas.width;
+// Target width 900 para legibilidad móvil sin saturar localStorage
+const targetW = Math.min(900, srcW);
+const scale = targetW / srcW;
+const targetH = Math.round(srcH * scale);
+const out = document.createElement("canvas");
+out.width = targetW;
+out.height = targetH;
+const ctx = out.getContext("2d");
+ctx.imageSmoothingEnabled = true;
+ctx.imageSmoothingQuality = "high";
+ctx.drawImage(canvas, 0, top, srcW, srcH, 0, 0, targetW, targetH);
+return out.toDataURL("image/jpeg", 0.55);
+}
+
+// === FLUJO PRINCIPAL DE PROCESAMIENTO ===
+async function cmpProcessFile(file) {
+document.getElementById("cmp-preview").style.display = "none";
+cmpPendingImport = [];
+try {
+// Cargar libs (PDF.js siempre, Tesseract solo si no hay texto)
+cmpProgress(5, "Cargando librerías…");
+await cmpLoadScript(CMP_CDN.pdfjs);
+if (window.pdfjsLib) window.pdfjsLib.GlobalWorkerOptions.workerSrc = CMP_CDN.pdfjsWorker;
+
+cmpProgress(15, "Renderizando archivo…");
+const pages = await cmpFileToPages(file);
+const needsOcr = pages.some(p => !p.hasText);
+if (needsOcr) {
+cmpProgress(20, "Cargando OCR (sólo necesario para imágenes)…");
+await cmpEnsureLibs();
+}
+const allDetected = [];
+// Detectar columnas-día globales (usar la página que tenga más números)
+let globalDayCols = [];
+for (let pi = 0; pi < pages.length; pi++) {
+const { canvas, words: textWords, hasText } = pages[pi];
+const baseP = 20 + (pi / pages.length) * 75;
+cmpProgress(baseP, hasText ? `Página ${pi+1}/${pages.length} · texto…` : `OCR página ${pi+1}/${pages.length}…`);
+let words;
+if (hasText) {
+words = textWords;
+} else {
+words = await cmpOcrCanvas(canvas, (p) => {
+cmpProgress(baseP + p * (75/pages.length) * 0.9, `OCR página ${pi+1}/${pages.length} · ${Math.round(p*100)}%`);
+});
+}
+const rows = cmpClusterRows(words, canvas.height);
+let dayCols = cmpDetectDayColumns(rows, canvas.width);
+if (dayCols.length >= 10) globalDayCols = dayCols;
+else if (globalDayCols.length) dayCols = globalDayCols;
+const dayColsX0 = dayCols.length ? dayCols[0].x : null;
+const wordsSortedY = [...words].sort((a,b) => a.bbox.y0 - b.bbox.y0);
+const workers = cmpFindWorkers(rows, dayColsX0, wordsSortedY);
+const monthOnPage = cmpDetectMonth(words);
+for (const w of workers) {
+// Si es el último worker de la página, extender bloque hasta el fondo del canvas
+if (!w.blockEndY) w.blockEndY = canvas.height - 10;
+const days = cmpExtractWorkerDays(w, dayCols, words);
+// Recorte amplio: desde la línea de matrícula hasta justo antes del siguiente worker
+const padTop = 4;
+const padBottom = 6;
+const stripDataUrl = cmpCropStrip(canvas, w.y0 - padTop, w.blockEndY - padBottom);
+allDetected.push({
+id: `cmp_${w.matricula}_${Date.now()}_${allDetected.length}`,
+matricula: w.matricula,
+name: w.name,
+stripDataUrl,
+days,
+month: monthOnPage || "",
+sourceFile: file.name,
+page: pi + 1,
+addedAt: Date.now()
+});
+}
+}
+cmpProgress(96, "Finalizando…");
+// Deduplicar por matrícula (quedarse con el último — el más reciente sobreescribe)
+const seen = new Map();
+for (const d of allDetected) seen.set(d.matricula, d);
+cmpPendingImport = [...seen.values()].sort((a,b) => a.name.localeCompare(b.name));
+cmpProgress(100, `${cmpPendingImport.length} compañero(s) detectado(s)`);
+setTimeout(() => cmpProgress(null), 800);
+cmpRenderPreview();
+} catch (err) {
+console.error("[cmp] error:", err);
+cmpProgress(null);
+showToast("⚠️ Error procesando: " + err.message, "error");
+}
+}
+
+function cmpDetectMonth(words) {
+const months = { enero:"01",febrero:"02",marzo:"03",abril:"04",mayo:"05",junio:"06",julio:"07",agosto:"08",septiembre:"09",octubre:"10",noviembre:"11",diciembre:"12" };
+const text = words.map(w => w.text).join(" ").toLowerCase();
+for (const [name, num] of Object.entries(months)) {
+const yMatch = text.match(new RegExp(name + "\\s*(?:de\\s*)?(20\\d{2})"));
+if (yMatch) return `${yMatch[1]}-${num}`;
+if (text.includes(name)) {
+const now = new Date();
+return `${now.getFullYear()}-${num}`;
+}
+}
+return null;
+}
+
+// === Render preview de detectados (antes de guardar) ===
+function cmpRenderPreview() {
+const wrap = document.getElementById("cmp-preview");
+const list = document.getElementById("cmp-preview-list");
+if (!cmpPendingImport.length) {
+wrap.style.display = "block";
+list.innerHTML = `<div class="cmp-empty"><div class="cmp-empty-ico">🤷</div>No se detectaron compañeros. Verifica que el archivo es legible y contiene matrículas (6-8 dígitos).</div>`;
+return;
+}
+wrap.style.display = "block";
+list.innerHTML = cmpPendingImport.map((c, idx) => cmpCardHTML(c, { showRemove: true, idx })).join("");
+list.querySelectorAll("[data-cmp-remove]").forEach(b => {
+b.onclick = () => {
+const i = parseInt(b.dataset.cmpRemove);
+cmpPendingImport.splice(i, 1);
+cmpRenderPreview();
+};
+});
+}
+
+function cmpCardHTML(c, opts = {}) {
+const initials = (c.name || "").split(" ").filter(Boolean).slice(0,2).map(w=>w[0]).join("") || "??";
+let extra = "";
+if (opts.dayCode) {
+const isFree = CMP_FREE_CODES.has(opts.dayCode);
+extra = `<div class="cmp-card-dayinfo">
+<span class="cmp-card-day-code ${isFree?'free':''}">${opts.dayCode}</span>
+<span class="cmp-card-day-label">Día ${opts.dayLabel}</span>
+</div>`;
+}
+const action = opts.showRemove
+? `<button class="cmp-card-action" data-cmp-remove="${opts.idx}" title="Descartar">✕ Descartar</button>`
+: (opts.showDelete
+? `<button class="cmp-card-action" data-cmp-del="${c.id}" title="Eliminar">🗑</button>`
+: "");
+return `<div class="cmp-card" data-testid="cmp-card-${c.matricula}">
+<div class="cmp-card-head">
+<div class="cmp-card-avatar">${escape(initials)}</div>
+<div class="cmp-card-info">
+<div class="cmp-card-name">${escape(c.name)}</div>
+<div class="cmp-card-mat">Mat. ${escape(c.matricula)} ${c.month?'· '+escape(c.month):''}</div>
+</div>
+${action}
+</div>
+<div class="cmp-card-strip"><img src="${c.stripDataUrl}" alt="Horario de ${escape(c.name)}" loading="lazy"/></div>
+${extra}
+</div>`;
+}
+
+function cmpConfirmImport() {
+if (!cmpPendingImport.length) {
+showToast("No hay compañeros por importar", "info");
+return;
+}
+// Merge: si ya existe matricula, reemplazar
+const byMat = new Map(cmpColleagues.map(c => [c.matricula, c]));
+for (const d of cmpPendingImport) byMat.set(d.matricula, d);
+cmpColleagues = [...byMat.values()].sort((a,b) => a.name.localeCompare(b.name));
+if (cmpSaveStore()) {
+showToast(`✅ ${cmpPendingImport.length} compañero(s) guardado(s)`, "success");
+cmpPendingImport = [];
+document.getElementById("cmp-preview").style.display = "none";
+cmpUpdateCount();
+cmpRefreshSearch();
+cmpRefreshDay();
+}
+}
+
+function cmpUpdateCount() {
+const el = document.getElementById("cmp-count");
+if (el) el.textContent = cmpColleagues.length;
+}
+
+function cmpRefreshSearch() {
+const input = document.getElementById("cmp-search-input");
+const q = (input?.value || "").trim().toLowerCase();
+const results = document.getElementById("cmp-search-results");
+if (!results) return;
+if (!cmpColleagues.length) {
+results.innerHTML = `<div class="cmp-empty"><div class="cmp-empty-ico">📭</div>Aún no has cargado ningún horario. Ve a la pestaña "Subir".</div>`;
+return;
+}
+let list = cmpColleagues;
+if (q) {
+list = cmpColleagues.filter(c => c.name.toLowerCase().includes(q) || c.matricula.includes(q));
+}
+if (!list.length) {
+results.innerHTML = `<div class="cmp-empty"><div class="cmp-empty-ico">🔍</div>Sin resultados para "${escape(q)}"</div>`;
+return;
+}
+results.innerHTML = list.map(c => cmpCardHTML(c, { showDelete: true })).join("");
+results.querySelectorAll("[data-cmp-del]").forEach(b => {
+b.onclick = () => cmpDeleteColleague(b.dataset.cmpDel);
+});
+}
+
+function cmpDeleteColleague(id) {
+showConfirm({
+title: "Eliminar compañero",
+message: "Se borrará el horario guardado de este compañero.",
+icon: "🗑️",
+danger: true,
+confirmText: "Eliminar",
+onConfirm: () => {
+cmpColleagues = cmpColleagues.filter(c => c.id !== id);
+cmpSaveStore();
+cmpUpdateCount();
+cmpRefreshSearch();
+cmpRefreshDay();
+showToast("Compañero eliminado", "success");
+}
+});
+}
+
+function cmpRefreshDay() {
+const input = document.getElementById("cmp-day-input");
+if (!input) return;
+const dateStr = input.value;
+const workingList = document.getElementById("cmp-working-list");
+const freeList = document.getElementById("cmp-free-list");
+const workingCount = document.getElementById("cmp-working-count");
+const freeCount = document.getElementById("cmp-free-count");
+if (!dateStr) {
+workingList.innerHTML = freeList.innerHTML = `<div class="cmp-empty"><div class="cmp-empty-ico">📅</div>Elige un día para ver quién trabaja</div>`;
+workingCount.textContent = freeCount.textContent = "0";
+return;
+}
+const d = new Date(dateStr + "T00:00");
+const dayNum = d.getDate();
+const working = [];
+const free = [];
+for (const c of cmpColleagues) {
+const code = (c.days || {})[dayNum] || (c.days || {})[String(dayNum)];
+if (!code) continue;
+if (CMP_FREE_CODES.has(code)) free.push({ c, code });
+else working.push({ c, code });
+}
+const dayLabel = d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+workingCount.textContent = working.length;
+freeCount.textContent = free.length;
+workingList.innerHTML = working.length
+? working.map(({c,code}) => cmpCardHTML(c, { dayCode: code, dayLabel })).join("")
+: `<div class="cmp-empty"><div class="cmp-empty-ico">🌙</div>Nadie con servicio detectado este día</div>`;
+freeList.innerHTML = free.length
+? free.map(({c,code}) => cmpCardHTML(c, { dayCode: code, dayLabel })).join("")
+: `<div class="cmp-empty"><div class="cmp-empty-ico">📋</div>Nadie en DO/LD/CP este día</div>`;
+}
+
+// === INIT WIRING ===
+function initCompaneros() {
+if (cmpInitDone) return;
+cmpInitDone = true;
+cmpLoadStore();
+cmpUpdateCount();
+
+// Abrir modal
+document.getElementById("btn-companeros").onclick = () => {
+openModal("modal-companeros");
+cmpUpdateCount();
+cmpRefreshSearch();
+cmpRefreshDay();
+};
+
+// Tabs
+document.querySelectorAll("[data-cmptab]").forEach(t => {
+t.onclick = () => {
+document.querySelectorAll("[data-cmptab]").forEach(x => x.classList.remove("active"));
+t.classList.add("active");
+const tab = t.dataset.cmptab;
+document.querySelectorAll("[data-cmppanel]").forEach(p => {
+p.style.display = p.dataset.cmppanel === tab ? "block" : "none";
+});
+if (tab === "search") cmpRefreshSearch();
+if (tab === "day") {
+const inp = document.getElementById("cmp-day-input");
+if (!inp.value) inp.value = new Date().toISOString().slice(0,10);
+cmpRefreshDay();
+}
+};
+});
+
+// Dropzone
+const dz = document.getElementById("cmp-dropzone");
+const fi = document.getElementById("cmp-file-input");
+fi.onchange = (e) => {
+const f = e.target.files?.[0];
+if (f) cmpProcessFile(f);
+fi.value = "";
+};
+["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add("dragging"); }));
+["dragleave","drop"].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove("dragging"); }));
+dz.addEventListener("drop", (e) => {
+const f = e.dataTransfer?.files?.[0];
+if (f) cmpProcessFile(f);
+});
+
+// Confirm/cancel import
+document.getElementById("cmp-confirm-import").onclick = cmpConfirmImport;
+document.getElementById("cmp-cancel-import").onclick = () => {
+cmpPendingImport = [];
+document.getElementById("cmp-preview").style.display = "none";
+showToast("Importación cancelada", "info");
+};
+
+// Clear all
+document.getElementById("cmp-clear-all").onclick = () => {
+if (!cmpColleagues.length) return showToast("No hay compañeros guardados", "info");
+showConfirm({
+title: "Vaciar todos los compañeros",
+message: "Se borrarán todos los horarios guardados localmente.",
+icon: "🗑️", danger: true, confirmText: "Vaciar todo",
+onConfirm: () => {
+cmpColleagues = [];
+cmpSaveStore();
+cmpUpdateCount();
+cmpRefreshSearch();
+cmpRefreshDay();
+showToast("Compañeros eliminados", "success");
+}
+});
+};
+
+// Search input
+const si = document.getElementById("cmp-search-input");
+const sw = si.closest(".cmp-search-wrap");
+si.addEventListener("input", () => {
+sw.classList.toggle("has-value", !!si.value);
+cmpRefreshSearch();
+});
+document.getElementById("cmp-search-clear").onclick = () => {
+si.value = "";
+sw.classList.remove("has-value");
+cmpRefreshSearch();
+};
+
+// Day input
+document.getElementById("cmp-day-input").addEventListener("change", cmpRefreshDay);
+}
+
+// Helper escape() ya existe globalmente
+
 window.addEventListener("DOMContentLoaded", () => {
 loadStore();
 applyTheme(settings.theme || "light");
@@ -2769,6 +3575,8 @@ initCalendar();
 wireNewForm();
 updateNotifBtn();
 render();
+// 👥 Módulo Compañeros
+initCompaneros();
 // 🔒 Banner privacidad
 const accepted = localStorage.getItem("tf_privacy_v1");
 if (!accepted) {
@@ -2787,6 +3595,6 @@ setTimeout(startOnboarding, 600);
 }
 });
 </script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"7f7b0fd8732c4326aae4b9d58d5c514a","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fbd98643a65c9f9',t:'MTc3ODgwMDQyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc1396669a980ee',t:'MTc3ODgzODQ3Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"7f7b0fd8732c4326aae4b9d58d5c514a","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
 </html>
