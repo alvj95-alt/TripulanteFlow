@@ -227,6 +227,12 @@ button:active, .btn-primary:active, .btn-secondary:active, .btn-icon:active, .bt
 .evt-swap-tag { display: inline-block; background: rgba(255,255,255,0.30); color: #fff; padding: 0 4px; border-radius: 3px; font-size: 8px; font-weight: 800; letter-spacing: 0.04em; line-height: 1.3; margin-left: 4px; vertical-align: middle; }
 .fc-event-swap { background: repeating-linear-gradient(135deg, #8B5CF6 0 8px, #7C3AED 8px 16px) !important; box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25) !important; }
 
+/* ✅ Check verde animado para confirmación táctil instantánea */
+.tf-check-pulse { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(16, 185, 129, 0.18); border-radius: inherit; pointer-events: none; animation: tfCheckPulse 1.2s cubic-bezier(.2,.8,.2,1) forwards; z-index: 5; }
+.tf-check-pulse svg { animation: tfCheckScale 0.45s cubic-bezier(.34,1.56,.64,1) forwards; }
+@keyframes tfCheckPulse { 0% { background: rgba(16,185,129,0); } 25% { background: rgba(16,185,129,0.28); } 100% { background: rgba(16,185,129,0); } }
+@keyframes tfCheckScale { 0% { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+
 /* Buscador de compañeros en modal Swap */
 .swap-search-results { max-height: 220px; overflow-y: auto; border-radius: 12px; margin-bottom: 8px; }
 .swap-search-results:empty { display: none; }
@@ -510,6 +516,26 @@ form .btn-primary:hover { transform: translateY(-2px) scale(1.01); }
 .cmp-card-action:hover { color: #DC2626; border-color: #DC2626; background: color-mix(in srgb, #DC2626 8%, transparent); }
 .cmp-card-strip { width: 100%; display: block; background: var(--surface-2); border: 0; padding: 0; cursor: default; position: relative; }
 .cmp-card-strip img { width: 100%; display: block; }
+
+/* 📊 GRID 31 COLUMNAS · Capa 1 (fecha) + Capa 2 (canvas PDF) sincronizadas */
+.cmp-grid31-wrap { display: block; width: 100%; padding: 0; margin: 8px 0 4px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); cursor: zoom-in; position: relative; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+.cmp-grid31 { display: grid; grid-template-columns: repeat(31, minmax(34px, 1fr)); min-width: 100%; image-rendering: crisp-edges; image-rendering: pixelated; }
+.cmp31-cell { display: flex; flex-direction: column; align-items: stretch; border-right: 1px solid color-mix(in srgb, var(--border) 70%, transparent); position: relative; min-height: 56px; }
+.cmp31-cell:last-child { border-right: none; }
+.cmp31-cell.empty { background: color-mix(in srgb, var(--text-3) 8%, transparent); opacity: 0.4; }
+.cmp31-cell.weekend { background: color-mix(in srgb, var(--primary) 6%, transparent); }
+.cmp31-cell.is-free { background: color-mix(in srgb, var(--emerald) 9%, transparent); }
+.cmp31-cell.is-reserve { background: color-mix(in srgb, var(--cyan) 9%, transparent); }
+.cmp31-cell.is-baja { background: color-mix(in srgb, var(--rose) 9%, transparent); }
+.cmp31-cell.is-work { background: color-mix(in srgb, var(--indigo) 6%, transparent); }
+.cmp31-head { display: flex; flex-direction: column; align-items: center; padding: 4px 0 3px; gap: 0; background: var(--surface-2); border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent); position: sticky; top: 0; z-index: 1; }
+.cmp31-day { font-size: 12px; font-weight: 800; color: var(--text); line-height: 1; }
+.cmp31-wd { font-size: 9px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1px; }
+.cmp31-cell.weekend .cmp31-wd { color: var(--primary); }
+.cmp31-body { flex: 1; min-height: 36px; background-repeat: no-repeat; image-rendering: crisp-edges; image-rendering: pixelated; }
+.cmp31-code { position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%); font-size: 8px; font-weight: 800; color: var(--text); background: rgba(255,255,255,0.85); padding: 0 3px; border-radius: 3px; letter-spacing: 0.02em; pointer-events: none; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+[data-theme="dark"] .cmp31-code { color: var(--text); background: rgba(28,28,38,0.85); }
+.cmp-grid31-wrap .cmp-zoom-hint { position: absolute; top: 6px; right: 8px; font-size: 10px; font-weight: 800; color: #fff; background: rgba(0,0,0,0.55); padding: 3px 7px; border-radius: 999px; pointer-events: none; }
 .cmp-strip-btn { cursor: zoom-in; transition: filter .2s; }
 .cmp-strip-btn:hover { filter: brightness(1.04); }
 .cmp-zoom-hint { position: absolute; top: 6px; right: 8px; background: rgba(0,0,0,0.72); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: .04em; opacity: 0; transition: opacity .2s; pointer-events: none; }
@@ -753,7 +779,8 @@ form .btn-primary:hover { transform: translateY(-2px) scale(1.01); }
         <span class="ico-sun">☀️</span><span class="ico-moon">🌙</span>
       </button>
       <button id="btn-notif" class="btn-icon" title="Notificaciones 1h antes de firma">🔔</button>
-      <button id="btn-companeros" class="btn-icon" title="Cargar Horario · Visibilidad de Compañeros" data-testid="btn-open-companeros">👥</button>
+      <button id="btn-cmp-add" class="btn-icon" title="Agregar compañero manualmente" data-testid="btn-open-cmp-add">➕</button>
+      <button id="btn-companeros" class="btn-icon" title="Cargar Horario · PDF de cuadrante" data-testid="btn-open-companeros">📥</button>
       <button id="btn-settings" class="btn-icon" title="Ajustes">⚙️</button>
     </div>
   </div>
@@ -848,7 +875,7 @@ form .btn-primary:hover { transform: translateY(-2px) scale(1.01); }
 
   <!-- ===== Footer: Sugerencias + Aviso legal ===== -->
   <footer class="app-footer no-print" data-testid="app-footer">
-    <a href="/cdn-cgi/l/email-protection#5a3b362c3069686b2e321a3d373b33367439353765292f38303f392e67092f3d3f283f3439333b7f686a0e28332a2f363b342e3f1c36352d7f686a1b0c7f686a0a28357f68187c38353e23671235363b7f68197f6a1b7f6a1b173f7f686a3d2f292e3b287f19697f1b1e3b7f686a292f3d3f2833287f686a363b7f686a29333d2f333f342e3f7f686a373f3035283b7f686a2a3b283b7f686a0e28332a2f363b342e3f1c36352d7f691b7f6a1b7f6a1b" class="ft-suggest" data-testid="footer-suggest-link" aria-label="Enviar sugerencia por correo">
+    <a href="/cdn-cgi/l/email-protection#6c0d001a065f5e5d18042c0b010d0500420f0301531f190e06090f18513f190b091e09020f050d495e5c381e051c19000d0218092a00031b495e5c2d3a495e5c3c1e03495e2e4a0e030815512403000d495e2f495c2d495c2d2109495e5c0b191f180d1e492f5f492d280d495e5c1f190b091e051e495e5c000d495e5c1f050b190509021809495e5c010906031e0d495e5c1c0d1e0d495e5c381e051c19000d0218092a00031b495f2d495c2d495c2d" class="ft-suggest" data-testid="footer-suggest-link" aria-label="Enviar sugerencia por correo">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M4 4h16v16H4z"/><path d="M4 4l8 8 8-8"/>
       </svg>
@@ -1206,6 +1233,37 @@ form .btn-primary:hover { transform: translateY(-2px) scale(1.01); }
   </div>
 </div>
 
+<!-- ➕ MODAL: Agregar Compañero Manual -->
+<div id="modal-cmp-add" class="modal" data-modal data-testid="modal-cmp-add" style="z-index:10010">
+  <div class="glass rounded-2xl modal-content" style="max-width:480px">
+    <div class="cmp-header" style="border-bottom:1px solid var(--border); margin-bottom:0">
+      <div class="flex items-center gap-3">
+        <div class="cmp-header-ico" style="background: color-mix(in srgb, var(--emerald) 14%, transparent); color: var(--emerald)">➕</div>
+        <div>
+          <h2 class="text-2xl" style="font-weight:600">Agregar Compañero</h2>
+          <p class="cmp-sub">Entrada manual · sin necesidad de PDF</p>
+        </div>
+      </div>
+      <button class="text-2xl opacity-60 hover:opacity-100 btn-icon" data-close="modal-cmp-add" data-testid="btn-close-cmp-add">×</button>
+    </div>
+    <div style="padding: 18px">
+      <p class="text-sm" style="color:var(--text-2); margin-bottom:14px; line-height:1.55">
+        Añade un compañero al listado sin importar un PDF. Útil cuando aún no tienes el cuadrante o quieres registrar a alguien puntual.
+      </p>
+      <p class="label">🔢 Matrícula (7 dígitos)</p>
+      <input class="input" id="cmp-add-matricula" inputmode="numeric" pattern="\d{7}" maxlength="7" placeholder="Ej. 4030351" autocomplete="off" data-testid="cmp-add-matricula"/>
+      <p class="label mt-3">👤 Apellidos, Nombre</p>
+      <input class="input" id="cmp-add-name" placeholder="MARTINEZ LOPEZ, CARLOS" autocomplete="off" data-testid="cmp-add-name"/>
+      <p class="label mt-3">📆 Mes (YYYY-MM, opcional)</p>
+      <input class="input" id="cmp-add-month" placeholder="2026-05" autocomplete="off" data-testid="cmp-add-month"/>
+      <div class="cmp-load-actions">
+        <button class="btn-soft" data-close="modal-cmp-add">Cancelar</button>
+        <button class="btn-primary" id="cmp-add-save" data-instant-save="1" data-testid="cmp-add-save">💾 Guardar compañero</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="modal-companeros" class="modal modal-fullscreen" data-modal data-testid="modal-companeros">
   <div class="glass companeros-content rounded-[28px] modal-content">
     <!-- Header del modal -->
@@ -1490,6 +1548,33 @@ form .btn-primary:hover { transform: translateY(-2px) scale(1.01); }
     <div class="flex gap-2 mt-2">
       <button id="ob-skip" class="btn-soft flex-1" data-testid="ob-skip">Saltar</button>
       <button id="ob-next" class="btn-primary flex-1" data-testid="ob-next">Siguiente →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 👁️ MODAL: Ver Turno (solo lectura, sin campos editables) -->
+<div id="modal-view-shift" class="modal" data-modal data-testid="modal-view-shift" style="z-index:10005">
+  <div class="glass rounded-[28px] modal-content" style="max-width:560px; padding:0">
+    <div style="padding:20px 24px 12px; display:flex; justify-content:space-between; align-items:flex-start; gap:12px">
+      <div>
+        <h2 class="text-2xl flex items-center gap-2" style="font-weight:700">👁️ <span id="view-shift-title">Ver Turno</span></h2>
+        <div class="text-sm mt-1" style="color:var(--text-3)" id="view-shift-date">—</div>
+      </div>
+      <button class="btn-icon" data-close="modal-view-shift" data-testid="view-shift-close" style="font-size:28px; width:44px; height:44px">×</button>
+    </div>
+
+    <div id="view-shift-hd-wrap" style="padding:0 24px 8px; display:none">
+      <div style="font-size:11px; color:var(--text-3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px">🔍 Recorte HD del PDF original</div>
+      <div style="background:#fff; border:1px solid var(--border); border-radius:12px; padding:6px; overflow-x:auto">
+        <img id="view-shift-hd-img" style="image-rendering: crisp-edges; image-rendering: pixelated; max-width:none; height:auto; min-height:48px; display:block" alt="Recorte HD del día"/>
+      </div>
+    </div>
+
+    <div id="view-shift-info" style="padding:8px 24px 20px"></div>
+
+    <div style="padding:14px 24px 22px; display:grid; grid-template-columns: 1fr 1.5fr; gap:12px; border-top:1px solid var(--border)">
+      <button class="btn-soft" data-close="modal-view-shift" data-testid="view-shift-cancel" style="padding:14px; font-size:14px; font-weight:700">✖ Cerrar</button>
+      <button class="btn-primary" id="view-shift-edit" data-testid="view-shift-edit" style="padding:14px; font-size:14px; font-weight:700">✏️ Modificar / 🔁 Cambio Compi</button>
     </div>
   </div>
 </div>
@@ -3092,7 +3177,72 @@ function openEdit(s) {
   openModal("modal-edit");
 }
 // 📅 ACCIONES DEL DÍA (calendario)
+// Si el día ya tiene turnos reales → muestra el popup "Ver Turno" (read-only, simplificado).
+// Si está vacío o sólo tiene descansos → fluye al menú de acciones tradicional (modal-day).
 function openDayActions(dateStr) {
+  const dayShifts = shifts.filter(s => s.date === dateStr);
+  const realShifts = dayShifts.filter(s => !s.dayOff);
+  if (realShifts.length > 0) {
+    return openViewShift(dateStr, realShifts);
+  }
+  _openDayActionsMenu(dateStr);
+}
+
+// 👁️ Popup "Ver Turno" simplificado (lectura, sin campos editables)
+function openViewShift(dateStr, shiftsForDay) {
+  const d = new Date(dateStr + "T00:00:00");
+  const fmt = d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+  document.getElementById("view-shift-title").innerText = "Ver Turno";
+  document.getElementById("view-shift-date").innerText = fmt.charAt(0).toUpperCase() + fmt.slice(1);
+  // Render info de cada turno
+  const infoEl = document.getElementById("view-shift-info");
+  infoEl.innerHTML = shiftsForDay.map(s => {
+    const orig = (s.origin||'—').split(' ')[0];
+    const dest = (s.destination||'—').split(' ')[0];
+    const isSwap = !!s.isSwapShift;
+    const tagSwap = isSwap ? '<span style="display:inline-block; background:color-mix(in srgb, var(--violet) 18%, transparent); color:var(--violet); padding:3px 8px; border-radius:999px; font-size:10px; font-weight:800; letter-spacing:0.04em; margin-left:8px">🔁 CAMBIO</span>' : '';
+    const trainBig = `<div style="font-size:28px; font-weight:800; color:var(--primary); letter-spacing:-0.02em">${s.train || 'Turno'}${tagSwap}</div>`;
+    const rows = [
+      ['⏰ Toma (firma)', s.signTime || s.workStart || '—'],
+      ['🚄 Salida tren', s.depTime || '—'],
+      ['🏁 Llegada tren', s.arrTime || '—'],
+      ['⏱️ Deje (fin)', s.workEnd || '—'],
+      ['🛤️ Trayecto', `${orig} → ${dest}`]
+    ];
+    const list = rows.map(([k,v]) => `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px dashed var(--border); font-size:15px"><span style="color:var(--text-3); font-weight:600">${k}</span><span style="font-weight:700; color:var(--text)">${v}</span></div>`).join("");
+    return `<div style="background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:10px" data-testid="view-shift-card-${s.id}">
+      ${trainBig}
+      <div style="margin-top:10px">${list}</div>
+    </div>`;
+  }).join("");
+
+  // 🖼️ Mini-recorte HD del PDF (si el turno tiene sourceCmp + col mapeada)
+  const hdWrap = document.getElementById("view-shift-hd-wrap");
+  const hdImg  = document.getElementById("view-shift-hd-img");
+  hdWrap.style.display = "none";
+  hdImg.src = "";
+  const sWithSrc = shiftsForDay.find(s => s.sourceCmp);
+  if (sWithSrc && typeof cmpGenerateDayCropDataUrl === "function") {
+    try {
+      const dayNum = d.getDate();
+      cmpGenerateDayCropDataUrl(sWithSrc.sourceCmp, dayNum).then(url => {
+        if (url) { hdImg.src = url; hdWrap.style.display = "block"; }
+      }).catch(()=>{});
+    } catch(_) {}
+  }
+
+  // Botón modificar → abre modal-day clásico (con todas las opciones)
+  const editBtn = document.getElementById("view-shift-edit");
+  editBtn.onclick = () => {
+    closeModal("modal-view-shift");
+    setTimeout(() => _openDayActionsMenu(dateStr), 100);
+  };
+
+  openModal("modal-view-shift");
+}
+
+// Menú clásico (Ver/Modificar, Agregar, Marcar descanso, Trabajo en descanso) — separado de openDayActions
+function _openDayActionsMenu(dateStr) {
   const dayShifts = shifts.filter(s => s.date === dateStr);
   const dayOffShift = dayShifts.find(s => s.dayOff);
   const realShifts = dayShifts.filter(s => !s.dayOff);
@@ -3655,8 +3805,9 @@ function openNextMonthModal(baseDateStr) {
 const CMP_STORAGE_KEY = "tf_colleagues_v1";
 const CMP_IDB_NAME = "tf_cmp_db";
 const CMP_IDB_STORE = "hd_strips";
-const CMP_FREE_CODES = new Set(["DO", "LD", "CP", "V", "B", "BAJA", "VAC"]);
+const CMP_FREE_CODES = new Set(["DO", "DOP", "LD", "CP", "V", "VAC"]);
 const CMP_RESERVE_CODES = new Set(["R", "RES", "RESERVA"]);
+const CMP_BAJA_CODES = new Set(["BAJ", "BAJA", "B", "IT", "ENF"]);
 const CMP_WEEKDAY_LETTERS = ["D", "L", "M", "X", "J", "V", "S"];
 
 // 🚉 Diccionario de estaciones (siglas → nombre oficial)
@@ -3777,10 +3928,14 @@ async function cmpEnsureLibs() {
 function cmpLoadStore() {
   try { cmpColleagues = JSON.parse(localStorage.getItem(CMP_STORAGE_KEY) || "[]"); }
   catch { cmpColleagues = []; }
+  // 🌐 Exponer globalmente para que cualquier módulo (Swap, etc.) los lea sin lazy-init
+  window.cmpColleagues = cmpColleagues;
 }
 function cmpSaveStore() {
   try {
     localStorage.setItem(CMP_STORAGE_KEY, JSON.stringify(cmpColleagues));
+    // 🌐 Mantener referencia global sincronizada tras cualquier save
+    window.cmpColleagues = cmpColleagues;
     return true;
   } catch (e) {
     showToast("⚠️ Sin espacio en localStorage. Limpia compañeros antiguos.", "error");
@@ -4101,7 +4256,10 @@ async function cmpProcessFile(file) {
       const wordsSortedY = [...words].sort((a,b) => a.bbox.y0 - b.bbox.y0);
       const workers = cmpFindWorkers(rows, dayColsX0, wordsSortedY);
       const monthOnPage = cmpDetectMonth(words);
-      for (const w of workers) {
+      // 🆕 Procesamiento por lotes (yields al UI thread) para soportar +200 empleados sin colgar
+      const BATCH = 15;
+      for (let wi = 0; wi < workers.length; wi++) {
+        const w = workers[wi];
         if (!w.blockEndY) w.blockEndY = canvas.height - 10;
         const extracted = cmpExtractWorkerDays(w, dayCols, words);
         const days = extracted.days || {};
@@ -4124,6 +4282,11 @@ async function cmpProcessFile(file) {
           addedAt: Date.now()
         });
         cmpPendingHd[id] = variants.hd;
+        // Cada BATCH empleados, soltar el hilo para no bloquear la UI
+        if ((wi + 1) % BATCH === 0) {
+          cmpProgress(baseP + ((wi + 1) / workers.length) * (75/pages.length), `Procesando empleados ${wi+1}/${workers.length}…`);
+          await new Promise(r => setTimeout(r, 0));
+        }
       }
     }
     cmpProgress(96, "Finalizando…");
@@ -4196,15 +4359,16 @@ function cmpCardHTML(c, opts = {}) {
         ? `<button class="cmp-card-action" data-cmp-del="${escape(c.id)}" title="Eliminar">🗑</button>`
         : "");
   const dateHeader = cmpDateHeaderHTML(c);
+  const grid31 = cmpGrid31HTML(c);
   const nameBtn = opts.showRemove
     ? `<div class="cmp-card-name">${escape(c.name)}</div>`
     : `<button type="button" class="cmp-card-name cmp-name-btn" data-cmp-hd="${escape(c.id)}" data-testid="cmp-name-${escape(c.matricula)}">${escape(c.name)}</button>`;
-  const stripWrap = opts.showRemove
+  const stripWrap = grid31 || (opts.showRemove
     ? `<div class="cmp-card-strip"><img src="${c.stripDataUrl}" alt="Horario de ${escape(c.name)}" loading="lazy"/></div>`
     : `<button type="button" class="cmp-card-strip cmp-strip-btn" data-cmp-hd="${escape(c.id)}" title="Abrir en HD" aria-label="Ver horario en HD">
          <img src="${c.stripDataUrl}" alt="Horario de ${escape(c.name)}" loading="lazy"/>
          <span class="cmp-zoom-hint">🔍 HD</span>
-       </button>`;
+       </button>`);
   // Botón "Cargar a mi Calendario" (solo en modo display, no en preview)
   const loadBtn = (!opts.showRemove && c.daysDetails && Object.keys(c.daysDetails || {}).length)
     ? `<button type="button" class="cmp-load-btn ${isMine?'is-mine':''}" data-cmp-load="${escape(c.id)}" data-testid="cmp-load-${escape(c.matricula)}">
@@ -4221,11 +4385,58 @@ function cmpCardHTML(c, opts = {}) {
       </div>
       ${action}
     </div>
-    ${dateHeader}
+    ${grid31 ? '' : dateHeader}
     ${stripWrap}
     ${extra}
     ${loadBtn}
   </div>`;
+}
+
+// 📊 Contenedor único: grid 31 columnas (Capa 1: cabecera fecha + Capa 2: recorte canvas)
+// Sincronización total — al escrollar/zoomear, ambas capas se mueven juntas matemáticamente.
+function cmpGrid31HTML(c) {
+  if (!c.stripDataUrl) return "";
+  // Año/mes del compañero
+  let year, month;
+  if (c.month && /^\d{4}-\d{2}$/.test(c.month)) {
+    [year, month] = c.month.split("-").map(Number);
+  } else {
+    const now = new Date(); year = now.getFullYear(); month = now.getMonth() + 1;
+  }
+  const daysInMonth = new Date(year, month, 0).getDate(); // 28..31
+  const cells = [];
+  for (let d = 1; d <= 31; d++) {
+    if (d > daysInMonth) {
+      // Celda vacía pero presente para mantener la grilla de 31
+      cells.push(`<div class="cmp31-cell empty"><div class="cmp31-head"></div><div class="cmp31-body"></div></div>`);
+      continue;
+    }
+    const date = new Date(year, month - 1, d);
+    const wd = date.getDay(); // 0=Dom..6=Sab
+    const letter = CMP_WEEKDAY_LETTERS[wd];
+    const isWeekend = (wd === 0 || wd === 6);
+    // Detectar código del día desde daysDetails
+    const det = (c.daysDetails || {})[d] || (c.daysDetails || {})[String(d)];
+    const code = (det && det.code || "").toUpperCase();
+    const isFree = CMP_FREE_CODES.has(code);
+    const isReserve = CMP_RESERVE_CODES.has(code);
+    const isBaja = CMP_BAJA_CODES.has(code);
+    const stateClass = isFree ? 'is-free' : isReserve ? 'is-reserve' : isBaja ? 'is-baja' : (code ? 'is-work' : '');
+    // background-position: dividir el strip en 31 columnas iguales → mostrar la N
+    const posPct = ((d - 1) / 30) * 100;  // 0%..100% (30 gaps entre 31 cols)
+    cells.push(`<div class="cmp31-cell ${isWeekend?'weekend':''} ${stateClass}" data-day="${d}" data-code="${escape(code)}">
+      <div class="cmp31-head">
+        <span class="cmp31-day">${d}</span>
+        <span class="cmp31-wd">${letter}</span>
+      </div>
+      <div class="cmp31-body" style="background-image:url('${c.stripDataUrl}'); background-position: ${posPct.toFixed(3)}% 0; background-size: 3100% 100%;" aria-label="Día ${d}${code?' · '+code:''}"></div>
+      ${code ? `<div class="cmp31-code">${escape(code)}</div>` : ''}
+    </div>`);
+  }
+  return `<button type="button" class="cmp-grid31-wrap" data-cmp-hd="${escape(c.id)}" title="Toca para ver en HD completo">
+    <div class="cmp-grid31">${cells.join("")}</div>
+    <span class="cmp-zoom-hint">🔍 HD completo</span>
+  </button>`;
 }
 
 // === Render header de fecha sobre la tira ===
@@ -4363,13 +4574,20 @@ function openSwapModal(shiftId) {
   swapSelectedColleague = null;
   document.getElementById("swap-subtitle").textContent =
     `${s.date} · ${s.train || ""} · ${(s.origin||"").split(" ")[0]} → ${(s.destination||"").split(" ")[0]}`;
+  // 🌐 Asegurar que cmpColleagues esté en window antes de abrir
+  try { if (typeof cmpLoadStore === "function" && (!window.cmpColleagues || !window.cmpColleagues.length)) cmpLoadStore(); } catch(_) {}
   // Reset inputs
   const ni = document.getElementById("swap-name");
   ni.value = "";
   document.getElementById("swap-delay").value = "";
   document.getElementById("swap-plus").value = "";
   document.getElementById("swap-note").value = "";
-  document.getElementById("swap-search-results").innerHTML = "";
+  const resEl = document.getElementById("swap-search-results");
+  const cmpCount = (window.cmpColleagues || []).length;
+  // Hint informativo permanente cuando hay compañeros cargados
+  resEl.innerHTML = cmpCount > 0
+    ? `<div class="swap-result-empty" style="color:var(--violet); font-weight:600">✅ ${cmpCount} compañero(s) precargado(s). Escribe nombre o matrícula para buscar.</div>`
+    : `<div class="swap-result-empty">📥 Aún no tienes compañeros cargados.<br>Sube un cuadrante desde <b>Cargar Horario</b> en la cabecera.</div>`;
   document.getElementById("swap-selected-info").style.display = "none";
   document.getElementById("swap-search-wrap").classList.remove("has-value");
   openModal("modal-swap");
@@ -4387,20 +4605,26 @@ function swapBindSearch(dateStr) {
   const doSearch = () => {
     const q = (ni.value || "").trim().toLowerCase();
     wrap.classList.toggle("has-value", q.length > 0);
-    if (q.length < 2) { resultsEl.innerHTML = ""; return; }
+    if (q.length < 1) { resultsEl.innerHTML = ""; return; }
     // Si hay un compañero seleccionado y el usuario sigue escribiendo, lo deseleccionamos
     if (swapSelectedColleague && swapSelectedColleague.name.toLowerCase() !== q && swapSelectedColleague.matricula.toLowerCase() !== q) {
       swapSelectedColleague = null;
       infoEl.style.display = "none";
     }
+    // 🌐 Garantizar lectura desde el storage actualizado (PDF puede haberse procesado en otra tab)
+    try { if (typeof cmpLoadStore === "function" && (!window.cmpColleagues || !window.cmpColleagues.length)) cmpLoadStore(); } catch(_) {}
     const list = (window.cmpColleagues || []);
+    if (list.length === 0) {
+      resultsEl.innerHTML = `<div class="swap-result-empty">📥 Aún no tienes compañeros cargados.<br>Sube un cuadrante desde <b>Cargar Horario</b> en la cabecera o añade uno con <b>➕</b>.</div>`;
+      return;
+    }
     const matches = list.filter(c => {
       const nm = (c.name || "").toLowerCase();
       const mt = (c.matricula || "").toLowerCase();
       return nm.includes(q) || mt.includes(q);
-    }).slice(0, 8);
+    }).slice(0, 10);
     if (matches.length === 0) {
-      resultsEl.innerHTML = `<div class="swap-result-empty">Sin coincidencias en compañeros importados.<br>Puedes pulsar <b>Registrar cambio</b> y se guardará con el texto que escribiste.</div>`;
+      resultsEl.innerHTML = `<div class="swap-result-empty">Sin coincidencias entre tus <b>${list.length}</b> compañeros.<br>Prueba con otras letras o los primeros dígitos de la matrícula.</div>`;
       return;
     }
     resultsEl.innerHTML = matches.map(c => {
@@ -4444,6 +4668,7 @@ function swapColleagueShiftSummary(c, dateStr) {
   const code = (detail.code || "").toUpperCase();
   if (CMP_FREE_CODES.has(code)) return `🌴 ${code} (descanso)`;
   if (CMP_RESERVE_CODES.has(code)) return `📋 R (reserva)`;
+  if (CMP_BAJA_CODES.has(code)) return `🩺 ${code} (baja)`;
   const t0 = detail.times && detail.times[0];
   const tN = detail.times && detail.times[detail.times.length - 1];
   if (t0 && tN) return `🚄 ${code} · ${t0}–${tN}`;
@@ -4551,16 +4776,56 @@ function confirmSwap() {
     s.swapShiftId = secId;
   }
 
+  // 💾 Persistencia inmediata + asíncrona (no bloquea UI; protege ante refresh)
   saveStore();
   try { recomputePernoctaLinks(); saveStore(); render(); } catch(_) {}
-  showToast(`🔁 Cambio con ${name} registrado · turno secundario añadido`, "success");
-  closeModal("modal-swap");
-  swapShiftId = null;
-  swapSelectedColleague = null;
+  setTimeout(() => { try { saveStore(); } catch(_) {} }, 0);
+  // ✅ Micro-feedback visual: check verde sobre el botón antes de cerrar
+  tfShowCheckPulse(document.getElementById("swap-confirm"));
+  showToast(`✅ Cambio con ${name} registrado · turno secundario añadido`, "success");
+  setTimeout(() => {
+    closeModal("modal-swap");
+    swapShiftId = null;
+    swapSelectedColleague = null;
+  }, 600);
 }
 
 // === Modal HD ===
 let cmpHdState = { zoom: 1, panX: 0, panY: 0, dragging: false, lastX: 0, lastY: 0, currentId: null };
+
+// 🖼️ Recorta el día N (1..31) del strip HD de un compañero por matrícula → dataURL
+// Matemáticamente divide el strip HD en 31 columnas de igual ancho.
+async function cmpGenerateDayCropDataUrl(matricula, dayNum) {
+  try {
+    if (!matricula || !dayNum || dayNum < 1 || dayNum > 31) return null;
+    const list = window.cmpColleagues || cmpColleagues || [];
+    const c = list.find(x => x.matricula === matricula);
+    if (!c) return null;
+    let hdUrl = null;
+    try { hdUrl = await cmpIdbGet(c.id); } catch(_) {}
+    if (!hdUrl) hdUrl = cmpPendingHd[c.id] || c.stripDataUrl;
+    if (!hdUrl) return null;
+    const img = new Image();
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = hdUrl;
+    });
+    // Matriz 31 celdas iguales — anclaje matemático
+    const cellW = img.naturalWidth / 31;
+    const sx = Math.floor(cellW * (dayNum - 1));
+    const sw = Math.ceil(cellW);
+    const canvas = document.createElement("canvas");
+    canvas.width = sw;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, sx, 0, sw, img.naturalHeight, 0, 0, sw, img.naturalHeight);
+    return canvas.toDataURL("image/png");
+  } catch (_) {
+    return null;
+  }
+}
 
 async function cmpOpenHd(id) {
   const c = cmpColleagues.find(x => x.id === id) || cmpPendingImport.find(x => x.id === id);
@@ -4769,14 +5034,21 @@ function cmpRefreshDay() {
     return;
   }
   const d = new Date(dateStr + "T00:00");
-  const dayNum = d.getDate();
+  const dayNum = d.getDate();   // 🎯 Celda exacta de la matriz (1..31)
   const working = [];
   const free = [];
   for (const c of cmpColleagues) {
-    const code = (c.days || {})[dayNum] || (c.days || {})[String(dayNum)];
+    // 🎯 Consultar EXACTAMENTE la celda dayNum (1..31) de daysDetails
+    // Sin cruzar datos de otros días: cada compañero tiene su matriz indexada 1..31
+    const det = (c.daysDetails || {})[dayNum] || (c.daysDetails || {})[String(dayNum)];
+    const fallbackCode = (c.days || {})[dayNum] || (c.days || {})[String(dayNum)];
+    if (!det && !fallbackCode) continue;
+    const code = ((det && det.code) || fallbackCode || "").toUpperCase();
     if (!code) continue;
+    // Clasificación estricta por código de la celda exacta
     if (CMP_FREE_CODES.has(code)) free.push({ c, code });
-    else working.push({ c, code });
+    else if (CMP_BAJA_CODES.has(code)) free.push({ c, code });    // BAJA en sección descansa
+    else working.push({ c, code });                                // R / numérico / cualquier otro → trabaja
   }
   const dayLabel = d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
   workingCount.textContent = working.length;
@@ -4786,7 +5058,7 @@ function cmpRefreshDay() {
     : `<div class="cmp-empty"><div class="cmp-empty-ico">🌙</div>Nadie con servicio detectado este día</div>`;
   freeList.innerHTML = free.length
     ? free.map(({c,code}) => cmpCardHTML(c, { dayCode: code, dayLabel })).join("")
-    : `<div class="cmp-empty"><div class="cmp-empty-ico">📋</div>Nadie en DO/LD/CP este día</div>`;
+    : `<div class="cmp-empty"><div class="cmp-empty-ico">📋</div>Nadie en DO/DOP/LD/CP/BAJA este día</div>`;
   cmpWireHdButtons(workingList);
   cmpWireHdButtons(freeList);
 }
@@ -4949,6 +5221,7 @@ function cmpAnalyzeColleague(c, defaultFirma) {
     const code = dd.code.toUpperCase();
     const isFree = CMP_FREE_CODES.has(code);
     const isReserve = CMP_RESERVE_CODES.has(code);
+    const isBaja = CMP_BAJA_CODES.has(code);
     const isDH = !!dd.dh;
     const dateStr = `${year}-${padZero(month)}-${padZero(d)}`;
     const overlap = existingByDate.has(dateStr);
@@ -5005,14 +5278,14 @@ function cmpAnalyzeColleague(c, defaultFirma) {
       deje   = cmpAddMinutes(salida, 60 * 8);  // estimación 8h jornada
       hoursBase = 8 + (preMin + postMin) / 60;
     }
-    // Si es libre o reserva, firma/deje/hours quedan en null/0 (no se inserta horario)
+    // Si es libre, reserva o baja → no inserta horario (0 horas)
 
     const entry = {
       day: d,
       dateStr,
-      type: isFree ? "free" : isReserve ? "reserve" : "work",
-      code, isFree, isReserve, isDH,
-      firma, salida, deje, trainStart, trainEnd, hoursBase,
+      type: isFree ? "free" : isReserve ? "reserve" : isBaja ? "baja" : "work",
+      code, isFree, isReserve, isBaja, isDH,
+      firma, salida, deje, trainStart, trainEnd, hoursBase: isBaja ? 0 : hoursBase,
       origin, destination, trainNum, postMin, preMin, destLooksBase,
       overlap, rawCode: code, allCodes: dd.codes || []
     };
@@ -5020,6 +5293,7 @@ function cmpAnalyzeColleague(c, defaultFirma) {
     stats.total++;
     if (isFree) stats.free++;
     else if (isReserve) stats.reserve++;
+    else if (isBaja) { stats.baja = (stats.baja || 0) + 1; }
     else stats.work++;
     if (isDH) stats.dh++;
     if (overlap) stats.overlap++;
@@ -5134,6 +5408,27 @@ function cmpApplyLoadPlan() {
       });
       shifts.push(reserveShift);
       added++;
+      continue;
+    }
+
+    if (entry.isBaja) {
+      // Baja Médica / Ausencia → dayOff con dayOffType:"BAJA", 0h, sin computar como descanso disfrutado
+      const bajaId = "tf_cmp_baja_" + entry.dateStr.replace(/-/g, "") + "_" + Math.random().toString(36).slice(2,5);
+      shifts.push({
+        id: bajaId,
+        date: entry.dateStr,
+        dayOff: true,
+        train: entry.code,                 // "BAJ" / "B" / "BAJA"
+        dayOffType: "BAJA",
+        restType: "baja",
+        hours: 0, income: 0, plusDetails: [],
+        base: settings.baseStation,
+        restChange: 0,                     // No suma a descansos disponibles
+        pluses: 0, plusNocturnidad: 0, nightHours: 0, extraHours: 0, plusExtra: 0, plusRestWorked: 0,
+        sourceCmp: cmpLoadCtx.colleague.matricula,
+        notes: `Auto · ${entry.code} · Baja Médica / Ausencia`
+      });
+      freeAdded++;
       continue;
     }
 
@@ -5361,6 +5656,18 @@ function tfFlashSave(btn) {
   btn.classList.add("is-saving");
   setTimeout(() => btn.classList.remove("is-saving"), 700);
 }
+// ✅ Check verde animado sobre cualquier botón (post-confirmación)
+function tfShowCheckPulse(btn) {
+  if (!btn) return;
+  // Evitar duplicados
+  btn.querySelectorAll('.tf-check-pulse').forEach(n => n.remove());
+  const span = document.createElement('span');
+  span.className = 'tf-check-pulse';
+  span.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" stroke="#10B981" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  btn.style.position = btn.style.position || 'relative';
+  btn.appendChild(span);
+  setTimeout(() => span.remove(), 1200);
+}
 // Wire global: cualquier .btn-primary con data-instant-save="1" parpadea al hacer pointerdown
 function tfInitInstantSave() {
   document.addEventListener("pointerdown", (e) => {
@@ -5382,9 +5689,47 @@ function initCompaneros() {
   // Abrir modal
   document.getElementById("btn-companeros").onclick = () => {
     openModal("modal-companeros");
+    // Forzar tab "Subir" (Cargar Horario)
+    document.querySelectorAll("[data-cmptab]").forEach(x => x.classList.toggle("active", x.dataset.cmptab === "upload"));
+    document.querySelectorAll("[data-cmppanel]").forEach(p => { p.style.display = p.dataset.cmppanel === "upload" ? "block" : "none"; });
     cmpUpdateCount();
     cmpRefreshSearch();
     cmpRefreshDay();
+  };
+
+  // 🆕 Agregar Compañero manual
+  const btnCmpAdd = document.getElementById("btn-cmp-add");
+  if (btnCmpAdd) btnCmpAdd.onclick = () => {
+    document.getElementById("cmp-add-matricula").value = "";
+    document.getElementById("cmp-add-name").value = "";
+    const now = new Date();
+    document.getElementById("cmp-add-month").value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+    openModal("modal-cmp-add");
+  };
+  const btnCmpAddSave = document.getElementById("cmp-add-save");
+  if (btnCmpAddSave) btnCmpAddSave.onclick = () => {
+    const mat = (document.getElementById("cmp-add-matricula").value || "").trim();
+    const nm  = (document.getElementById("cmp-add-name").value || "").trim().toUpperCase();
+    const mo  = (document.getElementById("cmp-add-month").value || "").trim();
+    if (!/^\d{7}$/.test(mat)) { showToast("Matrícula inválida · debe tener 7 dígitos", "error"); return; }
+    if (!nm || nm.length < 3) { showToast("Indica el nombre del compañero", "error"); return; }
+    if (mo && !/^\d{4}-\d{2}$/.test(mo)) { showToast("Mes debe ser formato YYYY-MM", "error"); return; }
+    // Evitar duplicado por matrícula → reemplazar
+    const list = window.cmpColleagues || (window.cmpColleagues = []);
+    const idx = list.findIndex(c => c.matricula === mat);
+    const obj = {
+      id: idx >= 0 ? list[idx].id : `cmp_manual_${mat}_${Date.now()}`,
+      matricula: mat, name: nm, month: mo || "",
+      daysDetails: idx >= 0 ? (list[idx].daysDetails || {}) : {},
+      stripDataUrl: idx >= 0 ? list[idx].stripDataUrl : "",
+      manual: true, addedAt: Date.now()
+    };
+    if (idx >= 0) list[idx] = obj; else list.push(obj);
+    try { cmpSaveStore(); } catch(_) {}
+    showToast(`✅ ${nm} guardado (Mat. ${mat})`, "success");
+    closeModal("modal-cmp-add");
+    if (typeof cmpUpdateCount === "function") cmpUpdateCount();
+    if (typeof cmpRefreshSearch === "function") cmpRefreshSearch();
   };
 
   // Tabs
@@ -5480,9 +5825,21 @@ window.addEventListener("DOMContentLoaded", () => {
   // 🎓 Onboarding tour
   tfInitTour();
   tfInitInstantSave();
-  // 🔁 Swap confirm wiring
+  // 🔁 Swap confirm wiring · pointerdown para sensibilidad táctil instantánea (Instant Save)
   const swapBtn = document.getElementById("swap-confirm");
-  if (swapBtn) swapBtn.addEventListener("click", confirmSwap);
+  if (swapBtn) {
+    let lastSwapFire = 0;
+    const fireSwap = (e) => {
+      const now = Date.now();
+      if (now - lastSwapFire < 400) return; // anti-doble disparo (pointerdown+click)
+      lastSwapFire = now;
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      try { confirmSwap(); } catch(err) { console.error("[swap]", err); showToast("⚠️ Error al guardar cambio: " + err.message, "error"); }
+    };
+    swapBtn.addEventListener("pointerdown", fireSwap, { passive: false });
+    swapBtn.addEventListener("touchstart", fireSwap, { passive: false });
+    swapBtn.addEventListener("click", fireSwap);
+  }
   // 💰 Custom pluses wiring
   const cpAdd = document.getElementById("cp-add");
   if (cpAdd) cpAdd.addEventListener("click", addCustomPlus);
