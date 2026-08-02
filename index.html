@@ -17468,6 +17468,23 @@ window.abrirBuscadorConHorarioGlobal = async function(){
   }
 };
 
+// NUEVO — MISMA carga de datos que abrirBuscadorConHorarioGlobal()
+// de arriba (Horario General + Intervención), pero SIN abrir ninguna
+// ventana — la usa la pantalla de Interventor, que ya tiene su propia
+// pantalla y no necesita el overlay "ov-buscador" de tripulación.
+// Se expone a window por el mismo motivo que la de arriba: el Portal
+// de Perfil vive fuera de este módulo aislado.
+window.cargarDatosParaInterventor = async function(){
+  var ok = await cargarHorarioGlobalDesdeAdmin();
+  if(ok) activateBase('global');
+  try{
+    await cargarIntervencionGlobalDesdeAdmin();
+  }catch(errIntervencionFatal){
+    console.warn('Fallo al cargar Intervención para el Portal de Interventor:', errIntervencionFatal);
+  }
+  return ok;
+};
+
 // NUEVO — Descarga el Gráfico + el Informe publicados por el admin
 // y reutiliza EXACTAMENTE el mismo pipeline que ya usaba el
 // formulario manual (pdfToLines → parseGraficoTurnos/parseAgentsTable
@@ -19274,14 +19291,16 @@ clearBtn.addEventListener('click', ()=>{
     if(el) el.style.display = 'flex';
     document.body.classList.add('modo-interventor');
     _marcarUsuarioComoInterventor();
-    // NUEVO — carga los MISMOS datos (Horario General) que ya usa el
-    // buscador de tripulación, sin duplicar esa lectura. Solo se
-    // duplica la PANTALLA de búsqueda propia del interventor (ver el
-    // bloque aislado con q2/clearBtn2/view2, más abajo en el archivo).
-    if(typeof cargarHorarioGlobalDesdeAdmin === 'function'){
-      cargarHorarioGlobalDesdeAdmin().then(function(ok){
-        if(ok && typeof activateBase === 'function') activateBase('global');
-      });
+    // FIX — antes se llamaba directamente a cargarHorarioGlobalDesdeAdmin()
+    // y activateBase(), pero esas funciones viven DENTRO de un módulo
+    // de código aislado (el mismo que usa el Buscador de Compañeros) y
+    // no eran visibles desde aquí — la comprobación "typeof...==='function'"
+    // fallaba en silencio y nunca llegaba a cargar nada, por eso el
+    // buscador de Interventor no reconocía ni nombres ni trenes. Ahora
+    // se llama a cargarDatosParaInterventor(), expuesta a propósito
+    // para este caso (hace lo mismo, sin abrir ninguna ventana).
+    if(typeof cargarDatosParaInterventor === 'function'){
+      cargarDatosParaInterventor();
     }
   }
   function ocultarPantallaInterventor(){
