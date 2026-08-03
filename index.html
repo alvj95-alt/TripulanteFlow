@@ -1741,6 +1741,11 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
     margin-top:4px;
     font-size:11px;
   }
+  .tramo-companeros-cal{
+    width:100%;
+    margin-top:6px;
+    font-size:11px;
+  }
   .tc-cargando, .tc-vacio{
     color:var(--tx3);
     font-style:italic;
@@ -2746,6 +2751,40 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
     <div class="cal-tren-panel" id="calTrenPanel2"></div>
     <button class="tr-go" id="trGoBtn2" style="width:100%;margin-bottom:10px">Buscar</button>
     <div id="trainView2"></div>
+  </div>
+</div>
+
+<!-- NUEVO — ACCESO DE INTERVENTOR. Antes de mostrar la pantalla de
+     Interventor se exige la matrícula de interventor, comprobada
+     contra el Horario General ya publicado (mismo dato/tabla que usa
+     el Buscador de Compañeros de tripulación — se actualiza cada
+     semana desde el Panel de Administrador → Supabase). Igual que
+     portal-interventor-screen, vive fuera de .ph, con su propio
+     z-index fijo, entre el Portal de Perfil (10000) y la pantalla de
+     Interventor (9998). -->
+<div id="portal-interventor-acceso" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:#0F0A1F;align-items:center;justify-content:center;padding:20px">
+  <div style="width:100%;max-width:360px;text-align:center">
+    <div style="font-size:44px;margin-bottom:6px">🔒</div>
+    <div style="font-size:18px;font-weight:900;color:#A78BFA;margin-bottom:2px">Acceso de Interventor</div>
+    <div style="font-size:12px;color:#94A3B8;margin-bottom:22px;line-height:1.5">
+      Introduce tu número de matrícula de interventor.<br>Debe figurar en el Informe de Intervención publicado.
+    </div>
+
+    <input type="text" id="accesoMatriculaInterventorInput" placeholder="Ej. 1234567" inputmode="numeric" autocomplete="off"
+      style="width:100%;background:#1E1533;border:2px solid #7C3AED;border-radius:12px;color:#F8FAFC;
+      font-size:15px;font-weight:700;padding:14px 16px;text-align:center;letter-spacing:.5px;margin-bottom:10px;outline:none">
+
+    <div id="accesoInterventorMsg" style="min-height:18px;font-size:12px;margin-bottom:10px;line-height:1.4"></div>
+
+    <button id="btnContinuarAccesoInterventor" style="width:100%;background:linear-gradient(135deg,#7C3AED,#A78BFA);
+      border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800;padding:14px;cursor:pointer;margin-bottom:8px">
+      Continuar
+    </button>
+    <button id="btnVolverAccesoInterventor" style="width:100%;background:transparent;border:none;
+      color:#94A3B8;font-size:12px;font-weight:700;padding:8px;cursor:pointer">
+      ‹ Volver
+    </button>
   </div>
 </div>
 
@@ -6845,6 +6884,34 @@ function searchByTrainNumber(n){
   return exactas.concat(parciales).slice(0,6);
 }
 
+// NUEVO — autocompleta estación de inicio, estación final y horario
+// de un tramo del "Registrar Intercambio" en cuanto se escribe un
+// número de tren YA GUARDADO antes (mismo origen de datos — SF — que
+// usa el autocompletado del turno normal, sin duplicarlo). Solo
+// rellena campos que estén vacíos, nunca pisa lo que el usuario ya
+// haya escrito a mano. Recordatorio: este intercambio es solo
+// informativo — nunca entra en el cálculo de horas, se rellene como
+// se rellene.
+function autocompletarTramoIntercambio(idx){
+  var trenEl = document.getElementById('reg-interc-tren-'+idx);
+  if(!trenEl) return;
+  var num = trenEl.value.trim();
+  if(!num) return;
+  var exacto = null;
+  for(var si=0; si<SF.length; si++){
+    if(SF[si].numTren === num){ exacto = SF[si]; break; }
+  }
+  if(!exacto) return; // solo coincidencia EXACTA — nada de resultados parciales aquí
+  var estIniEl = document.getElementById('reg-interc-est-ini-'+idx);
+  var estFinEl = document.getElementById('reg-interc-est-fin-'+idx);
+  var hiniEl   = document.getElementById('reg-interc-hini-'+idx);
+  var hfinEl   = document.getElementById('reg-interc-hfin-'+idx);
+  if(estIniEl && !estIniEl.value.trim() && exacto.sal) estIniEl.value = exacto.sal;
+  if(estFinEl && !estFinEl.value.trim() && exacto.lle) estFinEl.value = exacto.lle;
+  if(hiniEl && !hiniEl.value && exacto.hF) hiniEl.value = exacto.hF;
+  if(hfinEl && !hfinEl.value && exacto.hL) hfinEl.value = exacto.hL;
+}
+
 function guardarServicioFrecuente(datos){
   var numTren  = datos.numTren;
   var linea    = datos.linea;
@@ -7566,6 +7633,11 @@ function renderizarPopUpSimplificado(t, esDiaVuelta){
       // FIX: desglose del total de este tramo (antes el pop-up solo
       // mostraba el total del primer tramo, arriba en la cabecera).
       + (t.hF&&t.hL?'<div class="tv-hours" style="opacity:.65;font-size:10px">⏱ Duración: '+calcDur(t.hF,t.hL)+'</div>':'')
+      // NUEVO — "con quién viajas": hueco que se rellena solo, en
+      // cuanto este detalle se muestra en pantalla (ver el disparador
+      // al final de renderDiaArea). Solo si hay un número de tren
+      // claro (no en casos DH mixtos, más complejos de identificar).
+      + (t.numTren&&selDay&&selDay.k ? _huecoCompaneros(t.numTren, selDay.k) : '')
       + '</div>';
 
     // Tramos de continuidad (T2, T3...): un bloque independiente por
@@ -7589,6 +7661,7 @@ function renderizarPopUpSimplificado(t, esDiaVuelta){
           + (c.escalaMin!=null?'<div class="tv-route">⏳ Escala: '+c.escalaMin+' min</div>':'')
           + '<div class="tv-hours" style="opacity:.65;font-size:9px">'
           + _etiquetaRepartoDH(c)+'</div>'
+          + (c.tren&&selDay&&selDay.k ? _huecoCompaneros(c.tren, selDay.k) : '')
           + '</div>';
       });
     }
@@ -7657,6 +7730,8 @@ function renderizarPopUpSimplificado(t, esDiaVuelta){
       + (t.hF2&&t.hL2?'<div class="tv-hours">'+t.hF2+' – '+t.hL2+'</div>':'')
       // FIX: desglose del total de este tramo, igual que en IDA.
       + (t.hF2&&t.hL2?'<div class="tv-hours" style="opacity:.65;font-size:10px">⏱ Duración: '+calcDur(t.hF2,t.hL2)+'</div>':'')
+      // NUEVO — "con quién viajas", igual que en IDA.
+      + (t.numTrenVuelta&&selDay&&selDay.k ? _huecoCompaneros(t.numTrenVuelta, selDay.k) : '')
       + '</div>';
 
     // Tramos de continuidad de la vuelta (T2, T3...): se muestran
@@ -7678,6 +7753,7 @@ function renderizarPopUpSimplificado(t, esDiaVuelta){
           + (c.escalaMin!=null?'<div class="tv-route">⏳ Escala: '+c.escalaMin+' min</div>':'')
           + '<div class="tv-hours" style="opacity:.65;font-size:9px">'
           + _etiquetaRepartoDH(c)+'</div>'
+          + (c.tren&&selDay&&selDay.k ? _huecoCompaneros(c.tren, selDay.k) : '')
           + '</div>';
       });
     }
@@ -8288,6 +8364,7 @@ function renderDiaArea(){
         + dhVueltaTagDia2
         + (t.sal&&t.lle?'<div class="tv-route">'+t.sal+' → '+t.lle+'</div>':'')
         + (t.hF&&t.hL?'<div class="tv-hours">'+t.hF+' – '+t.hL+'</div>':'')
+        + (t.numTren&&selDay&&selDay.k ? _huecoCompaneros(t.numTren, selDay.k) : '')
         + '</div>';
     } else {
       body += '<div class="tv-block" style="border-left:3px solid var(--tx3)">'
@@ -8319,6 +8396,7 @@ function renderDiaArea(){
           + (c.escalaMin!=null?'<div class="tv-route">⏳ Escala: '+c.escalaMin+' min</div>':'')
           + '<div class="tv-hours" style="opacity:.65;font-size:9px">'
           + _etiquetaRepartoDH(c)+'</div>'
+          + (c.tren&&selDay&&selDay.k ? _huecoCompaneros(c.tren, selDay.k) : '')
           + '</div>';
       });
     }
@@ -8426,6 +8504,10 @@ function renderDiaArea(){
       : '')
     +'</div></div>';
   if(selDay) setTimeout(function(){renderTV2DiaCard(selDay.k);},10);
+  // NUEVO — "con quién viajas": rellena automáticamente, bajo demanda
+  // (solo el día que se está viendo, no todo el mes de golpe), los
+  // huecos de compañeros que acaban de pintarse en este detalle.
+  rellenarCompanerosAutomaticos(area);
 }
 
 /* ─── ACORDEÓN — historial del mes (ExpansionTile) ─── */
@@ -9131,7 +9213,7 @@ function _renderDiasIntercambio(){
     html += '<div style="background:var(--s2);border:1px solid var(--div);border-radius:11px;padding:12px;margin-bottom:10px">'
       + '<div style="font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--tx3);margin-bottom:8px">'+_etiquetaTramoIntercambio(i-1)+'</div>'
       + '<div style="margin-bottom:7px"><div class="aj-nombre-wrap"><span class="aj-nombre-ico">🚆</span>'
-      + '<input id="reg-interc-tren-'+i+'" class="aj-nombre-inp" inputmode="numeric" placeholder="'+etiquetaTren(i-1)+'" style="font-size:14px;font-weight:800"></div></div>'
+      + '<input id="reg-interc-tren-'+i+'" class="aj-nombre-inp" inputmode="numeric" placeholder="'+etiquetaTren(i-1)+'" style="font-size:14px;font-weight:800" oninput="autocompletarTramoIntercambio('+i+')"></div></div>'
       + '<div style="display:flex;gap:7px;margin-bottom:7px">'
       + '<input id="reg-interc-est-ini-'+i+'" placeholder="Estación inicio" style="flex:1;background:var(--s1);'
       + 'border:1.5px solid var(--div);border-radius:9px;color:var(--tx);font-size:12px;padding:9px 10px;outline:none">'
@@ -12041,6 +12123,48 @@ function _etiquetaRepartoDH(c){
     return 'Suma a Presencia (DH completo)';
   }
   return 'Suma a Presencia';
+}
+
+// NUEVO — "con quién viajas": hueco vacío que se rellena solo, sin
+// que el usuario tenga que hacer nada, en cuanto el detalle del día
+// se muestra en pantalla (ver rellenarCompanerosAutomaticos() más
+// abajo, disparada al final de renderDiaArea). diaKey es la clave
+// ISO del día (selDay.k, ej. '2026-08-15') — se extrae el número de
+// día del mes de ahí, que es el formato que usa el Horario General.
+function _huecoCompaneros(tren, diaKey){
+  var diaNum = String(parseInt(diaKey.slice(8,10), 10));
+  return '<div class="tramo-companeros-cal" data-tren="'+tren+'" data-dia="'+diaNum+'" data-buscado="0"></div>';
+}
+
+// Recorre TODOS los huecos pendientes dentro del área del día que se
+// acaba de mostrar y los rellena, uno a uno, buscando en el Horario
+// General ya publicado (o cargándolo la primera vez que haga falta).
+async function rellenarCompanerosAutomaticos(areaEl){
+  if(!areaEl) return;
+  var huecos = areaEl.querySelectorAll('.tramo-companeros-cal[data-buscado="0"]');
+  if(!huecos.length) return;
+  huecos.forEach(function(h){ h.dataset.buscado='1'; h.innerHTML='<div class="tc-cargando">🔍 Buscando compañeros...</div>'; });
+  if(typeof window.asegurarHorarioGeneralCargado !== 'function' || typeof window.buscarCompanerosParaTrenDia !== 'function'){
+    huecos.forEach(function(h){ h.innerHTML=''; });
+    return;
+  }
+  var listo = false;
+  try{ listo = await window.asegurarHorarioGeneralCargado(); }catch(e){ listo = false; }
+  huecos.forEach(function(h){
+    if(!listo){
+      h.innerHTML = '<div class="tc-vacio">Sin Horario General publicado todavía.</div>';
+      return;
+    }
+    var tren = h.dataset.tren, dia = h.dataset.dia;
+    var nombres = [];
+    try{ nombres = window.buscarCompanerosParaTrenDia(tren, dia) || []; }catch(e){ nombres = []; }
+    if(!nombres.length){
+      h.innerHTML = '<div class="tc-vacio">Nadie más de tu base hace el tren '+tren+' ese día.</div>';
+    } else {
+      h.innerHTML = '<div class="tc-tit">🧑‍🤝‍🧑 Viajas con:</div>'
+        + nombres.map(function(n){ return '<div class="tc-nombre">'+n+'</div>'; }).join('');
+    }
+  });
 }
 
 // NUEVO — total de minutos del día (ida y/o vuelta + tramos de
@@ -17568,7 +17692,50 @@ window.cargarDatosParaInterventor = async function(){
   }catch(errIntervencionFatal){
     console.warn('Fallo al cargar Intervención para el Portal de Interventor:', errIntervencionFatal);
   }
+  // NUEVO — revalidación silenciosa de la matrícula de interventor
+  // contra el Informe de agentes (sección Intervención del admin —
+  // el PDF "Gráfico + Informe", NO el Horario General de
+  // tripulación) que se acaba de sincronizar arriba en
+  // INTERVENTOR_SERVICES. Ese Informe se renueva cada pocos días,
+  // así que si la matrícula ya validada en este dispositivo ha
+  // dejado de aparecer en el más reciente, se cierra el acceso y se
+  // vuelve a pedir — en vez de dejar entrar con una matrícula
+  // desactualizada.
+  var matriculaGuardada = localStorage.getItem('interventorMatriculaValidada');
+  if(matriculaGuardada && INTERVENTOR_SERVICES.length){
+    var sigueValida = INTERVENTOR_SERVICES.some(function(servicio){
+      return (servicio.data||[]).some(function(agente){ return String(agente[0]).trim() === matriculaGuardada; });
+    });
+    if(!sigueValida && typeof window.__cerrarSesionInterventorPorMatriculaInvalida === 'function'){
+      window.__cerrarSesionInterventorPorMatriculaInvalida();
+    }
+  }
   return ok;
+};
+
+// NUEVO — Acceso de Interventor (Portal de Perfil): comprueba una
+// matrícula contra el Informe de agentes ya publicado en el segmento
+// de Intervención del admin ("Interventor (Gráfico + Informe)" —
+// mismo PDF con columnas Matrícula/Agente/turnos que sube el admin,
+// NO el Horario General de tripulación). Se expone a window por el
+// mismo motivo que cargarDatosParaInterventor: el Portal de Perfil
+// vive en su propio bloque aislado, al final del documento, y no ve
+// INTERVENTOR_SERVICES/cargarIntervencionGlobalDesdeAdmin
+// directamente.
+window.validarMatriculaInterventorContraInforme = async function(matricula){
+  var ok = await cargarIntervencionGlobalDesdeAdmin();
+  if(!ok){
+    return { valida:false, motivo: (typeof _diagIntervencion !== 'undefined' && _diagIntervencion) || 'No se pudo cargar el Informe de Intervención.' };
+  }
+  if(!INTERVENTOR_SERVICES.length){
+    return { valida:false, motivo: 'El Informe de Intervención está publicado pero no contiene ningún agente.' };
+  }
+  var encontrada = INTERVENTOR_SERVICES.some(function(servicio){
+    return (servicio.data||[]).some(function(agente){
+      return String(agente[0]).trim() === String(matricula).trim();
+    });
+  });
+  return { valida: encontrada, motivo: encontrada ? null : 'Esa matrícula no aparece en el Informe de Intervención publicado.' };
 };
 
 // NUEVO — para el "con quién viajas" automático en Turnos del mes
@@ -17597,25 +17764,44 @@ window.buscarCompanerosParaTrenDia = function(trainNum, dayNum){
 // y reutiliza EXACTAMENTE el mismo pipeline que ya usaba el
 // formulario manual (pdfToLines → parseGraficoTurnos/parseAgentsTable
 // → construirDiasDesdeCruce), sin tocar ninguna de esas funciones.
+// NUEVO — _diagIntervencion guarda el último motivo de fallo en
+// texto plano, para poder mostrarlo en el Acceso de Interventor
+// (Portal de Perfil) sin depender de toast(), que puede quedar
+// tapado detrás de esa pantalla.
+var _diagIntervencion = null;
 async function cargarIntervencionGlobalDesdeAdmin(){
+  _diagIntervencion = null;
   try{
     if(typeof sbAdmin === 'undefined'){
+      _diagIntervencion = 'Supabase no está disponible en este navegador.';
       toast('⚠️ Intervención: Supabase no está disponible en este navegador');
       return false;
     }
     var resp = await sbAdmin.from('config_global').select('*').eq('tipo','grafico_intervencion').single();
     if(resp.error){
+      _diagIntervencion = 'Error al consultar config_global: '+resp.error.message;
       toast('⚠️ Intervención: '+resp.error.message);
       return false;
     }
     if(!resp.data || !resp.data.url_archivo || !resp.data.url_archivo_informe){
+      _diagIntervencion = 'El admin aún no ha publicado el Gráfico+Informe de Intervención (falta la fila o alguno de los dos archivos).';
       toast('⚠️ Intervención: el admin aún no ha publicado el Gráfico+Informe');
       return false;
     }
     var d = resp.data;
 
-    // Evita volver a procesar si ya está cargado este mismo servicio.
-    if(INTERVENTOR_SERVICES.some(function(s){ return s.name === d.nombre_servicio; })){
+    // FIX — antes se evitaba reprocesar comparando SOLO
+    // d.nombre_servicio: si el admin resubía un Informe nuevo
+    // reutilizando el mismo nombre de servicio (lo habitual en una
+    // publicación semanal), la app se quedaba para siempre con la
+    // copia vieja en caché y nunca veía las matrículas nuevas — el
+    // Acceso de Interventor podía rechazar a alguien que SÍ estaba
+    // en el Informe recién publicado. Ahora se compara también
+    // fecha_subida: incluso con el mismo nombre, una subida más
+    // reciente sí se vuelve a descargar y parsear.
+    var idxServicioExistente = INTERVENTOR_SERVICES.findIndex(function(s){ return s.name === d.nombre_servicio; });
+    var yaActualizado = idxServicioExistente !== -1 && INTERVENTOR_SERVICES[idxServicioExistente].fechaSubida === d.fecha_subida;
+    if(yaActualizado){
       toast('ℹ️ Intervención «'+d.nombre_servicio+'» ya estaba cargada');
       return true;
     }
@@ -17634,6 +17820,7 @@ async function cargarIntervencionGlobalDesdeAdmin(){
     var respGrafico = await fetch(d.url_archivo);
     var respInforme = await fetch(d.url_archivo_informe);
     if(!respGrafico.ok || !respInforme.ok){
+      _diagIntervencion = 'No se pudo descargar el Gráfico ('+respGrafico.status+') o el Informe ('+respInforme.status+').';
       toast('⚠️ Intervención: no se pudo descargar el Gráfico ('+respGrafico.status+') o el Informe ('+respInforme.status+')');
       return false;
     }
@@ -17647,21 +17834,33 @@ async function cargarIntervencionGlobalDesdeAdmin(){
     var agentsData = parseAgentsTable(informeLines, d.fecha_inicio);
 
     if(!agentsData){
+      _diagIntervencion = 'No se reconoció la tabla de fechas del Informe (revisa que el PDF tenga cabecera con fechas tipo "01 S").';
       toast('⚠️ Intervención: no se reconoció la tabla de fechas del Informe');
       return false;
     }
     if(Object.keys(turnosData).length === 0){
+      _diagIntervencion = 'No se encontraron trenes en el Gráfico.';
       toast('⚠️ Intervención: no se encontraron trenes en el Gráfico');
       return false;
     }
 
     var diasPorAgente = construirDiasDesdeCruce(agentsData, turnosData);
-    INTERVENTOR_SERVICES.push({ name: d.nombre_servicio, isoDates: agentsData.isoDates, data: diasPorAgente, turnos: turnosData });
+    var nuevoServicio = { name: d.nombre_servicio, isoDates: agentsData.isoDates, data: diasPorAgente, turnos: turnosData, fechaSubida: d.fecha_subida };
+    // FIX — si ya existía un servicio con este nombre (versión vieja),
+    // se REEMPLAZA en el mismo sitio en vez de añadir uno duplicado;
+    // así INTERVENTOR_SERVICES nunca arrastra una copia desactualizada
+    // que pudiera seguir "validando" una matrícula ya retirada.
+    if(idxServicioExistente !== -1){
+      INTERVENTOR_SERVICES[idxServicioExistente] = nuevoServicio;
+    } else {
+      INTERVENTOR_SERVICES.push(nuevoServicio);
+    }
     atGuardarInterventor();
     if(elEstado) elEstado.textContent = 'Intervención sincronizada: «'+d.nombre_servicio+'»';
     toast('✅ Intervención sincronizada: '+diasPorAgente.length+' agentes cruzados');
     return true;
   }catch(e){
+    _diagIntervencion = 'Excepción: '+(e && e.message ? e.message : String(e));
     toast('⚠️ Error Intervención: '+(e&&e.message?e.message:e));
     return false;
   }
@@ -19432,20 +19631,98 @@ clearBtn.addEventListener('click', ()=>{
     }
   }
 
+  // ── NUEVO: Acceso de Interventor (matrícula) ──
+  function mostrarAccesoInterventor(msgError){
+    var el = document.getElementById('portal-interventor-acceso');
+    if(el) el.style.display = 'flex';
+    var input = document.getElementById('accesoMatriculaInterventorInput');
+    var msg = document.getElementById('accesoInterventorMsg');
+    if(input) input.value = '';
+    if(msg) msg.innerHTML = msgError ? '<span style="color:#FCA5A5">'+msgError+'</span>' : '';
+  }
+  function ocultarAccesoInterventor(){
+    var el = document.getElementById('portal-interventor-acceso');
+    if(el) el.style.display = 'none';
+  }
+
+  // Comprueba la matrícula escrita contra el Informe de agentes de
+  // Intervención ya publicado (validarMatriculaInterventorContraInforme,
+  // expuesta más arriba en el archivo, dentro del módulo del
+  // Buscador de Compañeros). Solo si aparece se guarda la elección de
+  // perfil y se entra a la pantalla de Interventor.
+  async function validarMatriculaInterventor(){
+    var input = document.getElementById('accesoMatriculaInterventorInput');
+    var msg = document.getElementById('accesoInterventorMsg');
+    var btn = document.getElementById('btnContinuarAccesoInterventor');
+    var matricula = input ? input.value.trim() : '';
+
+    if(!matricula){
+      if(msg) msg.innerHTML = '<span style="color:#FCA5A5">Escribe tu número de matrícula.</span>';
+      return;
+    }
+    if(typeof validarMatriculaInterventorContraInforme !== 'function'){
+      if(msg) msg.innerHTML = '<span style="color:#FCA5A5">No se pudo comprobar la matrícula ahora mismo. Inténtalo de nuevo.</span>';
+      return;
+    }
+
+    var textoOriginal = btn ? btn.textContent : '';
+    if(btn){ btn.disabled = true; btn.textContent = 'Comprobando...'; }
+    var resultado = { valida:false, motivo:'No se pudo comprobar la matrícula ahora mismo. Inténtalo de nuevo.' };
+    try{
+      resultado = await validarMatriculaInterventorContraInforme(matricula);
+    }catch(e){
+      resultado = { valida:false, motivo:'No se pudo comprobar la matrícula ahora mismo. Inténtalo de nuevo.' };
+    }
+    if(btn){ btn.disabled = false; btn.textContent = textoOriginal; }
+
+    if(!resultado || !resultado.valida){
+      if(msg) msg.innerHTML = '<span style="color:#FCA5A5">'+(resultado && resultado.motivo ? resultado.motivo : 'Esa matrícula no aparece en el Informe de Intervención publicado.')+'</span>';
+      return;
+    }
+
+    localStorage.setItem('interventorMatriculaValidada', matricula);
+    localStorage.setItem('perfilPortalTrenTurnos', 'interventor');
+    ocultarAccesoInterventor();
+    mostrarPantallaInterventor();
+  }
+
+  // NUEVO — Expuesta a window: cargarDatosParaInterventor() (módulo
+  // del Buscador de Compañeros, fuera de este bloque) la llama si la
+  // matrícula guardada deja de aparecer en el Horario General más
+  // reciente — por ejemplo tras la actualización semanal del admin.
+  window.__cerrarSesionInterventorPorMatriculaInvalida = function(){
+    localStorage.removeItem('interventorMatriculaValidada');
+    localStorage.removeItem('perfilPortalTrenTurnos');
+    if(typeof usuarioActual !== 'undefined') usuarioActual = null;
+    ocultarPantallaInterventor();
+    mostrarAccesoInterventor('Tu matrícula ya no aparece en el Horario General actualizado. Vuelve a comprobarla.');
+  };
+
   function elegirTripulante(){
     localStorage.setItem('perfilPortalTrenTurnos', 'tripulante');
     ocultarPortal();
     ocultarPantallaInterventor();
   }
+  // MODIFICADO — ya no se entra directo al elegir "Interventor": ahora
+  // primero se pide su matrícula y se comprueba contra el Horario
+  // General publicado (ver mostrarAccesoInterventor /
+  // validarMatriculaInterventor, arriba). Solo si la comprobación pasa
+  // se guarda 'perfilPortalTrenTurnos'='interventor' y se entra.
   function elegirInterventor(){
-    localStorage.setItem('perfilPortalTrenTurnos', 'interventor');
     ocultarPortal();
-    mostrarPantallaInterventor();
+    mostrarAccesoInterventor();
   }
   function cambiarPerfil(){
     localStorage.removeItem('perfilPortalTrenTurnos');
+    // NUEVO — al cambiar de perfil se olvida también la matrícula de
+    // interventor ya validada, para que la próxima vez que se elija
+    // "Interventor" se compruebe de nuevo contra el listado más
+    // reciente (evita que una matrícula dada de baja siga entrando
+    // solo porque quedó guardada en este dispositivo).
+    localStorage.removeItem('interventorMatriculaValidada');
     if(typeof usuarioActual !== 'undefined') usuarioActual = null;
     ocultarPantallaInterventor();
+    ocultarAccesoInterventor();
     mostrarPortal();
   }
 
@@ -19458,6 +19735,19 @@ clearBtn.addEventListener('click', ()=>{
     if(btnI) btnI.addEventListener('click', elegirInterventor);
     if(btnC1) btnC1.addEventListener('click', cambiarPerfil);
     if(btnC2) btnC2.addEventListener('click', cambiarPerfil);
+
+    // NUEVO — Acceso de Interventor (matrícula)
+    var btnValidar = document.getElementById('btnContinuarAccesoInterventor');
+    var btnVolver = document.getElementById('btnVolverAccesoInterventor');
+    var inputMat = document.getElementById('accesoMatriculaInterventorInput');
+    if(btnValidar) btnValidar.addEventListener('click', validarMatriculaInterventor);
+    if(btnVolver) btnVolver.addEventListener('click', function(){
+      ocultarAccesoInterventor();
+      mostrarPortal();
+    });
+    if(inputMat) inputMat.addEventListener('keydown', function(e){
+      if(e.key === 'Enter') validarMatriculaInterventor();
+    });
   }
 
   // FIX — antes el Portal de Perfil decidía cuándo aparecer con SU
@@ -19476,7 +19766,18 @@ clearBtn.addEventListener('click', ()=>{
     _yaSeReviso = true;
     var elegido = localStorage.getItem('perfilPortalTrenTurnos');
     if(elegido === 'interventor'){
-      mostrarPantallaInterventor();
+      // NUEVO — solo se entra directo si esta matrícula ya quedó
+      // validada antes en este dispositivo (localStorage). Si no —
+      // primera vez con esta versión, o la matrícula fue invalidada
+      // por cargarDatosParaInterventor() al detectar que ya no
+      // figura en el Horario General más reciente — se vuelve a
+      // pedir en vez de entrar directo.
+      var matriculaGuardada = localStorage.getItem('interventorMatriculaValidada');
+      if(matriculaGuardada){
+        mostrarPantallaInterventor();
+      } else {
+        mostrarAccesoInterventor();
+      }
     } else if(elegido !== 'tripulante'){
       mostrarPortal();
     }
