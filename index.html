@@ -2759,7 +2759,19 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
       style="width:100%;background:#132236;border:2px solid #2563EB;border-radius:12px;color:#F8FAFC;
       font-size:15px;font-weight:700;padding:14px 16px;text-align:center;letter-spacing:.5px;margin-bottom:10px;outline:none">
 
-    <div id="accesoTripulanteMsg" style="min-height:18px;font-size:12px;margin-bottom:14px;line-height:1.4"></div>
+    <div id="accesoTripulanteMsg" style="min-height:18px;font-size:12px;margin-bottom:10px;line-height:1.4"></div>
+
+    <!-- NUEVO — checkbox discreto con las condiciones como ENLACE
+         dentro de la misma frase (a propósito distinto del botón
+         grande "📄 Ver descargo" del Interventor) — el pop-up con el
+         texto completo se abre solo si se toca el enlace, sin
+         ensuciar esta pantalla con texto largo. -->
+    <label id="lblAceptoDescargoTripulante" style="display:flex;align-items:flex-start;gap:9px;margin:0 0 14px;
+      cursor:pointer;font-size:12px;color:#94A3B8;line-height:1.5;text-align:left">
+      <input type="checkbox" id="accesoAceptoDescargoTripulante"
+        style="width:17px;height:17px;flex-shrink:0;margin-top:1px;accent-color:#2563EB">
+      He leído y acepto las <span id="btnVerDescargoTripulante" style="color:#3B82F6;text-decoration:underline;font-weight:700">condiciones de uso</span>
+    </label>
 
     <button id="btnContinuarAccesoTripulante" style="width:100%;background:linear-gradient(135deg,#2563EB,#3B82F6);
       border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800;padding:14px;cursor:pointer;margin-bottom:8px">
@@ -2772,6 +2784,31 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
     <button id="btnVolverAccesoTripulante" style="width:100%;background:transparent;border:none;
       color:#64748B;font-size:11px;font-weight:700;padding:4px;cursor:pointer">
       ‹ Volver
+    </button>
+  </div>
+</div>
+
+<!-- NUEVO — Pop-up con el texto completo de las condiciones de uso
+     para Tripulante — mismo patrón que interventorDescargoModal, pero
+     con su propio id y texto (aquí no hace falta obligar a abrirlo
+     para habilitar la casilla, ya que el checkbox no empieza
+     deshabilitado — puede leerlo si quiere, sin ser un requisito
+     aparte del propio checkbox). -->
+<div id="tripulanteDescargoModal" style="display:none;position:fixed;inset:0;z-index:10001;
+  background:rgba(0,0,0,.75);align-items:flex-end;justify-content:center">
+  <div style="width:100%;max-width:420px;background:#132236;border-radius:20px 20px 0 0;
+    padding:22px 20px 26px;max-height:75vh;overflow-y:auto;text-align:left">
+    <div style="font-size:15px;font-weight:900;color:#3B82F6;margin-bottom:12px">📄 Condiciones de uso</div>
+    <div style="font-size:13px;color:#CBD5E1;line-height:1.6;margin-bottom:20px">
+      Esta app es una herramienta personal de apoyo para llevar tus turnos, horas y compensaciones — no sustituye
+      al Cómputo Oficial que publica la empresa, que es siempre el documento que manda ante cualquier duda o
+      reclamación. Al aceptar, confirmas que entras con tu propia matrícula, que los datos que registres son
+      responsabilidad tuya, y que el Buscador de Compañeros solo debe usarse para fines profesionales legítimos,
+      con el mismo respeto hacia los datos de tus compañeros que esperarías para los tuyos.
+    </div>
+    <button id="btnCerrarDescargoTripulante" style="width:100%;background:linear-gradient(135deg,#2563EB,#3B82F6);
+      border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800;padding:14px;cursor:pointer">
+      Entendido
     </button>
   </div>
 </div>
@@ -4944,6 +4981,23 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
       <button class="m-save" style="width:100%;margin-bottom:8px" onclick="cargarAccesosInterventorAdmin()">🔄 Actualizar lista</button>
       <div class="estado-archivo sin-archivo" id="estadoAccesosInterventor">Toca "Actualizar lista" para ver los accesos.</div>
       <div id="listaAccesosInterventor" style="margin-top:8px"></div>
+    </div>
+
+    <!-- NUEVO — Accesos de Tripulante: igual que Interventor, pero
+         para quien entra por el otro botón del Portal de Perfil.
+         Solo aparece una fila por matrícula (la primera vez que
+         entra), no cada vez que abre la app. -->
+    <div class="admin-card">
+      <div class="admin-card-hdr">
+        <div class="admin-card-ico">🚂</div>
+        <div>
+          <div class="admin-card-tit">Accesos de Tripulante</div>
+          <div class="admin-card-sub">Quién ha entrado como Tripulante (primera vez por matrícula), con nombre, sede y cuándo.</div>
+        </div>
+      </div>
+      <button class="m-save" style="width:100%;margin-bottom:8px" onclick="cargarAccesosTripulanteAdmin()">🔄 Actualizar lista</button>
+      <div class="estado-archivo sin-archivo" id="estadoAccesosTripulante">Toca "Actualizar lista" para ver los accesos.</div>
+      <div id="listaAccesosTripulante" style="margin-top:8px"></div>
     </div>
 
     <div class="admin-card">
@@ -17704,6 +17758,36 @@ async function cargarAccesosInterventorAdmin(){
   });
 }
 
+// NUEVO — Accesos de Tripulante: mismo patrón que
+// cargarAccesosInterventorAdmin(), leyendo accesos_tripulante (ver
+// SQL de creación entregado aparte). Se rellena en
+// validarMatriculaTripulanteYEntrar() (módulo del Portal de Perfil),
+// una sola vez por matrícula (matricula es la clave primaria de la
+// tabla). Se muestra también la sede, que aquí sí se conoce.
+async function cargarAccesosTripulanteAdmin(){
+  if(!perfilAdminActual || perfilAdminActual.rol !== 'admin') return;
+  var elLista = document.getElementById('listaAccesosTripulante');
+  var elEstado = document.getElementById('estadoAccesosTripulante');
+  if(elEstado) elEstado.textContent = 'Cargando...';
+  var resp = await sbAdmin.from('accesos_tripulante').select('*').order('fecha_hora', { ascending:false }).limit(100);
+  if(resp.error){
+    if(elEstado) elEstado.textContent = 'Error al cargar: ' + resp.error.message;
+    return;
+  }
+  var filas = resp.data || [];
+  if(elEstado) elEstado.textContent = filas.length ? (filas.length+' tripulante(s) registrado(s)') : 'Todavía no ha entrado ningún tripulante por este paso nuevo.';
+  if(!elLista) return;
+  elLista.innerHTML = '';
+  filas.forEach(function(fila){
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:var(--s2);border:1px solid var(--div);border-radius:9px;padding:8px 11px;margin-bottom:6px;font-size:12px';
+    var fecha = fila.fecha_hora ? new Date(fila.fecha_hora).toLocaleString('es-ES') : '';
+    div.innerHTML = '<span><b>'+(fila.nombre || '(sin nombre)')+'</b> · '+fila.matricula+' · '+(fila.sede||'—')+'</span>'
+      + '<span style="color:var(--tx3)">'+fecha+'</span>';
+    elLista.appendChild(div);
+  });
+}
+
 /* ═══════════════════════════════════════════════════════════
    MI HORARIO PERSONAL EN LA NUBE — módulo aditivo, independiente
    de config_global (que es la que comparten todos los compañeros).
@@ -20892,6 +20976,17 @@ clearBtn.addEventListener('click', ()=>{
   };
 
   function elegirTripulante(){
+    // NUEVO — si ya hay sesión de admin activa en este dispositivo,
+    // su identidad ya quedó demostrada con email+contraseña (más
+    // fuerte que una matrícula) — entra directo, sin matrícula ni
+    // descargo, igual que ya se hace en otras partes de la app para
+    // el admin.
+    if(typeof perfilAdminActual !== 'undefined' && perfilAdminActual && perfilAdminActual.rol === 'admin'){
+      localStorage.setItem('perfilPortalTrenTurnos', 'tripulante');
+      ocultarPortal();
+      ocultarPantallaInterventor();
+      return;
+    }
     ocultarPortal();
     mostrarAccesoTripulante();
   }
@@ -20918,9 +21013,14 @@ clearBtn.addEventListener('click', ()=>{
     var input = document.getElementById('accesoMatriculaTripulanteInput');
     var msg = document.getElementById('accesoTripulanteMsg');
     var btn = document.getElementById('btnContinuarAccesoTripulante');
+    var checkDescargo = document.getElementById('accesoAceptoDescargoTripulante');
     var matricula = input ? input.value.trim() : '';
     if(!matricula){
       if(msg) msg.innerHTML = '<span style="color:#FCA5A5">Escribe tu número de matrícula.</span>';
+      return;
+    }
+    if(!checkDescargo || !checkDescargo.checked){
+      if(msg) msg.innerHTML = '<span style="color:#FCA5A5">Marca la casilla de las condiciones de uso para continuar.</span>';
       return;
     }
     if(typeof buscarTripulanteEnTodasLasSedes !== 'function'){
@@ -20952,6 +21052,29 @@ clearBtn.addEventListener('click', ()=>{
       AJ.base = resultado.sede || AJ.base;
       try{ localStorage.setItem('aj5', JSON.stringify(AJ)); }catch(e){}
     }
+    // NUEVO — deja la MISMA marca que ya usa el Buscador de
+    // Compañeros para saber que esta matrícula ya aceptó el
+    // descargo — así, al entrar luego al Buscador, no se le vuelve a
+    // preguntar nada (ni matrícula ni condiciones), porque ya quedó
+    // resuelto aquí, en el primer acceso a la app.
+    try{ localStorage.setItem('descargoAceptado_matricula', matricula); }catch(e){}
+
+    // NUEVO — Registro del acceso (matrícula + nombre + sede + fecha)
+    // en la tabla dedicada accesos_tripulante, para que el admin
+    // pueda ver en su panel quién usa la app como Tripulante — igual
+    // que ya existe para Interventor. Solo la PRIMERA vez por
+    // matrícula (matricula es la clave primaria de la tabla): si ya
+    // existe, el error de clave duplicada se ignora a propósito, sin
+    // molestar a la persona con ningún aviso.
+    if(typeof sbAdmin !== 'undefined'){
+      sbAdmin.from('accesos_tripulante').insert({
+        matricula: matricula,
+        nombre: resultado.nombre || null,
+        sede: resultado.sede || null,
+        fecha_hora: new Date().toISOString()
+      }).then(function(){}).catch(function(){});
+    }
+
     localStorage.setItem('perfilPortalTrenTurnos', 'tripulante');
     ocultarAccesoTripulante();
     ocultarPantallaInterventor();
@@ -20964,6 +21087,15 @@ clearBtn.addEventListener('click', ()=>{
   // validarMatriculaInterventor, arriba). Solo si la comprobación pasa
   // se guarda 'perfilPortalTrenTurnos'='interventor' y se entra.
   function elegirInterventor(){
+    // NUEVO — mismo bypass que en elegirTripulante(): el admin ya
+    // demostró quién es con su email+contraseña, no necesita pasar
+    // por la matrícula de interventor.
+    if(typeof perfilAdminActual !== 'undefined' && perfilAdminActual && perfilAdminActual.rol === 'admin'){
+      localStorage.setItem('perfilPortalTrenTurnos', 'interventor');
+      ocultarPortal();
+      mostrarPantallaInterventor();
+      return;
+    }
     ocultarPortal();
     mostrarAccesoInterventor();
   }
@@ -21022,6 +21154,16 @@ clearBtn.addEventListener('click', ()=>{
     });
     if(inputMatT) inputMatT.addEventListener('keydown', function(e){
       if(e.key === 'Enter') validarMatriculaTripulanteYEntrar();
+    });
+    var btnVerDescargoT = document.getElementById('btnVerDescargoTripulante');
+    var btnCerrarDescargoT = document.getElementById('btnCerrarDescargoTripulante');
+    if(btnVerDescargoT) btnVerDescargoT.addEventListener('click', function(){
+      var m = document.getElementById('tripulanteDescargoModal');
+      if(m) m.style.display = 'flex';
+    });
+    if(btnCerrarDescargoT) btnCerrarDescargoT.addEventListener('click', function(){
+      var m = document.getElementById('tripulanteDescargoModal');
+      if(m) m.style.display = 'none';
     });
   }
 
