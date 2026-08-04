@@ -2905,6 +2905,10 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
 <!-- BODY -->
 <div class="body">
 
+  <!-- NUEVO — Saludo personal según la hora del día, con el nombre de
+       Ajustes (si está puesto). Se actualiza con actualizarSaludo(). -->
+  <div id="saludo-personal" style="padding:10px 14px 0;font-size:15px;font-weight:700;color:var(--tx2)"></div>
+
   <!-- TURNO DE HOY — ahora en formato acordeón (clic para expandir/colapsar) -->
   <div class="hoy-acc" id="hoyAcc">
     <div class="hoy-acc-toggle" id="hoyAccToggle" onclick="toggleHoyAcc()">
@@ -3050,7 +3054,7 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
           <div class="aj-nombre-wrap" style="margin-bottom:10px">
             <div class="aj-nombre-ico">🪪</div>
             <input class="aj-nombre-inp" id="aj-mat" placeholder="Número de matrícula…" autocomplete="off"
-              style="font-variant-numeric:tabular-nums">
+              style="font-variant-numeric:tabular-nums" onblur="autoRellenarNombrePorMatricula()">
           </div>
 
           <div class="aj-roles">
@@ -5354,6 +5358,20 @@ var listaNovedades = [
   }
 ];
 
+// NUEVO — saludo personal según la hora del día, con el primer nombre
+// de Ajustes si está puesto (si no, un saludo genérico). Se llama al
+// arrancar y cada vez que se actualiza el reloj de la cabecera (cada
+// 15s), así el saludo cambia solo de "buenos días" a "buenas tardes"
+// sin que la persona tenga que recargar la app.
+function actualizarSaludo(){
+  var el = document.getElementById('saludo-personal');
+  if(!el) return;
+  var hora = new Date().getHours();
+  var momento = (hora>=6 && hora<12) ? 'buenos días' : (hora>=12 && hora<20) ? 'buenas tardes' : 'buenas noches';
+  var primerNombre = (AJ.nombre||'').trim().split(' ')[0] || '';
+  el.textContent = 'Hola' + (primerNombre ? ', '+primerNombre : '') + ', '+momento;
+}
+
 function init(){
   // Limpiar claves de versiones anteriores (ya no necesarias)
   ['tv3','tv4','aj3','aj4'].forEach(function(k){localStorage.removeItem(k);});
@@ -5365,8 +5383,9 @@ function init(){
   // los elimina.
   migrarRetrasosPernocta();
 
-  setInterval(function(){var n=new Date();document.getElementById('sbt').textContent=pad(n.getHours())+':'+pad(n.getMinutes());},15000);
+  setInterval(function(){var n=new Date();document.getElementById('sbt').textContent=pad(n.getHours())+':'+pad(n.getMinutes());actualizarSaludo();},15000);
   var n=new Date();document.getElementById('sbt').textContent=pad(n.getHours())+':'+pad(n.getMinutes());
+  actualizarSaludo();
   loadAjUI();
   renderCal();
   renderStats();
@@ -11998,6 +12017,35 @@ function loadAjUI(){
     if(aLbl){ aLbl.textContent=AJ.alarmas.activas?'Activadas':'Desactivadas';
               aLbl.style.color=AJ.alarmas.activas?'var(--green2)':'var(--tx3)';}
   }
+// NUEVO — al escribir la matrícula en Ajustes y salir del campo, si
+// el nombre está vacío, se busca esa matrícula en el Horario General
+// ya publicado (el mismo que usa el Buscador de Compañeros) y se
+// rellena el nombre completo automáticamente — útil sobre todo para
+// que los correos (HTDL, Art.51/52, etc.) salgan siempre con el
+// nombre completo tal como consta oficialmente, sin tener que
+// escribirlo dos veces. Si ya hay un nombre puesto, no se pisa: se
+// asume que la persona lo quiso así a propósito.
+async function autoRellenarNombrePorMatricula(){
+  var matInput = document.getElementById('aj-mat');
+  var nomInput = document.getElementById('aj-nom');
+  if(!matInput || !nomInput) return;
+  var matricula = matInput.value.trim();
+  if(!matricula || nomInput.value.trim()) return;
+  try{
+    if(typeof BASES==='undefined' || !BASES.global || !BASES.global.data || !BASES.global.data.length){
+      if(typeof cargarHorarioGlobalDesdeAdmin==='function') await cargarHorarioGlobalDesdeAdmin();
+    }
+    if(typeof BASES==='undefined' || !BASES.global || !BASES.global.data) return;
+    var encontrado = BASES.global.data.find(function(e){ return String(e[0]).trim()===matricula; });
+    if(encontrado && encontrado[1]){
+      nomInput.value = encontrado[1];
+      toast('✍️ Nombre completado automáticamente: '+encontrado[1]);
+    }
+  }catch(e){
+    console.log('No se pudo autocompletar el nombre por matrícula:', e);
+  }
+}
+
   document.getElementById('aj-nom').value=AJ.nombre||'';
   document.getElementById('aj-mat').value=AJ.matricula||'';
   document.getElementById('aj-vh').value=AJ.vh||12.5;
@@ -12079,6 +12127,7 @@ function saveAj(){
   AJ.nocturnidad=parseFloat(document.getElementById('aj-noc').value)||1.80;
   localStorage.setItem('aj5',JSON.stringify(AJ));
   updHeader();toast('✅ Ajustes guardados');
+  actualizarSaludo();
 }
 function updHeader(){
   document.getElementById('hdr-nom').textContent=AJ.nombre||'Mis Turnos';
