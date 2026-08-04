@@ -8428,13 +8428,30 @@ function renderDiaArea(){
   var wd=(dt.getDay()+6)%7;
   var fstr=DIAS_L[wd]+' '+d+' de '+MESES[mo-1].toLowerCase();
 
+  // NUEVO — Sistema Horario Compañero: si hay un compañero importado
+  // (solo posible siendo admin, ver importarComoCompanero) y el modo
+  // de vista no es 'mio', se calcula aquí su turno de este mismo día
+  // para poder mostrarlo en el detalle — tanto si tú tienes turno
+  // propio ese día como si no (antes, si no tenías turno propio, la
+  // función terminaba antes de llegar aquí y nunca se mostraba nada
+  // del compañero).
+  var companeroTexto = null;
+  if(typeof vistaMode!=='undefined' && vistaMode!=='mio' && typeof COMP_DATA!=='undefined' && COMP_DATA && COMP_DATA.days){
+    companeroTexto = COMP_DATA.days[String(d)] || null;
+  }
+  var companeroHtml = companeroTexto
+    ? '<div class="ibox" style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.3);margin-top:10px">'
+      +'<span class="ibox-i">👤</span><span><b>'+(COMP_DATA.name||'Compañero')+'</b>: '+companeroTexto+'</span></div>'
+    : '';
+
   if(!t){
     area.innerHTML='<div class="dc-vacia" onclick="abrirTipo()">'
       +'<div class="dcv-ico">📋</div>'
       +'<div class="dcv-fecha">'+fstr+'</div>'
       +'<div class="dcv-hint">Sin turno asignado</div>'
       +'<button class="dcv-btn" onclick="abrirTipoDesdeCard()">➕ Agregar turno</button>'
-      +'</div>';
+      +'</div>'
+      + companeroHtml;
     return;
   }
 
@@ -8756,6 +8773,11 @@ function renderDiaArea(){
       : '')
     +'</div></div>';
   if(selDay) setTimeout(function(){renderTV2DiaCard(selDay.k);},10);
+  // NUEVO — Sistema Horario Compañero: si hay texto de compañero para
+  // este día, se añade al final del detalle (no reemplaza nada tuyo,
+  // solo se añade debajo) — así el modo "Comparar" muestra los dos
+  // turnos juntos en la misma tarjeta.
+  if(companeroHtml) area.insertAdjacentHTML('beforeend', companeroHtml);
   // NUEVO — "con quién viajas": rellena automáticamente, bajo demanda
   // (solo el día que se está viendo, no todo el mes de golpe), los
   // huecos de compañeros que acaban de pintarse en este detalle.
