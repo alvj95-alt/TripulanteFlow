@@ -2737,6 +2737,45 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
   </div>
 </div>
 
+<!-- NUEVO — ACCESO DE TRIPULANTE (Portal de Perfil). Antes "Tripulante"
+     entraba directo sin preguntar nada; ahora pide la matrícula, la
+     busca en TODOS los Horarios Generales publicados a la vez (cada
+     sede tiene sus propias matrículas), y si la encuentra rellena
+     sola el nombre y la Estación Base en Ajustes — así solo hace
+     falta entrar en Ajustes para cambiar el nombre a mano o ajustar
+     los montos a pagar, no para lo básico. Mismo patrón visual que
+     el acceso de Interventor, sin descargo (no hace falta para
+     tripulación). -->
+<div id="portal-tripulante-acceso" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:#07111F;align-items:center;justify-content:center;padding:20px">
+  <div style="width:100%;max-width:360px;text-align:center">
+    <div style="font-size:44px;margin-bottom:6px">🪪</div>
+    <div style="font-size:18px;font-weight:900;color:#3B82F6;margin-bottom:2px">Tu matrícula</div>
+    <div style="font-size:12px;color:#94A3B8;margin-bottom:22px;line-height:1.5">
+      Búscate una vez y ya no hace falta volver a escribir nombre ni sede — se rellenan solos.
+    </div>
+
+    <input type="text" id="accesoMatriculaTripulanteInput" placeholder="Ej. 1234567" inputmode="numeric" autocomplete="off"
+      style="width:100%;background:#132236;border:2px solid #2563EB;border-radius:12px;color:#F8FAFC;
+      font-size:15px;font-weight:700;padding:14px 16px;text-align:center;letter-spacing:.5px;margin-bottom:10px;outline:none">
+
+    <div id="accesoTripulanteMsg" style="min-height:18px;font-size:12px;margin-bottom:14px;line-height:1.4"></div>
+
+    <button id="btnContinuarAccesoTripulante" style="width:100%;background:linear-gradient(135deg,#2563EB,#3B82F6);
+      border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800;padding:14px;cursor:pointer;margin-bottom:8px">
+      Continuar
+    </button>
+    <button id="btnSaltarAccesoTripulante" style="width:100%;background:transparent;border:none;
+      color:#94A3B8;font-size:12px;font-weight:700;padding:8px;cursor:pointer">
+      No la tengo a mano, rellenar a mano en Ajustes
+    </button>
+    <button id="btnVolverAccesoTripulante" style="width:100%;background:transparent;border:none;
+      color:#64748B;font-size:11px;font-weight:700;padding:4px;cursor:pointer">
+      ‹ Volver
+    </button>
+  </div>
+</div>
+
 <!-- Portal de Interventor — pantalla propia y simple, distinta de
      todo lo demás. De momento un punto de partida en blanco: aquí
      se irá construyendo lo que necesite el interventor, sin mezclar
@@ -11752,7 +11791,13 @@ function selEst(e){
     renderFormBody();
     return;
   }
-  if(estField==='base'){AJ.base=e;var bv=document.getElementById('aj-base-v');bv.textContent=e;bv.className='aj-base-val';closeOv('ov-est');return;}
+  if(estField==='base'){AJ.base=e;var bv=document.getElementById('aj-base-v');bv.textContent=e;bv.className='aj-base-val';closeOv('ov-est');
+    // NUEVO — si la matrícula ya estaba puesta ANTES de fijar la
+    // Estación Base (orden natural al rellenar el formulario de
+    // arriba a abajo), reintenta el autocompletado del nombre ahora
+    // que ya se sabe qué sede mirar.
+    if(typeof autoRellenarNombrePorMatricula==='function') autoRellenarNombrePorMatricula();
+    return;}
   F[estField]=e;
   var hayI=[F.sal,F.lle,F.sal2,F.lle2].filter(Boolean).some(function(x){return ESTACIONES_INTERNACIONALES.has(x);});
   var antI=F.plusIntlAuto;F.plusIntlAuto=hayI;
@@ -12030,19 +12075,45 @@ async function autoRellenarNombrePorMatricula(){
   var nomInput = document.getElementById('aj-nom');
   if(!matInput || !nomInput) return;
   var matricula = matInput.value.trim();
-  if(!matricula || nomInput.value.trim()) return;
+  if(!matricula) return;
+  if(nomInput.value.trim()){
+    return; // ya hay un nombre puesto, no se pisa
+  }
   try{
-    if(typeof BASES==='undefined' || !BASES.global || !BASES.global.data || !BASES.global.data.length){
-      if(typeof cargarHorarioGlobalDesdeAdmin==='function') await cargarHorarioGlobalDesdeAdmin();
+    // FIX — antes, si algo impedía encontrar el nombre (sin Estación
+    // Base configurada, sin conexión, matrícula no encontrada...), la
+    // función simplemente no hacía nada y no había forma de saber por
+    // qué. Ahora cada caso avisa con un mensaje claro.
+    if(!AJ.base){
+      toast('⚠️ Configura primero tu Estación Base más abajo, para poder buscar tu nombre');
+      return;
     }
-    if(typeof BASES==='undefined' || !BASES.global || !BASES.global.data) return;
+    if(typeof BASES==='undefined' || !BASES.global || !BASES.global.data || !BASES.global.data.length){
+      if(typeof cargarHorarioGlobalDesdeAdmin==='function'){
+        toast('🔍 Buscando tu nombre en el Horario General...');
+        var ok = await cargarHorarioGlobalDesdeAdmin();
+        if(!ok){
+          toast('⚠️ No se pudo cargar el Horario General de tu sede todavía (puede que el admin no lo haya publicado, o falte conexión).');
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+    if(typeof BASES==='undefined' || !BASES.global || !BASES.global.data || !BASES.global.data.length){
+      toast('⚠️ No hay Horario General cargado para tu sede todavía.');
+      return;
+    }
     var encontrado = BASES.global.data.find(function(e){ return String(e[0]).trim()===matricula; });
     if(encontrado && encontrado[1]){
       nomInput.value = encontrado[1];
       toast('✍️ Nombre completado automáticamente: '+encontrado[1]);
+    } else {
+      toast('⚠️ Esa matrícula no aparece en el Horario General de tu sede. Escribe tu nombre a mano.');
     }
   }catch(e){
     console.log('No se pudo autocompletar el nombre por matrícula:', e);
+    toast('⚠️ Error buscando tu nombre: ' + (e && e.message ? e.message : String(e)));
   }
 }
 
@@ -18542,6 +18613,99 @@ window.validarMatriculaInterventorContraInforme = async function(matricula){
   return { valida:true, motivo:null, nombre: agenteEncontrado[1] };
 };
 
+// NUEVO — Acceso de Tripulante (Portal de Perfil): busca una
+// matrícula en TODOS los Horarios Generales publicados A LA VEZ (cada
+// sede es un PDF distinto — Barcelona, Madrid, Valencia...), parando
+// en cuanto la encuentra en cualquiera de ellas. Devuelve tanto el
+// nombre completo como la sede a la que pertenece esa matrícula, para
+// poder rellenar Ajustes (nombre + Estación Base) sin que la persona
+// tenga que elegir nada a mano. Reutiliza el mismo parser en
+// producción (parsePageWords) y el mismo patrón rápido en paralelo ya
+// probado para crear cuentas (Promise.any + salida temprana por
+// página) — no toca ninguna de esas funciones, solo las reutiliza.
+async function _buscarFilaMatriculaEnPdf(buf, matricula){
+  await asegurarPdfWorkerSeguro();
+  var pdf = await pdfjsLib.getDocument({data: buf}).promise;
+  var numPages = pdf.numPages;
+  var leftover = [];
+  for(var pi=1; pi<=numPages; pi++){
+    try{
+      var page = await pdf.getPage(pi);
+      var viewport = page.getViewport({scale:1});
+      var pageHeight = viewport.height;
+      var content = await page.getTextContent();
+      var words = [];
+      for(var wi=0; wi<content.items.length; wi++){
+        var item = content.items[wi];
+        var str = (item.str||'').trim();
+        if(!str) continue;
+        var x0 = item.transform[4];
+        var top = pageHeight - item.transform[5];
+        var parts = str.split(/\s+/).filter(Boolean);
+        if(parts.length<=1){
+          words.push({text: str, x0: x0, top: top, pagina: pi});
+        } else {
+          var w = item.width || 0;
+          (function(parts, x0, w, top, pi){
+            parts.forEach(function(p, idx){
+              words.push({text: p, x0: x0 + (w*idx/parts.length), top: top, pagina: pi});
+            });
+          })(parts, x0, w, top, pi);
+        }
+      }
+      var parsed = parsePageWords(words, leftover, pi);
+      leftover = parsed.leftover || [];
+      var match = parsed.find(function(e){ return String(e[0]).trim()===matricula; });
+      if(match) return match; // [id, nombre, dias]
+    }catch(errPag){
+      console.log('Búsqueda de tripulante: no se pudo leer la página '+pi+' de '+numPages+', se continúa.', errPag);
+      leftover = [];
+    }
+  }
+  return null;
+}
+
+async function _buscarFilaMatriculaEnArchivo(fila, matricula){
+  var archivoResp = await fetch(fila.url_archivo);
+  if(!archivoResp.ok) return null;
+  var nombreArchivo = fila.nombre_archivo || '';
+  if(/\.xlsx$/i.test(nombreArchivo)){
+    var buf = await archivoResp.arrayBuffer();
+    var datos = parseHorarioGeneralXLSX(buf);
+    return datos.find(function(e){ return String(e[0]).trim()===matricula; }) || null;
+  }
+  if(/\.csv$/i.test(nombreArchivo)){
+    var texto = await archivoResp.text();
+    var datosCsv = parseHorarioGeneralCSV(texto);
+    return datosCsv.find(function(e){ return String(e[0]).trim()===matricula; }) || null;
+  }
+  var bufPdf = await archivoResp.arrayBuffer();
+  return await _buscarFilaMatriculaEnPdf(bufPdf, matricula);
+}
+
+window.buscarTripulanteEnTodasLasSedes = async function(matricula){
+  if(typeof sbAdmin==='undefined') return { valida:false, motivo:'No se pudo conectar para comprobar la matrícula.' };
+  var resp = await sbAdmin.from('config_global').select('*').like('tipo','horario_general_%');
+  if(resp.error || !resp.data || !resp.data.length){
+    return { valida:false, motivo:'No hay ningún Horario General publicado todavía.' };
+  }
+  var filasConArchivo = resp.data.filter(function(f){ return f.url_archivo; });
+  if(!filasConArchivo.length) return { valida:false, motivo:'No hay ningún Horario General publicado todavía.' };
+
+  var promesas = filasConArchivo.map(function(fila){
+    return _buscarFilaMatriculaEnArchivo(fila, matricula).then(function(match){
+      if(match) return { nombre: match[1], sede: fila.sede || fila.tipo.replace('horario_general_','') };
+      return Promise.reject(new Error('no está en esta sede'));
+    });
+  });
+  try{
+    var resultado = await Promise.any(promesas);
+    return { valida:true, nombre: resultado.nombre, sede: resultado.sede };
+  }catch(e){
+    return { valida:false, motivo:'Esa matrícula no aparece en ningún Horario General publicado todavía.' };
+  }
+};
+
 // NUEVO — para el "con quién viajas" automático en Turnos del mes
 // (Horario individual). Reutiliza activeBase/cellContainsTrain ya
 // existentes, sin duplicar esa lógica. Se expone a window por el
@@ -20728,9 +20892,71 @@ clearBtn.addEventListener('click', ()=>{
   };
 
   function elegirTripulante(){
-    localStorage.setItem('perfilPortalTrenTurnos', 'tripulante');
     ocultarPortal();
+    mostrarAccesoTripulante();
+  }
+  function mostrarAccesoTripulante(motivo){
+    var el = document.getElementById('portal-tripulante-acceso');
+    if(el) el.style.display = 'flex';
+    var msg = document.getElementById('accesoTripulanteMsg');
+    if(msg) msg.innerHTML = motivo ? '<span style="color:#FCA5A5">'+motivo+'</span>' : '';
+  }
+  function ocultarAccesoTripulante(){
+    var el = document.getElementById('portal-tripulante-acceso');
+    if(el) el.style.display = 'none';
+  }
+  // Entra como tripulante SIN rellenar nada — la persona podrá poner
+  // su nombre/matrícula/sede a mano en Ajustes, como funcionaba antes
+  // de este cambio. Es la vía de escape si no tiene la matrícula a
+  // mano ahora mismo, o si prefiere no buscarla.
+  function saltarAccesoTripulante(){
+    localStorage.setItem('perfilPortalTrenTurnos', 'tripulante');
+    ocultarAccesoTripulante();
     ocultarPantallaInterventor();
+  }
+  async function validarMatriculaTripulanteYEntrar(){
+    var input = document.getElementById('accesoMatriculaTripulanteInput');
+    var msg = document.getElementById('accesoTripulanteMsg');
+    var btn = document.getElementById('btnContinuarAccesoTripulante');
+    var matricula = input ? input.value.trim() : '';
+    if(!matricula){
+      if(msg) msg.innerHTML = '<span style="color:#FCA5A5">Escribe tu número de matrícula.</span>';
+      return;
+    }
+    if(typeof buscarTripulanteEnTodasLasSedes !== 'function'){
+      if(msg) msg.innerHTML = '<span style="color:#FCA5A5">No se pudo comprobar la matrícula ahora mismo. Inténtalo de nuevo.</span>';
+      return;
+    }
+    var textoOriginal = btn ? btn.textContent : '';
+    if(btn){ btn.disabled = true; btn.textContent = 'Buscando en todas las sedes...'; }
+    var resultado = { valida:false, motivo:'No se pudo comprobar la matrícula ahora mismo. Inténtalo de nuevo.' };
+    try{
+      resultado = await buscarTripulanteEnTodasLasSedes(matricula);
+    }catch(e){
+      resultado = { valida:false, motivo:'No se pudo comprobar la matrícula ahora mismo. Inténtalo de nuevo.' };
+    }
+    if(btn){ btn.disabled = false; btn.textContent = textoOriginal; }
+
+    if(!resultado || !resultado.valida){
+      if(msg) msg.innerHTML = '<span style="color:#FCA5A5">'+(resultado && resultado.motivo ? resultado.motivo : 'Esa matrícula no aparece en ningún Horario General publicado.')+'</span>';
+      return;
+    }
+
+    // Encontrada: se rellenan AJ.nombre/AJ.matricula/AJ.base solas —
+    // a partir de aquí ya no hace falta entrar en Ajustes para nada
+    // de esto (solo para cambiar el nombre a mano o los montos a
+    // pagar, si algún día hace falta).
+    if(typeof AJ !== 'undefined'){
+      AJ.nombre = resultado.nombre || AJ.nombre;
+      AJ.matricula = matricula;
+      AJ.base = resultado.sede || AJ.base;
+      try{ localStorage.setItem('aj5', JSON.stringify(AJ)); }catch(e){}
+    }
+    localStorage.setItem('perfilPortalTrenTurnos', 'tripulante');
+    ocultarAccesoTripulante();
+    ocultarPantallaInterventor();
+    if(typeof toast==='function') toast('✅ ¡Hola '+(resultado.nombre||'')+'! Sede: '+(resultado.sede||'—'));
+    if(typeof actualizarSaludo==='function') actualizarSaludo();
   }
   // MODIFICADO — ya no se entra directo al elegir "Interventor": ahora
   // primero se pide su matrícula y se comprueba contra el Horario
@@ -20782,6 +21008,21 @@ clearBtn.addEventListener('click', ()=>{
     });
     if(btnVerDescargo) btnVerDescargo.addEventListener('click', abrirDescargoInterventor);
     if(btnCerrarDescargo) btnCerrarDescargo.addEventListener('click', cerrarDescargoInterventor);
+
+    // NUEVO — Acceso de Tripulante (matrícula, sin descargo)
+    var btnValidarT = document.getElementById('btnContinuarAccesoTripulante');
+    var btnSaltarT = document.getElementById('btnSaltarAccesoTripulante');
+    var btnVolverT = document.getElementById('btnVolverAccesoTripulante');
+    var inputMatT = document.getElementById('accesoMatriculaTripulanteInput');
+    if(btnValidarT) btnValidarT.addEventListener('click', validarMatriculaTripulanteYEntrar);
+    if(btnSaltarT) btnSaltarT.addEventListener('click', saltarAccesoTripulante);
+    if(btnVolverT) btnVolverT.addEventListener('click', function(){
+      ocultarAccesoTripulante();
+      mostrarPortal();
+    });
+    if(inputMatT) inputMatT.addEventListener('keydown', function(e){
+      if(e.key === 'Enter') validarMatriculaTripulanteYEntrar();
+    });
   }
 
   // FIX — antes el Portal de Perfil decidía cuándo aparecer con SU
