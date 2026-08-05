@@ -2965,7 +2965,10 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
 <div class="hdr">
   <div class="hdr-top">
     <div>
-      <div class="hdr-titulo" id="hdr-nom">Mis Turnos</div>
+      <!-- NUEVO — se oculta el nombre completo grande de aquí: ya
+           queda cubierto por el saludo de abajo ("Hola, [nombre]") y
+           por la insignia de rol+matrícula, que sí se mantiene. -->
+      <div class="hdr-titulo" id="hdr-nom" style="display:none">Mis Turnos</div>
       <div class="hdr-pill pill-t" id="hdr-rol">🚆 TRIPULANTE</div>
     </div>
     <div class="hdr-btns">
@@ -3126,6 +3129,16 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
           <div class="aj-nombre-wrap">
             <div class="aj-nombre-ico">✍️</div>
             <input class="aj-nombre-inp" id="aj-nom" placeholder="Nombre completo…" autocomplete="off">
+          </div>
+          <!-- NUEVO — nombre para el saludo de la pantalla principal
+               ("Hola, [esto], buenos días"). Se rellena solo con el
+               nombre de pila calculado a partir del Nombre completo
+               de arriba (como placeholder, sin forzar nada) — si la
+               persona prefiere que le salude de otra forma, escribe
+               aquí lo que quiera y eso es lo que se usa. -->
+          <div class="aj-nombre-wrap" style="margin-bottom:10px">
+            <div class="aj-nombre-ico">👋</div>
+            <input class="aj-nombre-inp" id="aj-nombre-saludo" placeholder="Cómo te saludamos (ej. Alejandro)…" autocomplete="off">
           </div>
           <div class="aj-nombre-wrap" style="margin-bottom:10px">
             <div class="aj-nombre-ico">🪪</div>
@@ -5456,12 +5469,30 @@ var listaNovedades = [
 // arrancar y cada vez que se actualiza el reloj de la cabecera (cada
 // 15s), así el saludo cambia solo de "buenos días" a "buenas tardes"
 // sin que la persona tenga que recargar la app.
+// NUEVO — extrae el nombre de pila de un nombre guardado como
+// "APELLIDOS ,NOMBRE" (formato del Horario General, ej. "ALVARADO
+// RODRIGUEZ ,JOSE ALEJANDRO") — antes se cogía la primera palabra del
+// texto completo, que con este formato daba el APELLIDO ("ALVARADO"),
+// no el nombre real. Si no hay coma (alguien escribió su nombre a
+// mano, "normal"), se coge la primera palabra tal cual, como antes.
+function _primerNombreDesde(nombreCompleto){
+  if(!nombreCompleto) return '';
+  var texto = String(nombreCompleto).trim();
+  var partes = texto.split(',');
+  var pila = (partes.length > 1 ? partes[1] : partes[0]).trim().split(/\s+/)[0] || '';
+  if(!pila) return '';
+  return pila.charAt(0).toUpperCase() + pila.slice(1).toLowerCase();
+}
+
 function actualizarSaludo(){
   var el = document.getElementById('saludo-personal');
   if(!el) return;
   var hora = new Date().getHours();
   var momento = (hora>=6 && hora<12) ? 'buenos días' : (hora>=12 && hora<20) ? 'buenas tardes' : 'buenas noches';
-  var primerNombre = (AJ.nombre||'').trim().split(' ')[0] || '';
+  // NUEVO — si la persona puso un nombre propio para el saludo
+  // (AJ.nombrePila, editable en Ajustes), se usa ese tal cual; si no,
+  // se calcula solo a partir del nombre completo.
+  var primerNombre = (AJ.nombrePila && AJ.nombrePila.trim()) || _primerNombreDesde(AJ.nombre);
   el.textContent = 'Hola' + (primerNombre ? ', '+primerNombre : '') + ', '+momento;
 }
 
@@ -8516,6 +8547,72 @@ function compartirOFallback(blob, tramos, mensajePersonalizado){
   }
 }
 
+// NUEVO — Sistema Horario Compañero (rediseño): vista de SOLO LECTURA
+// para los modos "Compañero" y "Comparar". Nunca modifica nada, no
+// tiene ningún botón de editar/añadir turno. Reutiliza COMP_DATA (el
+// compañero, ya extraído del Horario General) y TV[k] (tu propio
+// turno real, para "Comparar"), presentados con el mismo formato de
+// tarjeta sencilla — pero claramente marcados como orientativos/
+// bloqueados. El modo "Mis turnos" nunca llama a esto.
+function _renderVistaSoloLecturaCompanero(d, k, t, fstr){
+  var partes = [];
+  partes.push('<div style="padding:2px 4px 10px;font-size:13px;color:var(--tx2);font-weight:700">'+fstr+'</div>');
+
+  if(vistaMode==='ambos'){
+    partes.push(_tarjetaOrientativaPropia(t));
+  }
+
+  var codigo = (COMP_DATA.days && COMP_DATA.days[String(d)]) || '';
+  if(codigo){
+    var ci = (COMP_DATA.horasCI||{})[d] || '';
+    var co = (COMP_DATA.horasCO||{})[d] || '';
+    var ruta = (COMP_DATA.rutaPorDia||{})[d] || '';
+    partes.push(_tarjetaOrientativaCompanero(COMP_DATA.name, codigo, ci, co, ruta));
+  } else {
+    partes.push('<div class="ibox" style="margin-top:10px;opacity:.7"><span class="ibox-i">👤</span><span>'+(COMP_DATA.name||'Compañero')+' no tiene turno registrado este día (según el Horario General).</span></div>');
+  }
+
+  return partes.join('');
+}
+
+// Tarjeta de solo lectura para TU PROPIO turno, usada solo en modo
+// "Comparar" — muestra los mismos datos reales de TV[k], pero sin
+// ningún botón de acción (para editar, hay que volver a "Mis turnos").
+function _tarjetaOrientativaPropia(t){
+  if(!t) return '<div class="ibox" style="margin-bottom:10px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.25);border-radius:12px;padding:12px"><span class="ibox-i">📋</span><span>Sin turno propio registrado este día.</span></div>';
+  var ti = (typeof TIPO_INFO!=='undefined' && TIPO_INFO[t.tipo]) ? TIPO_INFO[t.tipo] : {ico:'❓', lbl:t.tipo||''};
+  var horas = (t.hF && t.hL) ? (t.hF+' → '+t.hL) : '';
+  var ruta = (t.sal && t.lle) ? (t.sal+' → '+t.lle) : '';
+  return '<div style="margin-bottom:10px;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.3);border-radius:12px;padding:12px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center">'
+    + '<span style="font-size:11px;font-weight:800;color:#93c5fd;text-transform:uppercase;letter-spacing:.3px">👤 Tú</span>'
+    + (t.numTren ? '<span style="font-size:11px;color:var(--tx3)">🚆 Tren '+t.numTren+'</span>' : '')
+    + '</div>'
+    + (horas ? '<div style="font-size:14px;font-weight:700;color:var(--tx);margin-top:5px">'+horas+'</div>' : '<div style="font-size:12px;color:var(--tx2);margin-top:5px">'+(ti.lbl||'')+'</div>')
+    + (ruta ? '<div style="font-size:11px;color:var(--tx2);margin-top:2px">'+ruta+'</div>' : '')
+    + '<div style="font-size:9px;color:var(--tx3);margin-top:8px;font-style:italic">Vista de solo lectura — para modificar, cambia a "Mis turnos"</div>'
+    + '</div>';
+}
+
+// Tarjeta de solo lectura para el turno del COMPAÑERO — datos
+// orientativos extraídos del Horario General (código de turno tal
+// cual, ruta aproximada, hora de toma/deje si se pudieron leer).
+function _tarjetaOrientativaCompanero(nombre, codigo, ci, co, ruta){
+  var trenMatch = codigo.match(/([0-9]{2,5})/);
+  var tren = trenMatch ? trenMatch[1] : '';
+  var rutaFmt = ruta ? ruta.split(/\s+/).join(' · ') : '';
+  return '<div style="margin-bottom:10px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:12px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center">'
+    + '<span style="font-size:11px;font-weight:800;color:#6ee7b7;text-transform:uppercase;letter-spacing:.3px">👤 '+(nombre||'Compañero')+'</span>'
+    + (tren ? '<span style="font-size:11px;color:var(--tx3)">🚆 Tren '+tren+'</span>' : '')
+    + '</div>'
+    + '<div style="font-size:13px;font-weight:700;color:var(--tx);margin-top:5px">'+codigo+'</div>'
+    + ((ci||co) ? '<div style="font-size:12px;color:var(--tx2);margin-top:3px">'+(ci||'—')+' → '+(co||'—')+'</div>' : '')
+    + (rutaFmt ? '<div style="font-size:11px;color:var(--tx2);margin-top:2px">'+rutaFmt+'</div>' : '')
+    + '<div style="font-size:9px;color:var(--tx3);margin-top:8px;font-style:italic">Información orientativa — no editable</div>'
+    + '</div>';
+}
+
 function renderDiaArea(){
   // MÓDULO MULTI-TURNO: si hay extras, delegamos en renderDiaAreaMulti
   if(selDay && selDay.k && TV2[selDay.k] && TV2[selDay.k].length > 0){
@@ -8540,21 +8637,17 @@ function renderDiaArea(){
   var wd=(dt.getDay()+6)%7;
   var fstr=DIAS_L[wd]+' '+d+' de '+MESES[mo-1].toLowerCase();
 
-  // NUEVO — Sistema Horario Compañero: si hay un compañero importado
-  // (solo posible siendo admin, ver importarComoCompanero) y el modo
-  // de vista no es 'mio', se calcula aquí su turno de este mismo día
-  // para poder mostrarlo en el detalle — tanto si tú tienes turno
-  // propio ese día como si no (antes, si no tenías turno propio, la
-  // función terminaba antes de llegar aquí y nunca se mostraba nada
-  // del compañero).
-  var companeroTexto = null;
+  // NUEVO — Sistema Horario Compañero, REDISEÑADO: cuando el modo de
+  // vista no es 'mio' (Compañero/Comparar), este día se muestra por
+  // un camino COMPLETAMENTE APARTE — tarjetas de solo lectura, con
+  // el mismo aspecto que una tarjeta de turno normal, pero SIN
+  // ningún botón de editar/añadir (bloqueado a propósito). El modo
+  // 'Mis turnos' nunca entra aquí — sigue exactamente el camino de
+  // siempre, sin ningún cambio de apariencia ni de comportamiento.
   if(typeof vistaMode!=='undefined' && vistaMode!=='mio' && typeof COMP_DATA!=='undefined' && COMP_DATA && COMP_DATA.days){
-    companeroTexto = COMP_DATA.days[String(d)] || null;
+    area.innerHTML = _renderVistaSoloLecturaCompanero(d, k, t, fstr);
+    return;
   }
-  var companeroHtml = companeroTexto
-    ? '<div class="ibox" style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.3);margin-top:10px">'
-      +'<span class="ibox-i">👤</span><span><b>'+(COMP_DATA.name||'Compañero')+'</b>: '+companeroTexto+'</span></div>'
-    : '';
 
   if(!t){
     area.innerHTML='<div class="dc-vacia" onclick="abrirTipo()">'
@@ -8562,8 +8655,7 @@ function renderDiaArea(){
       +'<div class="dcv-fecha">'+fstr+'</div>'
       +'<div class="dcv-hint">Sin turno asignado</div>'
       +'<button class="dcv-btn" onclick="abrirTipoDesdeCard()">➕ Agregar turno</button>'
-      +'</div>'
-      + companeroHtml;
+      +'</div>';
     return;
   }
 
@@ -8885,11 +8977,6 @@ function renderDiaArea(){
       : '')
     +'</div></div>';
   if(selDay) setTimeout(function(){renderTV2DiaCard(selDay.k);},10);
-  // NUEVO — Sistema Horario Compañero: si hay texto de compañero para
-  // este día, se añade al final del detalle (no reemplaza nada tuyo,
-  // solo se añade debajo) — así el modo "Comparar" muestra los dos
-  // turnos juntos en la misma tarjeta.
-  if(companeroHtml) area.insertAdjacentHTML('beforeend', companeroHtml);
   // NUEVO — "con quién viajas": rellena automáticamente, bajo demanda
   // (solo el día que se está viendo, no todo el mes de golpe), los
   // huecos de compañeros que acaban de pintarse en este detalle.
@@ -12172,6 +12259,16 @@ async function autoRellenarNombrePorMatricula(){
 }
 
   document.getElementById('aj-nom').value=AJ.nombre||'';
+  var elSaludoInp = document.getElementById('aj-nombre-saludo');
+  if(elSaludoInp){
+    elSaludoInp.value = AJ.nombrePila || '';
+    // Si no hay nada guardado a mano, se sugiere el nombre de pila
+    // calculado a partir del nombre completo, como placeholder —
+    // se ve gris, no se guarda hasta que la persona lo confirme o
+    // escriba el suyo propio.
+    var sugerido = (typeof _primerNombreDesde==='function') ? _primerNombreDesde(AJ.nombre) : '';
+    if(sugerido) elSaludoInp.placeholder = 'Cómo te saludamos (sugerido: '+sugerido+')';
+  }
   document.getElementById('aj-mat').value=AJ.matricula||'';
   document.getElementById('aj-vh').value=AJ.vh||12.5;
   document.getElementById('aj-noc').value=AJ.nocturnidad||1.80;
@@ -12247,6 +12344,8 @@ function _sedeUsuarioActual(){
 
 function saveAj(){
   AJ.nombre=document.getElementById('aj-nom').value.trim()||'Mis Turnos';
+  var elSaludoInpSave = document.getElementById('aj-nombre-saludo');
+  AJ.nombrePila = elSaludoInpSave ? elSaludoInpSave.value.trim() : '';
   AJ.matricula=document.getElementById('aj-mat').value.trim()||'';
   AJ.vh=parseFloat(document.getElementById('aj-vh').value)||12.5;
   AJ.nocturnidad=parseFloat(document.getElementById('aj-noc').value)||1.80;
@@ -13588,6 +13687,12 @@ function setVistaMode(mode) {
 // por renderSlide() — no modifica ninguna clase ni dato existente de
 // las celdas, solo añade un elemento visual encima.
 function aplicarVistaCompanero(grid, y, m){
+  // FIX — antes, al volver a "Mis turnos", la función se salía aquí
+  // mismo sin quitar la clase que atenúa la celda — si venías de
+  // "Compañero", esa apariencia se quedaba "pegada" aunque ya
+  // estuvieras en Mis turnos. Ahora se limpia siempre primero, así
+  // Mis turnos vuelve a verse exactamente como antes de esta función.
+  grid.classList.remove('cal-modo-comp-solo');
   if(vistaMode==='mio') return;
   if(!COMP_DATA || !COMP_DATA.days || !Object.keys(COMP_DATA.days).length) return;
   // FIX — antes solo se pintaba si el año/mes que se estaba viendo
@@ -13627,8 +13732,12 @@ function aplicarVistaCompanero(grid, y, m){
 // aquí para que ambas partes coincidan. Si el mes real cambia, este
 // valor habrá que actualizarlo (o, mejor, sacarlo del propio PDF —
 // pendiente para una mejora futura, no bloquea esta función).
-function importarComoCompanero(id, name, days){
-  COMP_DATA = {id:id, name:name, days:days};
+function importarComoCompanero(id, name, days, horasCI, horasCO, rutaPorDia){
+  // NUEVO — se guardan también, día a día, la hora de toma (CI), la
+  // hora de deje (CO) y la ruta orientativa (estación salida-llegada)
+  // del compañero — para poder mostrar su turno con el mismo formato
+  // que una tarjeta normal en el Calendario, en modo solo lectura.
+  COMP_DATA = {id:id, name:name, days:days, horasCI:horasCI||{}, horasCO:horasCO||{}, rutaPorDia:rutaPorDia||{}};
   saveComp();
   toast('👤 '+name+' importado como Compañero — mira el Calendario');
   renderVistaToggle();
@@ -18421,17 +18530,30 @@ async function cargarHorarioGlobalDesdeAdmin(){
       if(!respTodas.data || !respTodas.data.length){ _diagHorarioGeneral = 'Consulta (admin) sin filas: no hay ninguna fila con tipo LIKE horario_general_%'; return false; }
       var datosFusionados = [];
       var fechaMasReciente = null;
+      // NUEVO — antes, si el PDF de una sede fallaba al leerse (0
+      // empleados, por el motivo que fuera), esa sede simplemente se
+      // saltaba EN SILENCIO — el resultado seguía llamándose "Todas
+      // las sedes (admin)" aunque, en la práctica, esa sede no
+      // hubiera entrado. Ahora se lleva la cuenta de cuántos
+      // empleados se leyeron de CADA sede, y si alguna se queda en 0,
+      // se avisa explícitamente en el propio label — para que un
+      // fallo de lectura ya no se confunda con "esa sede de verdad no
+      // tiene a nadie en ese tren ese día".
+      var resumenPorSede = [];
       for(var i=0; i<respTodas.data.length; i++){
         var filaSede = respTodas.data[i];
-        if(!filaSede.url_archivo) continue;
+        var sedeLbl = filaSede.sede || filaSede.tipo.replace('horario_general_','');
+        if(!filaSede.url_archivo){ resumenPorSede.push(sedeLbl+':sin archivo'); continue; }
         var datosSede = await _descargarYParsearHorario(filaSede);
         if(datosSede && datosSede.length){
           // Se etiqueta cada empleado con su sede real, añadiéndola
           // como 4º elemento de la tupla [id, nombre, dias, sede] —
           // no rompe nada existente, que solo usa los 3 primeros.
-          var sedeLbl = filaSede.sede || filaSede.tipo.replace('horario_general_','');
           datosSede.forEach(function(emp){ emp[3] = sedeLbl; });
           datosFusionados = datosFusionados.concat(datosSede);
+          resumenPorSede.push(sedeLbl+':'+datosSede.length);
+        } else {
+          resumenPorSede.push(sedeLbl+':⚠️0 empleados');
         }
         var fechaFila = new Date(filaSede.fecha_subida);
         if(!fechaMasReciente || fechaFila>fechaMasReciente) fechaMasReciente = fechaFila;
@@ -18439,7 +18561,9 @@ async function cargarHorarioGlobalDesdeAdmin(){
       if(!datosFusionados.length){ _diagHorarioGeneral = 'Filas encontradas ('+respTodas.data.length+'), pero 0 empleados tras parsear todas'; return false; }
       BASES.global.data = datosFusionados;
       BASES.global.month = fechaMasReciente ? fechaMasReciente.toLocaleDateString('es-ES') : '—';
-      BASES.global.label = 'Horario General · Todas las sedes (admin)';
+      var huboFallo = resumenPorSede.some(function(r){ return r.indexOf('⚠️')!==-1 || r.indexOf('sin archivo')!==-1; });
+      BASES.global.label = 'Horario General · Todas las sedes (admin)' + (huboFallo ? ' — ⚠️ revisar: '+resumenPorSede.join(', ') : '');
+      console.log('Horario General (admin, todas las sedes) — empleados por sede:', resumenPorSede.join(' | '));
       return true;
     }
 
@@ -18790,14 +18914,32 @@ window.buscarTripulanteEnTodasLasSedes = async function(matricula){
   }
 };
 
+// NUEVO — recuerda con qué "modo" se cargaron los datos la última vez
+// (todas las sedes, si eres admin/interventor; o una sola sede, si
+// eres tripulante normal) — para saber cuándo hay que recargar.
+var _ultimoModoCargaHorarioGeneral = null;
+
 // NUEVO — para el "con quién viajas" automático en Turnos del mes
 // (Horario individual). Reutiliza activeBase/cellContainsTrain ya
 // existentes, sin duplicar esa lógica. Se expone a window por el
 // mismo motivo de siempre: ese panel vive fuera de este módulo.
 window.asegurarHorarioGeneralCargado = async function(){
-  if(activeBase && activeBase.data) return true;
+  // FIX — antes, en cuanto activeBase.data se cargaba UNA vez (por
+  // ejemplo, como tripulante normal de una sola sede, ANTES de
+  // iniciar sesión de admin o entrar como interventor), esos datos se
+  // quedaban en caché para siempre — aunque luego la persona pasara a
+  // ser admin/interventor, "con quién viajas" seguía buscando solo en
+  // esa única sede de antes. Ahora se comprueba si el modo (todas las
+  // sedes vs. una sola) cambió desde la última carga, y si cambió, se
+  // vuelve a pedir todo de cero.
+  var esAdminOInterventorAhora = !!(perfilAdminActual && perfilAdminActual.rol==='admin') || !!(usuarioActual && usuarioActual.esInterventor);
+  var modoEsperado = esAdminOInterventorAhora ? 'todas-las-sedes' : ('sede:'+_sedeUsuarioActual());
+  if(activeBase && activeBase.data && _ultimoModoCargaHorarioGeneral === modoEsperado) return true;
   var ok = await cargarHorarioGlobalDesdeAdmin();
-  if(ok) activateBase('global');
+  if(ok){
+    activateBase('global');
+    _ultimoModoCargaHorarioGeneral = modoEsperado;
+  }
   return !!(activeBase && activeBase.data);
 };
 window.buscarCompanerosParaTrenDia = function(trainNum, dayNum){
@@ -19745,7 +19887,17 @@ const SHIFT_WHITELIST = new Set(['DO','F','R','LD','CP','DOP','B','EX','PP','FE'
 function isShiftCode(text){
   if(text.includes(':') || text.includes(',')) return false;
   if(/^[0-9]/.test(text)) return true;
-  return SHIFT_WHITELIST.has(text);
+  if(SHIFT_WHITELIST.has(text)) return true;
+  // FIX — un código de turno partido en 2 líneas a veces continúa en
+  // la segunda con una letra (ej. "4121T1D" arriba, "H-622" debajo,
+  // en el PDF real de Madrid) — antes se rechazaba por no empezar con
+  // un número, y esa segunda línea se perdía sin más, dejando el
+  // código incompleto ("4121T1D" en vez de "4121T1DH-622"). Ahora se
+  // acepta si contiene algún dígito Y no es un fragmento de ruta/
+  // estación puro (looksLikeStationCode ya distingue eso, ej.
+  // "BSN-ATO" sigue rechazándose correctamente).
+  if(/[0-9]/.test(text) && !looksLikeStationCode(text)) return true;
+  return false;
 }
 function getDayColumns(words){
   const cands = words.filter(w => /^[0-9]{1,2}$/.test(w.text) && w.top>=50 && w.top<=65);
@@ -19774,6 +19926,37 @@ function splitRepeatedTurnoCode(text){
 // "Prorr.") por su segunda palabra de etiqueta (x0<25, única por
 // fila) y devuelve el primer valor numérico (hh:mm o NN,NN) que
 // aparece en esa misma línea, antes de la zona de días.
+// NUEVO — divide un "blob" de ruta fusionado (varios días pegados sin
+// espacio, ej. "BSN-CARCAR-BSNBSN-SVQ") en sus tramos "origen-destino"
+// individuales, usando los códigos de estación conocidos. Igual que
+// splitRepeatedTurnoCode pero para la fila de ruta — probado contra
+// el PDF real (funciona bien, con el mismo margen de imprecisión ya
+// conocido en los empalmes entre días, siempre en modo orientativo).
+function splitRouteBlob(text){
+  var out = [];
+  var rest = text;
+  var guard = 0;
+  while(rest.length > 0 && guard < 20){
+    guard++;
+    var matched = false;
+    for(var nCodes = 5; nCodes >= 2 && !matched; nCodes--){
+      var re = new RegExp('^((?:[A-Z]{2,4}-){' + (nCodes-1) + '}[A-Z]{2,4})');
+      var m = rest.match(re);
+      if(m){
+        var partes = m[1].split('-');
+        if(partes.every(function(p){ return STATION_CODES.has(p); })){
+          out.push(m[1]);
+          rest = rest.slice(m[1].length);
+          matched = true;
+        }
+      }
+    }
+    if(!matched) break;
+  }
+  if(rest.length>0) out.push(rest);
+  return out;
+}
+
 function extractSummaryValue(bwords, subLabel){
   const anchor = bwords.find(w => w.x0<25 && w.text===subLabel);
   if(!anchor) return '';
@@ -19860,6 +20043,44 @@ function parsePageWords(rawWords, leftoverIn, pageNum){
       const items = dayData[day].sort((a,b)=> a[0]-b[0] || a[1]-b[1]);
       daysFinal[day] = items.map(x=>x[2]).join('');
     }
+
+    // NUEVO — hora de toma (CI) y hora de deje (CO) por día, y ruta
+    // (estación origen-destino) por día — para el Sistema Horario
+    // Compañero, en modo orientativo. Reutiliza el mismo reparto por
+    // columna de día que ya usan los códigos de turno de arriba.
+    const nearestDay = (x0) => {
+      let bestIdx = 0, bestDiff = Infinity;
+      daycols.forEach((cx, idx)=>{ const d = Math.abs(x0-cx); if(d<bestDiff){bestDiff=d; bestIdx=idx;} });
+      return bestIdx+1;
+    };
+    const ciAnchor = bwords.find(w => w.x0<100 && w.text==='CI');
+    const coAnchor = bwords.find(w => w.x0<100 && w.text==='CO');
+    const horasCI = {}, horasCO = {};
+    if(ciAnchor){
+      bwords.filter(w => Math.abs(w.top-ciAnchor.top)<=2.5 && w.x0>=100 && /^[0-9]{1,2}:[0-9]{2}$/.test(w.text))
+        .forEach(w => { horasCI[nearestDay(w.x0)] = w.text; });
+    }
+    if(coAnchor){
+      bwords.filter(w => Math.abs(w.top-coAnchor.top)<=2.5 && w.x0>=100 && /^[0-9]{1,2}:[0-9]{2}$/.test(w.text))
+        .forEach(w => { horasCO[nearestDay(w.x0)] = w.text; });
+    }
+    const rutaWords = bwords.filter(w => w.x0>=100 && w.top<nameLimitTop && looksLikeStationCode(w.text));
+    const rutaTmp = {};
+    rutaWords.forEach(w=>{
+      const partes = splitRouteBlob(w.text.toUpperCase());
+      const dayInicio = nearestDay(w.x0);
+      partes.forEach((p, k)=>{
+        const day = dayInicio + k;
+        if(day > daycols.length) return;
+        (rutaTmp[day] = rutaTmp[day] || []).push([w.top, w.x0 + k*colWidth, p]);
+      });
+    });
+    const rutaPorDia = {};
+    for(const day in rutaTmp){
+      const items = rutaTmp[day].sort((a,b)=> a[0]-b[0] || a[1]-b[1]);
+      rutaPorDia[day] = items.map(x=>x[2]).join(' ');
+    }
+
     // NUEVO — resumen de horas del mes + página del PDF donde
     // aparece, para mostrarlos junto al nombre en el Buscador (igual
     // que ya aparecía en la maqueta de verificación).
@@ -19872,7 +20093,10 @@ function parsePageWords(rawWords, leftoverIn, pageNum){
     // índice 3 se deja libre a propósito: cargarHorarioGlobalDesdeAdmin()
     // lo usa para anotar la sede cuando el admin fusiona varias sedes
     // (emp[3] = sedeLbl) — no lo tocamos para no romper esa función.
-    out.push([empId, name, daysFinal, undefined, horasTotales, horasEF, horasPR, jorProrr, pagina]);
+    // Índices 9/10/11 (horasCI/horasCO/rutaPorDia) son NUEVOS — se
+    // añaden al final para no romper ningún código existente que ya
+    // lea esta tupla por posición (0-8).
+    out.push([empId, name, daysFinal, undefined, horasTotales, horasEF, horasPR, jorProrr, pagina, horasCI, horasCO, rutaPorDia]);
   }
   // sobrante: todo lo que quedó después del último "Jor." de este
   // bloque combinado — se traslada, desplazado bien al negativo, a
@@ -20290,7 +20514,7 @@ function renderList(matches, query){
 }
 
 const TAG_LABEL = {ord:'TURNO', des:'DESCANSO', res:'FRANCO/RES.', dop:'DOP', oth:'OTROS'};
-function renderProfile([id, name, days, sede, horasTotales, horasEF, horasPR, jorProrr, pagina]){
+function renderProfile([id, name, days, sede, horasTotales, horasEF, horasPR, jorProrr, pagina, horasCI, horasCO, rutaPorDia]){
   let items = '';
   for(let d=1; d<=31; d++){
     const cell = days[String(d)] || '';
@@ -20356,7 +20580,7 @@ function renderProfile([id, name, days, sede, horasTotales, horasEF, horasPR, jo
   `;
   document.getElementById('backBtn').addEventListener('click', ()=>{ doSearch(); });
   var btnImpComp = document.getElementById('btnImportarComp');
-  if(btnImpComp) btnImpComp.addEventListener('click', ()=>{ importarComoCompanero(id, name, days); });
+  if(btnImpComp) btnImpComp.addEventListener('click', ()=>{ importarComoCompanero(id, name, days, horasCI, horasCO, rutaPorDia); });
   var btnCompararAqui = document.getElementById('btnCompararAqui');
   if(btnCompararAqui) btnCompararAqui.addEventListener('click', ()=>{ compararAquiEnBuscador(id, name, days); });
   viewEl.querySelectorAll('.tl-item').forEach(item=>{
