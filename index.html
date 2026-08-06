@@ -20373,9 +20373,10 @@ document.getElementById('trGoBtn').addEventListener('click', async ()=>{
   btn.textContent = 'Buscando...';
   try{
     const matches = [];
-    for(const [id, name, days] of activeBase.data){
+    for(const entryTren of activeBase.data){
+      const [id, name, days] = entryTren;
       const cell = days[String(selectedTrainDay)];
-      if(cell && cellContainsTrain(cell, raw)) matches.push({id, name, cell});
+      if(cell && cellContainsTrain(cell, raw)) matches.push({id, name, cell, entry: entryTren});
     }
     const interventorMatches = buscarInterventor(raw, fecha_seleccionada_busqueda);
     renderTrain(raw, selectedTrainDay, matches, interventorMatches);
@@ -20447,13 +20448,17 @@ function renderTrain(trainNum, day, matches, interventorMatches){
       </div>
     </div>`;
   });
-  matches.forEach((m)=>{
-    filas += `<div class="pcard">
-      <div class="pcard-av">${initials(m.name)}</div>
-      <div class="pcard-info">
-        <div class="pcard-name">${m.name}</div>
-        <div class="pcard-id">TRIPULACIÓN · ${activeBase.label}${m.id ? ' · ID '+m.id : ''}</div>
+  matches.forEach((m, mIdx)=>{
+    var esAdminTren = (typeof perfilAdminActual!=='undefined' && perfilAdminActual && perfilAdminActual.rol==='admin');
+    filas += `<div class="pcard" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="pcard-av">${initials(m.name)}</div>
+        <div class="pcard-info">
+          <div class="pcard-name">${m.name}</div>
+          <div class="pcard-id">TRIPULACIÓN · ${activeBase.label}${m.id ? ' · ID '+m.id : ''}</div>
+        </div>
       </div>
+      ${esAdminTren ? `<button class="btn-import-comp-tren" data-midx="${mIdx}" style="margin-top:8px;padding:8px;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.35);border-radius:8px;color:#93c5fd;font-size:11px;font-weight:700;cursor:pointer">👤 (Admin) Ver su horario junto al mío</button>` : ''}
     </div>`;
   });
   const partes = [];
@@ -20463,6 +20468,16 @@ function renderTrain(trainNum, day, matches, interventorMatches){
     <div class="train-meta">Tren <b>${trainNum}</b> · ${wd} ${day} · ${partes.join(' + ')}</div>
     <div class="comp-list">${filas}</div>
   </div>`;
+  trainView.querySelectorAll('.btn-import-comp-tren').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var mIdx = parseInt(btn.dataset.midx, 10);
+      var m = matches[mIdx];
+      if(!m || !m.entry) return;
+      var entry = m.entry;
+      // entry = [id, name, days, sede, horasTotales, horasEF, horasPR, jorProrr, pagina, horasCI, horasCO, rutaPorDia]
+      importarComoCompanero(entry[0], entry[1], entry[2], entry[9], entry[10], entry[11]);
+    });
+  });
   };
   mostrarConAnimacionTren(trainView, _render);
 }
