@@ -8095,6 +8095,16 @@ function _escribirCopiaTurno(res){
       // afecta a Stats del mes — ahí sus horas siguen contando igual
       // que siempre, sin este filtro.
       ddViejo.esAntiguoPrincipal = true;
+      // NUEVO — Confirmado por Alex: sus horas se quedan GRABADAS en
+      // este mismo momento, calculadas mientras el dato todavía es
+      // 100% fiable (justo antes de pisarlo), en vez de fiarse de que
+      // el cálculo mensual lo vuelva a procesar bien más adelante.
+      // calcularJornadaDiaria() usa este valor directamente si existe
+      // (ver el FIX correspondiente ahí), así que estas horas quedan
+      // garantizadas pase lo que pase después.
+      try{
+        ddViejo._horasGarantizadas = calcularJornadaDiaria([existente], esc.k);
+      }catch(errGarantia){ /* si falla, calcularJornadaDiaria() recalcula como siempre */ }
       TV2[esc.k].push(ddViejo);
     }
     // Limpieza de enlaces de pernocta huérfanos si el día pisado
@@ -12190,6 +12200,11 @@ function _escribirDiaPernoctaConDemota(kDestino, kOrigen, nuevoDato){
     // DÍA" no sume estas horas junto al nuevo día de vuelta/intermedio.
     // Stats del mes no se ve afectado, ahí sigue sumando igual.
     ddViejo.esAntiguoPrincipal = true;
+    // NUEVO — mismas horas grabadas en el momento del pisado, ver el
+    // comentario igual en _escribirCopiaTurno().
+    try{
+      ddViejo._horasGarantizadas = calcularJornadaDiaria([existente], kDestino);
+    }catch(errGarantia){ /* si falla, se recalcula como siempre */ }
     TV2[kDestino].push(ddViejo);
   }
   TV[kDestino] = nuevoDato;
@@ -14450,6 +14465,21 @@ function calcularJornadaDiaria(turnos, fecha){
     // sin ninguna de las dos sigue calculándose exactamente igual que
     // siempre — el objeto jornada original del usuario, sin tocar.
     if(t.turno_referencia_externa || t.esTurnoIntercambiado) return;
+
+    // NUEVO — Confirmado por Alex: si este turno tiene horas GRABADAS
+    // (se congelaron en el momento exacto en que pasó a secundario,
+    // ver _escribirCopiaTurno()/_escribirDiaPernoctaConDemota()), se
+    // usan tal cual, sin volver a calcular nada — así quedan
+    // garantizadas pase lo que pase con el resto del día. Esto NO
+    // sustituye al cálculo normal para turnos nuevos, solo aplica a
+    // los ya congelados en su momento.
+    if(t._horasGarantizadas){
+      efectivasCal  += t._horasGarantizadas.efectivasMin||0;
+      presenciaCal  += t._horasGarantizadas.presenciaMin||0;
+      efectivasHTDL += t._horasGarantizadas.efectivasHTDLMin||0;
+      presenciaHTDL += t._horasGarantizadas.presenciaHTDLMin||0;
+      return;
+    }
     // FIX — bucket POR TURNO, no por día completo.
     var esHTDLEste = (t.tipo==='trabajado' || t.tipo==='art5152');
 
