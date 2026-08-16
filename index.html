@@ -15969,7 +15969,29 @@ function renderDiaAreaMulti(){
   // horas del turno viejo siguen contando en Stats del mes con
   // normalidad (calcularJornadaDiaria no cambia); aquí solo se filtra
   // qué entra en ESTE total concreto de la tarjeta del día.
-  var allParaTotal = all.filter(function(x){ return !x.esAntiguoPrincipal; });
+  // NUEVO — Confirmado por Alex: cuando el día de la vuelta/intermedio
+  // es el turno PRINCIPAL de ese día (por "Copiar turno" o por
+  // registrarlo a mano encima de algo), su propio "TOTAL DEL DÍA"
+  // debe mostrar sus horas — pero calcularJornadaDiaria() solo sabe
+  // sumar tipo 'ordinario'/'trabajado'/'art5152', nunca
+  // 'vuelta-pernocta'/'pernocta3-intermedio' (para el cálculo MENSUAL
+  // eso está bien: esas horas ya se cuentan una vez, desde el día de
+  // origen). Aquí, para ESTE total del día en concreto, se traduce
+  // una copia SOLO PARA EL CÁLCULO (no se guarda nada) al tipo real
+  // del origen, con sus propios datos como si fueran la "ida" de ese
+  // día — así sus horas sí entran en la suma, sin tocar cómo vive
+  // guardado ni duplicar nada en Stats del mes.
+  var allParaTotal = all.filter(function(x){ return !x.esAntiguoPrincipal; }).map(function(x){
+    if(x.tipo!=='vuelta-pernocta' && x.tipo!=='pernocta3-intermedio') return x;
+    var origen = x.origenPernocta ? TV[x.origenPernocta] : null;
+    var tipoReal = (origen && (origen.tipo==='trabajado'||origen.tipo==='art5152')) ? origen.tipo : 'ordinario';
+    var traducido = {}; for(var _kt in x) traducido[_kt] = x[_kt];
+    traducido.tipo = tipoReal;
+    if(origen && origen.continuidadVuelta && origen.continuidadVuelta.length && (!x.continuidad||!x.continuidad.length)){
+      traducido.continuidad = origen.continuidadVuelta;
+    }
+    return traducido;
+  });
   var jornadaCombo = calcularJornadaDiaria(allParaTotal, k);
   // FIX — el total real del día es la suma de los CUATRO buckets. Antes
   // solo se sumaban efectivasMin+presenciaMin (bucket Ordinario), asi
@@ -16014,8 +16036,13 @@ function renderDiaAreaMulti(){
   // con"), colapsado por defecto salvo el primero, en vez de la
   // tarjeta plana anterior — resuelve que faltaran compañeros y que
   // el aspecto no coincidiera con el de un día normal.
-  for(var ii=all.length-1; ii>=0; ii--){
-    html += renderAccordionTurno(all[ii], k, ii>0, ii-1, ii===all.length-1, tipoHTDLDia);
+  // FIX — Confirmado por Alex: el TURNO PRINCIPAL (all[0]) tiene que
+  // salir SIEMPRE arriba del todo, y ser el que se abre por defecto —
+  // antes el bucle iba al revés (de los adicionales hacia el
+  // principal), así que el principal quedaba abajo y era el
+  // adicional el que se abría solo.
+  for(var ii=0; ii<all.length; ii++){
+    html += renderAccordionTurno(all[ii], k, ii>0, ii-1, ii===0, tipoHTDLDia);
   }
 
   html += '</div>';
