@@ -4158,8 +4158,8 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
       <button class="dct-btn-sec" style="width:100%;margin-bottom:8px;text-align:left" onclick="_elegirCompCopia('dias')">
         <b>Días</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Genera día(s) libres el mes siguiente — eliges cuáles</span>
       </button>
-      <button class="dct-btn-sec" style="width:100%;text-align:left" onclick="_elegirCompCopia('mix')">
-        <b>Mixto</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Parte dinero, parte días</span>
+      <button id="cop-comp-mix-btn" class="dct-btn-sec" style="width:100%;text-align:left" onclick="_elegirCompCopia('mix')">
+        <b>Mixto</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Parte dinero, parte días — el tramo con más horas se paga, el de menos genera día libre</span>
       </button>
     </div>
   </div>
@@ -4169,13 +4169,13 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
   <div class="sh" onclick="event.stopPropagation()">
     <div class="sh-handle"></div>
     <div class="sh-hdr">
-      <div class="sh-ico">⚠️</div>
-      <div><div class="sh-tit">Ese día ya tiene algo</div><div class="sh-sub" id="cop-conflicto-dias">—</div></div>
+      <div class="sh-ico">📋</div>
+      <div><div class="sh-tit">Así va a quedar</div><div class="sh-sub">Revisa antes de confirmar</div></div>
     </div>
     <div style="padding:0 18px 18px">
-      <button class="dct-btn-sec" style="width:100%;margin-bottom:8px" onclick="_resolverConflictoCopia('sobrescribir')">♻️ Sobrescribir</button>
-      <button class="dct-btn-sec" style="width:100%;margin-bottom:8px" onclick="_resolverConflictoCopia('extra')">➕ Añadir como turno extra</button>
-      <button class="dct-btn-sec sec-red" style="width:100%" onclick="_resolverConflictoCopia('omitir')">⏭️ Cancelar copia</button>
+      <div id="cop-conflicto-dias" class="msg-info" style="margin-bottom:14px;line-height:1.6">—</div>
+      <button class="dct-btn-sec" style="width:100%;margin-bottom:8px;background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.4)" onclick="_resolverConflictoCopia('confirmar')">✅ Confirmar copia</button>
+      <button class="dct-btn-sec sec-red" style="width:100%" onclick="_resolverConflictoCopia('cancelar')">✕ Cancelar</button>
     </div>
   </div>
 </div>
@@ -7841,6 +7841,15 @@ function _elegirTipoCopia(tipoElegido){
     // motor de dinero no tiene datos suficientes.
     document.getElementById('cop-comp-sub').textContent =
       (tipoElegido==='htdl'?'HTDL':'Art. 51/52')+' — cómo se compensa esta copia';
+    // FIX — "Mixto" solo existe para pernoctas (confirmado por
+    // Alex): el tramo con más horas va a dinero y el de menos a
+    // día libre — eso no tiene sentido en un ida-vuelta de un solo
+    // día, y el propio motor de dinero no lo calcula si no hay
+    // modo pernocta. El formulario real ya oculta "Mix" en ese
+    // caso (F.modo!=='pernocta'); aquí se hace lo mismo para no
+    // dejar elegir una opción que luego no calcularía nada.
+    var esPernocta = _copiarOrigen && _copiarOrigen.dias>1;
+    document.getElementById('cop-comp-mix-btn').style.display = esPernocta ? '' : 'none';
     openOvTop('ov-copiar-comp');
     return;
   }
@@ -7849,6 +7858,10 @@ function _elegirTipoCopia(tipoElegido){
 
 function _elegirCompCopia(modoComp){
   closeOv('ov-copiar-comp');
+  if(modoComp==='mix' && !(_copiarOrigen && _copiarOrigen.dias>1)){
+    toast('⚠️ Mixto solo existe para pernoctas');
+    return;
+  }
   if(modoComp==='dinero'){
     _procesarCopiaConModo(_copiarTipoPendiente, 'dinero');
   } else {
@@ -7865,12 +7878,22 @@ function _procesarCopiaConModo(tipoElegido, modoComp){
   var res = _construirEscrituraCopia(_copiarOrigen, _copiarDestino, tipoElegido, modoComp);
   if(!res){ toast('⚠️ No se pudo preparar la copia'); return; }
   window._copiaConflictoPendiente = res;
-  var conflicto = res.escrituras.some(function(esc){ return !!TV[esc.k] || (TV2[esc.k]&&TV2[esc.k].length); });
-  if(!conflicto){
-    _escribirCopiaTurno(res, 'directo');
+  // NUEVO — regla confirmada por Alex, evaluada día por día (no todo
+  // el bloque a la vez): si el día ya tenía DESCANSO, se sobrescribe
+  // sin más (no hay nada que perder). Si ya tenía un turno REAL, ese
+  // turno no se borra — pasa a SECUNDARIO (turno extra) y sus horas
+  // siguen contando igual que ahora; la copia entra como principal.
+  var hayAlgo = res.escrituras.some(function(esc){ return !!TV[esc.k]; });
+  if(!hayAlgo){
+    _escribirCopiaTurno(res);
   } else {
-    var etiquetas = res.escrituras.map(function(esc){ return esc.k; }).join(', ');
-    document.getElementById('cop-conflicto-dias').textContent = etiquetas;
+    var resumen = res.escrituras.map(function(esc){
+      var existente = TV[esc.k];
+      if(!existente) return '· '+esc.k+': vacío → se rellena';
+      if(existente.tipo==='descanso') return '· '+esc.k+': tenía descanso → se sobrescribe';
+      return '· '+esc.k+': tenía un turno guardado → pasa a secundario (sus horas se siguen contando)';
+    });
+    document.getElementById('cop-conflicto-dias').innerHTML = resumen.join('<br>');
     openOvTop('ov-copiar-conflicto');
   }
 }
@@ -7931,8 +7954,7 @@ function _resolverConflictoCopia(accion){
   closeOv('ov-copiar-conflicto');
   var res = window._copiaConflictoPendiente;
   if(!res) return;
-  if(accion==='sobrescribir') _escribirCopiaTurno(res,'sobrescribir');
-  else if(accion==='extra') _escribirCopiaTurno(res,'extra');
+  if(accion==='confirmar') _escribirCopiaTurno(res);
   else toast('Copia cancelada');
 }
 
@@ -8013,20 +8035,34 @@ function _construirEscrituraCopia(origen, destino, tipoElegido, modoComp){
   return {escrituras:escrituras, incompletos:[]};
 }
 
-function _escribirCopiaTurno(res, modo){
+function _escribirCopiaTurno(res){
   res.escrituras.forEach(function(esc){
-    if(modo==='extra' || esc.esTV2){
-      var tipoHeredado = esc.esTV2 ? esc.data.tipo : ((TV[esc.k]&&TV[esc.k].tipo)||'ordinario');
+    if(esc.esTV2){
+      // HTDL copiado — siempre entra como turno extra (así ya se
+      // construyó en _construirEscrituraCopia), esto no cambia.
       if(!TV2[esc.k]) TV2[esc.k]=[];
-      var dd={}; for(var campo in esc.data) dd[campo]=esc.data[campo];
-      if(!esc.esTV2) dd.tipo = tipoHeredado;
-      TV2[esc.k].push(dd);
-    } else {
-      if(modo==='sobrescribir' && TV[esc.k] && TV[esc.k].diaSiguiente && TV[esc.k].diaSiguiente!==esc.data.diaSiguiente){
-        if(TV[TV[esc.k].diaSiguiente] && TV[TV[esc.k].diaSiguiente].origenPernocta===esc.k) delete TV[TV[esc.k].diaSiguiente];
-      }
-      TV[esc.k] = esc.data;
+      var ddH={}; for(var campoH in esc.data) ddH[campoH]=esc.data[campoH];
+      TV2[esc.k].push(ddH);
+      return;
     }
+    var existente = TV[esc.k];
+    // NUEVO — regla confirmada por Alex: si ya había un turno REAL
+    // (no descanso), no se pierde — pasa a SECUNDARIO (turno extra),
+    // conservando todos sus datos tal cual, así que sus horas y su
+    // dinero se siguen contando exactamente igual que antes. Solo
+    // deja de ser el turno "oficial" del día — la copia pasa a serlo.
+    if(existente && existente.tipo!=='descanso'){
+      if(!TV2[esc.k]) TV2[esc.k]=[];
+      var ddViejo={}; for(var campoV in existente) ddViejo[campoV]=existente[campoV];
+      TV2[esc.k].push(ddViejo);
+    }
+    // Limpieza de enlaces de pernocta huérfanos si el día pisado
+    // apuntaba a otro día distinto del nuevo (evita dejar un
+    // "vuelta-pernocta" colgando sin turno de origen real).
+    if(existente && existente.diaSiguiente && existente.diaSiguiente!==esc.data.diaSiguiente){
+      if(TV[existente.diaSiguiente] && TV[existente.diaSiguiente].origenPernocta===esc.k) delete TV[existente.diaSiguiente];
+    }
+    TV[esc.k] = esc.data;
   });
   saveTV(); saveTV2();
   renderCal(); renderStats();
@@ -16794,10 +16830,35 @@ function _pdfSumarMinutos(hhmm, mins){
    que ya usa la app en LINEAS/F.sal/F.lle). El PDF individual solo
    trae siglas (BSN, COR, ATO...), nunca el nombre completo. Se
    guarda en localStorage y se va enseñando la primera vez que
-   aparece cada sigla — nunca se adivina una que no esté aprendida.
+   aparece cada sigla que NO esté ya en este diccionario base —
+   nunca se adivina una desconocida.
+
+   Confirmadas por Alex (16/08/2026) — vienen de serie para que
+   nadie tenga que volver a enseñarlas desde cero:
 ═══════════════════════════════════════════════════════════ */
+var ESTACIONES_PDF_BASE = {
+  BSN:'Barcelona-Sants',
+  COR:'Córdoba',
+  BIL:'Bilbao-Abando',
+  FVL:'Figueres-Vilafant',
+  ALC:'Alicante / Alacant',
+  GRA:'Granada',
+  ATO:'Madrid-Puerta de Atocha',
+  CHA:'Madrid-Chamartín Clara Campoamor',
+  VIG:'Vigo-Urzáiz',
+  SVO:'Sevilla-Santa Justa',
+  VLC:'Valencia-Joaquín Sorolla',
+  ZAZ:'Zaragoza-Delicias'
+};
 var ESTACIONES_PDF = (function(){
-  try{ return JSON.parse(localStorage.getItem('pdfEstMap')||'{}'); }catch(e){ return {}; }
+  var guardadas = {};
+  try{ guardadas = JSON.parse(localStorage.getItem('pdfEstMap')||'{}'); }catch(e){ guardadas = {}; }
+  // Las siglas base van primero; lo que el usuario ya haya aprendido
+  // por su cuenta (o corregido a mano) tiene prioridad y no se pisa.
+  var combinado = {};
+  for(var k1 in ESTACIONES_PDF_BASE) combinado[k1] = ESTACIONES_PDF_BASE[k1];
+  for(var k2 in guardadas) combinado[k2] = guardadas[k2];
+  return combinado;
 })();
 function _guardarEstacionesPdf(){
   try{ localStorage.setItem('pdfEstMap', JSON.stringify(ESTACIONES_PDF)); }catch(e){}
