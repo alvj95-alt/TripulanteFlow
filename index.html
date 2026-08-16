@@ -17040,7 +17040,7 @@ function _pdfConstruirDiaSuelto(entry){
 function _pdfDireccionCompleta(entry){
   var tramos = entry.tramos;
   var dhMap = _pdfClasificarDH(entry.codigo);
-  var out = {salida:null,horaInicio:null,numTren:'',destino:null,horaFinal:null,continuidad:[],incompleto:false,
+  var out = {salida:null,horaInicio:null,numTren:'',destino:null,llegadaCabeza:null,horaFinal:null,continuidad:[],incompleto:false,
              esDH:null, dhMinutosCabeza:0};
   if(!tramos.length){ out.incompleto = true; return out; }
   var salTxt = _pdfTraducirEstacion(tramos[0].est);
@@ -17063,6 +17063,7 @@ function _pdfDireccionCompleta(entry){
     // en _pdfConstruirDiaSuelto — si no, se perdía ese margen final.
     out.horaFinal = tramos[0].CO || tramos[0].arr || null;
     out.destino = _pdfBuscarLlegadaSF(tramos[0].tren);
+    out.llegadaCabeza = out.destino;
   } else {
     for(var i=1;i<tramos.length;i++){
       var llegadaTxt = (i+1<tramos.length) ? _pdfTraducirEstacion(tramos[i+1].est) : _pdfBuscarLlegadaSF(tramos[tramos.length-1].tren);
@@ -17098,6 +17099,25 @@ function _pdfDireccionCompleta(entry){
       out.continuidad.push(contI);
     }
     out.destino = out.continuidad[out.continuidad.length-1].llegada;
+    // NUEVO — Confirmado por Alex: 'destino' es el final de TODA la
+    // cadena de tramos de este día (se usa para enlazar con el día
+    // siguiente de la pernocta) — pero para MOSTRAR el tramo de la
+    // "cabeza" (el primer tren) hace falta su propia llegada, que es
+    // sencillamente donde arranca el segundo tramo (ahí es donde
+    // conecta). Antes se usaba 'destino' para las dos cosas, y el
+    // tramo de cabeza mostraba el destino final de todo el viaje en
+    // vez del suyo propio (ej. mostraba "Barcelona" en vez de
+    // "Madrid Chamartín" para un tren que solo llega hasta ahí).
+    // FIX — Confirmado por Alex: a veces hay un traslado real entre dos
+    // estaciones de la misma ciudad (ej. Chamartín → Atocha) que el
+    // PDF nunca refleja como tramo aparte — el siguiente tren figura
+    // saliendo de la estación del traslado, no de donde realmente
+    // llegó el tren anterior. Por eso, si ya conoces el destino real
+    // de ESE tren en concreto (tu historial, SF), se usa ese dato con
+    // prioridad; solo si no lo conoces se usa la suposición de que
+    // llega justo donde sale el siguiente (lo normal, cuando no hay
+    // traslado de por medio).
+    out.llegadaCabeza = _pdfBuscarLlegadaSF(tramos[0].tren) || out.continuidad[0].salida;
   }
   // NUEVO — DH en la CABECERA de esta dirección (tramos[0]) — se
   // devuelve para que el llamante (_pdfConstruirEscrituras) decida si
@@ -17192,8 +17212,8 @@ function _pdfConstruirEscrituras(bloque, anio, mesNum){
     var horasVta = (dVta.horaInicio&&dVta.horaFinal?Math.round(calcMins(dVta.horaInicio,dVta.horaFinal)/60*100)/100:0);
     var principal = {
       tipo:'ordinario', linea:null, estadoServicio:'ordinario',
-      sal:dIda.salida, lle:dIda.destino, hF:dIda.horaInicio, hL:dIda.horaFinal, numTren:dIda.numTren,
-      sal2:dVta.salida, lle2:dVta.destino, hF2:dVta.horaInicio, hL2:dVta.horaFinal, numTrenVuelta:dVta.numTren,
+      sal:dIda.salida, lle:dIda.llegadaCabeza, hF:dIda.horaInicio, hL:dIda.horaFinal, numTren:dIda.numTren,
+      sal2:dVta.salida, lle2:dVta.llegadaCabeza, hF2:dVta.horaInicio, hL2:dVta.horaFinal, numTrenVuelta:dVta.numTren,
       continuidad:dIda.continuidad, continuidadVuelta:dVta.continuidad,
       nocturno: !!((dIda.horaInicio&&esHoraNocturna(dIda.horaInicio))||(dVta.horaFinal&&esHoraNocturna(dVta.horaFinal))),
       cargadoDesdePdf:true
@@ -17219,7 +17239,7 @@ function _pdfConstruirEscrituras(bloque, anio, mesNum){
       escrituras.push({k:kIda, data:principal});
       escrituras.push({k:kVta, data:{
         tipo:'vuelta-pernocta', linea:null,
-        sal:dVta.salida, lle:dVta.destino, hF:dVta.horaInicio, hL:dVta.horaFinal, numTren:dVta.numTren,
+        sal:dVta.salida, lle:dVta.llegadaCabeza, hF:dVta.horaInicio, hL:dVta.horaFinal, numTren:dVta.numTren,
         nocturno: !!((dVta.horaInicio&&esHoraNocturna(dVta.horaInicio))||(dVta.horaFinal&&esHoraNocturna(dVta.horaFinal))),
         origenPernocta:kIda, cargadoDesdePdf:true
       }});
@@ -17233,13 +17253,13 @@ function _pdfConstruirEscrituras(bloque, anio, mesNum){
       escrituras.push({k:kIda, data:principal});
       escrituras.push({k:kInt, data:{
         tipo:'pernocta3-intermedio', linea:null,
-        sal:dInt.salida, lle:dInt.destino, hF:dInt.horaInicio, hL:dInt.horaFinal, numTren:dInt.numTren,
+        sal:dInt.salida, lle:dInt.llegadaCabeza, hF:dInt.horaInicio, hL:dInt.horaFinal, numTren:dInt.numTren,
         nocturno: !!((dInt.horaInicio&&esHoraNocturna(dInt.horaInicio))||(dInt.horaFinal&&esHoraNocturna(dInt.horaFinal))),
         origenPernocta:kIda, cargadoDesdePdf:true
       }});
       escrituras.push({k:kVta, data:{
         tipo:'vuelta-pernocta', linea:null,
-        sal:dVta.salida, lle:dVta.destino, hF:dVta.horaInicio, hL:dVta.horaFinal, numTren:dVta.numTren,
+        sal:dVta.salida, lle:dVta.llegadaCabeza, hF:dVta.horaInicio, hL:dVta.horaFinal, numTren:dVta.numTren,
         nocturno: !!((dVta.horaInicio&&esHoraNocturna(dVta.horaInicio))||(dVta.horaFinal&&esHoraNocturna(dVta.horaFinal))),
         origenPernocta:kIda, cargadoDesdePdf:true
       }});
