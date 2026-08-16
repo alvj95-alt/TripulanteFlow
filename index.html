@@ -4095,6 +4095,92 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
+     NUEVO — Copiar turno: 1) elegir día destino en un mini
+     calendario propio (independiente del calendario de días de
+     compensación de HTDL, para no mezclar estados); 2) elegir tipo
+     de jornada; 3) conflicto si el destino ya tiene algo.
+═══════════════════════════════════════════════════════════ -->
+<div class="ov" id="ov-copiar-cal">
+  <div class="sh" onclick="event.stopPropagation()">
+    <div class="sh-handle"></div>
+    <div class="sh-hdr">
+      <div class="sh-ico">📋</div>
+      <div><div class="sh-tit">Copiar turno</div><div class="sh-sub" id="cop-origen-lbl">—</div></div>
+      <button class="sh-close btn-cerrar" onclick="closeOv('ov-copiar-cal')" style="margin-left:auto">✕</button>
+    </div>
+    <div id="cop-pernocta-aviso" style="display:none;margin:0 18px 10px;padding:8px 10px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.35);border-radius:10px;font-size:11px;color:#fdba74"></div>
+    <div style="padding:0 18px 4px;display:flex;align-items:center;justify-content:space-between">
+      <button onclick="_copiarCalMesNav(-1)" style="background:none;border:none;color:var(--tx2);font-size:18px;padding:4px 10px">‹</button>
+      <div id="cop-cal-mes" style="font-weight:700;font-size:13px">—</div>
+      <button onclick="_copiarCalMesNav(1)" style="background:none;border:none;color:var(--tx2);font-size:18px;padding:4px 10px">›</button>
+    </div>
+    <div id="cop-cal-grid" style="padding:0 18px 18px;display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>
+  </div>
+</div>
+
+<div class="ov" id="ov-copiar-tipo">
+  <div class="sh" onclick="event.stopPropagation()">
+    <div class="sh-handle"></div>
+    <div class="sh-hdr">
+      <div class="sh-ico">🏷️</div>
+      <div><div class="sh-tit">¿Cómo quieres guardarlo?</div><div class="sh-sub" id="cop-tipo-destino-lbl">—</div></div>
+    </div>
+    <div style="padding:0 18px 18px">
+      <button class="dct-btn-sec" style="width:100%;margin-bottom:8px;text-align:left" onclick="_elegirTipoCopia('ordinario')">
+        <b>Ordinario</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Jornada normal de trabajo</span>
+      </button>
+      <button class="dct-btn-sec" style="width:100%;margin-bottom:8px;text-align:left" onclick="_elegirTipoCopia('art5152')">
+        <b>Art. 51/52</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Régimen especial de descanso</span>
+      </button>
+      <button class="dct-btn-sec" style="width:100%;text-align:left" onclick="_elegirTipoCopia('htdl')">
+        <b>HTDL</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Trabajado en día libre</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- NUEVO — modo de compensación al copiar como Art.51/52 o HTDL.
+     "Días"/"Mixto" se derivan al formulario real de la app (mismo
+     mini-calendario de días de compensación ya existente) porque
+     implican elegir días concretos del mes siguiente — no se
+     reimplementa esa lógica aparte, se reutiliza tal cual. -->
+<div class="ov" id="ov-copiar-comp">
+  <div class="sh" onclick="event.stopPropagation()">
+    <div class="sh-handle"></div>
+    <div class="sh-hdr">
+      <div class="sh-ico">💶</div>
+      <div><div class="sh-tit">¿Cómo se compensa?</div><div class="sh-sub" id="cop-comp-sub">—</div></div>
+    </div>
+    <div style="padding:0 18px 18px">
+      <button class="dct-btn-sec" style="width:100%;margin-bottom:8px;text-align:left" onclick="_elegirCompCopia('dinero')">
+        <b>Dinero</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Se paga directamente</span>
+      </button>
+      <button class="dct-btn-sec" style="width:100%;margin-bottom:8px;text-align:left" onclick="_elegirCompCopia('dias')">
+        <b>Días</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Genera día(s) libres el mes siguiente — eliges cuáles</span>
+      </button>
+      <button class="dct-btn-sec" style="width:100%;text-align:left" onclick="_elegirCompCopia('mix')">
+        <b>Mixto</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Parte dinero, parte días</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ov-copiar-conflicto">
+  <div class="sh" onclick="event.stopPropagation()">
+    <div class="sh-handle"></div>
+    <div class="sh-hdr">
+      <div class="sh-ico">⚠️</div>
+      <div><div class="sh-tit">Ese día ya tiene algo</div><div class="sh-sub" id="cop-conflicto-dias">—</div></div>
+    </div>
+    <div style="padding:0 18px 18px">
+      <button class="dct-btn-sec" style="width:100%;margin-bottom:8px" onclick="_resolverConflictoCopia('sobrescribir')">♻️ Sobrescribir</button>
+      <button class="dct-btn-sec" style="width:100%;margin-bottom:8px" onclick="_resolverConflictoCopia('extra')">➕ Añadir como turno extra</button>
+      <button class="dct-btn-sec sec-red" style="width:100%" onclick="_resolverConflictoCopia('omitir')">⏭️ Cancelar copia</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
      MÓDULO DH — Modal para especificar tramo de servicio DH.
      Completamente aditivo. No toca TV, AJ ni ningún dato existente.
      Guarda F.estadoServicio / F.estadoServicioVuelta (campos nuevos).
@@ -7647,6 +7733,307 @@ function _desplazarContinuidadPorRetraso(t, idxContinuidad, deltaMin){
   if(t.hL2) t.hL2 = _pdfSumarMinutos(t.hL2, deltaMin);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — COPIAR TURNO A OTRO DÍA.
+   100% aditivo. Reutiliza el mismo lenguaje visual que ya usas en
+   la carga del PDF (calendario propio, popup de tipo, popup de
+   conflicto Sobrescribir/Extra/Omitir), pero con su propio estado
+   — no toca _cargaPdfCola ni nada del módulo del PDF.
+═══════════════════════════════════════════════════════════ */
+var _copiarOrigen = null;      // {k, t, dias, tipoOriginal}
+var _copiarMesCal = null;      // Date del mes visible en el mini-calendario
+var _copiarDestino = null;     // {y,m,d}
+var _copiarTipoPendiente = null;
+
+// Suma/resta N días a una clave "YYYY-MM-DD".
+function _sumarDiasKey(k, n){
+  var p = k.split('-').map(Number);
+  var dt = new Date(p[0], p[1]-1, p[2]+n);
+  return key(dt.getFullYear(), dt.getMonth()+1, dt.getDate());
+}
+
+function abrirCopiarTurno(k){
+  var kOrigen = k || (selDay && selDay.k);
+  if(!kOrigen || !TV[kOrigen]) return;
+  var t = TV[kOrigen];
+  // Si estás viendo el día derivado de una pernocta (vuelta o
+  // intermedio), la copia se hace siempre desde el día de ORIGEN,
+  // para poder copiar la pernocta completa igual que se guardó.
+  var esDerivado = (t.tipo==='vuelta-pernocta' || t.tipo==='pernocta3-intermedio');
+  var kReal = esDerivado ? t.origenPernocta : kOrigen;
+  var tReal = esDerivado ? TV[kReal] : t;
+  if(!tReal){ toast('⚠️ No se encontró el turno de origen de la pernocta'); return; }
+  var dias = (tReal.modo==='pernocta3') ? 3 : (tReal.modo==='pernocta') ? 2 : 1;
+  _copiarOrigen = {k:kReal, t:tReal, dias:dias};
+
+  var kp = kReal.split('-').map(Number);
+  var etiquetaDias = dias===1 ? (kp[2]+' '+MESES_C[kp[1]-1]) :
+    (kp[2]+'-'+parseInt(_sumarDiasKey(kReal,dias-1).split('-')[2],10)+' '+MESES_C[kp[1]-1]);
+  document.getElementById('cop-origen-lbl').textContent = 'Origen: '+etiquetaDias;
+  var avisoEl = document.getElementById('cop-pernocta-aviso');
+  if(dias>1){
+    avisoEl.style.display='block';
+    avisoEl.textContent = '🌙 Es una '+(dias===3?'pernocta de 3 días':'pernocta')+' — se copiarán juntos el día que elijas'+(dias===3?' + los 2 siguientes.':' + el siguiente.');
+  } else {
+    avisoEl.style.display='none';
+  }
+
+  _copiarMesCal = new Date(kp[0], kp[1]-1, 1);
+  _copiarDestino = null;
+  _renderCopiarCal();
+  openOvTop('ov-copiar-cal');
+}
+
+function _copiarCalMesNav(delta){
+  _copiarMesCal = new Date(_copiarMesCal.getFullYear(), _copiarMesCal.getMonth()+delta, 1);
+  _renderCopiarCal();
+}
+
+function _renderCopiarCal(){
+  var y=_copiarMesCal.getFullYear(), m=_copiarMesCal.getMonth();
+  document.getElementById('cop-cal-mes').textContent =
+    MESES[m].charAt(0).toUpperCase()+MESES[m].slice(1)+' '+y;
+  var ultimo = new Date(y,m+1,0).getDate();
+  var sd = new Date(y,m,1).getDay(); sd = sd===0?6:sd-1;
+  var dias = _copiarOrigen ? _copiarOrigen.dias : 1;
+  var html = ['L','M','X','J','V','S','D'].map(function(l){
+    return '<div style="text-align:center;font-size:10px;color:var(--tx3);padding:4px 0">'+l+'</div>';
+  }).join('');
+  for(var i=0;i<sd;i++) html+='<div></div>';
+  for(var d=1; d<=ultimo; d++){
+    var kD = key(y,m+1,d);
+    // Si es pernocta, los días que ocuparía (kD..kD+dias-1) que ya
+    // tienen algo se marcan en ámbar para avisar de un vistazo, sin
+    // bloquear la selección (el conflicto real se resuelve después).
+    var ocupado = false;
+    for(var j=0;j<dias;j++){ if(TV[_sumarDiasKey(kD,j)]) ocupado=true; }
+    var esOrigen = (_copiarOrigen && kD>=_copiarOrigen.k && kD<_sumarDiasKey(_copiarOrigen.k,dias));
+    var estilo = esOrigen
+      ? 'background:var(--s2);color:var(--tx3);opacity:.4'
+      : (ocupado ? 'background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);color:#fdba74' : 'background:var(--s2);color:var(--tx2)');
+    html += '<div onclick="'+(esOrigen?'':'_seleccionarDestinoCopiar('+y+','+(m+1)+','+d+')')+'" '
+      + 'style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:12px;'+estilo+(esOrigen?'':';cursor:pointer')+'">'+d+'</div>';
+  }
+  document.getElementById('cop-cal-grid').innerHTML = html;
+}
+
+function _seleccionarDestinoCopiar(y,m,d){
+  _copiarDestino = {y:y,m:m,d:d};
+  closeOv('ov-copiar-cal');
+  var origen = _copiarOrigen.t;
+  var puedeElegirTipo = (origen.tipo==='ordinario'||origen.tipo==='trabajado'||origen.tipo==='art5152');
+  if(puedeElegirTipo){
+    var kDestino = key(y,m,d);
+    document.getElementById('cop-tipo-destino-lbl').textContent = 'Destino: '+d+' '+MESES_C[m-1];
+    openOvTop('ov-copiar-tipo');
+  } else {
+    // Días sin tipo que elegir (ej. descanso): se copian tal cual.
+    _elegirTipoCopia(null);
+  }
+}
+
+function _elegirTipoCopia(tipoElegido){
+  closeOv('ov-copiar-tipo');
+  _copiarTipoPendiente = tipoElegido;
+  if(tipoElegido==='art5152' || tipoElegido==='htdl'){
+    // NUEVO — Art.51/52 y HTDL necesitan saber cómo se compensa
+    // (dinero/días/mix) antes de poder guardar nada — sin esto el
+    // motor de dinero no tiene datos suficientes.
+    document.getElementById('cop-comp-sub').textContent =
+      (tipoElegido==='htdl'?'HTDL':'Art. 51/52')+' — cómo se compensa esta copia';
+    openOvTop('ov-copiar-comp');
+    return;
+  }
+  _procesarCopiaConModo(tipoElegido, null);
+}
+
+function _elegirCompCopia(modoComp){
+  closeOv('ov-copiar-comp');
+  if(modoComp==='dinero'){
+    _procesarCopiaConModo(_copiarTipoPendiente, 'dinero');
+  } else {
+    // "Días" y "Mixto" implican elegir día(s) concretos del mes
+    // siguiente — en vez de reconstruir ese selector aparte, se
+    // reutiliza el formulario real de creación de turno, ya
+    // preparado para esto (mismo mini-calendario de compensación
+    // que usas al crearlo a mano).
+    _abrirFormParaCopiaDiasMixto(_copiarTipoPendiente, modoComp);
+  }
+}
+
+function _procesarCopiaConModo(tipoElegido, modoComp){
+  var res = _construirEscrituraCopia(_copiarOrigen, _copiarDestino, tipoElegido, modoComp);
+  if(!res){ toast('⚠️ No se pudo preparar la copia'); return; }
+  window._copiaConflictoPendiente = res;
+  var conflicto = res.escrituras.some(function(esc){ return !!TV[esc.k] || (TV2[esc.k]&&TV2[esc.k].length); });
+  if(!conflicto){
+    _escribirCopiaTurno(res, 'directo');
+  } else {
+    var etiquetas = res.escrituras.map(function(esc){ return esc.k; }).join(', ');
+    document.getElementById('cop-conflicto-dias').textContent = etiquetas;
+    openOvTop('ov-copiar-conflicto');
+  }
+}
+
+// NUEVO — Para "Días"/"Mixto": abre el formulario REAL de la app
+// (el mismo que usas al crear un turno a mano), pre-rellenado con
+// todo lo del turno de origen, apuntando ya al día destino elegido.
+// Así el mini-calendario de días de compensación, el cálculo de
+// Mix y el guardado final son exactamente los que ya tienes
+// probados — no se duplica esa lógica aquí.
+function _abrirFormParaCopiaDiasMixto(tipoElegido, modoComp){
+  closeOv('ov-copiar-cal'); closeOv('ov-copiar-tipo'); closeOv('ov-copiar-comp'); closeOv('ov-copiar-conflicto');
+  var o = _copiarOrigen.t;
+  var destino = _copiarDestino;
+  var kDestino = key(destino.y, destino.m, destino.d);
+  var yaExistia = !!TV[kDestino];
+
+  var tipoFinal = (tipoElegido==='htdl') ? 'trabajado' : 'art5152';
+  var kIntOrigen = o.diaIntermedio;
+  var tIntOrigen = kIntOrigen ? TV[kIntOrigen] : null;
+
+  F={tipo:tipoFinal, linea:o.linea||null,
+     sal:o.sal||(AJ.base||null), lle:o.lle||null, hF:o.hF||null, hL:o.hL||null,
+     sal2:o.sal2||null, lle2:o.lle2||null, hF2:o.hF2||null, hL2:o.hL2||null,
+     sal3:(tIntOrigen&&tIntOrigen.sal)||null, lle3:(tIntOrigen&&tIntOrigen.lle)||null,
+     hF3:(tIntOrigen&&tIntOrigen.hF)||null, hL3:(tIntOrigen&&tIntOrigen.hL)||null,
+     modo:o.modo||null,
+     comp:(tipoFinal==='trabajado')?modoComp:null,
+     compArt5152:(tipoFinal==='art5152')?modoComp:null,
+     horas:o.horas||0, diasComp:[], notas:o.notas||'',
+     numTren:o.numTren||'', numTrenVuelta:o.numTrenVuelta||'',
+     numTrenIntermedio:o.numTrenIntermedio||'',
+     estadoServicio:o.estadoServicio||'ordinario',
+     estadoServicioDetalle:o.estadoServicioDetalle||'',
+     estadoServicioVuelta:o.estadoServicioVuelta||'ordinario',
+     estadoServicioVueltaDetalle:o.estadoServicioVueltaDetalle||'',
+     dhMismoTren:(typeof o.dhMismoTren==='boolean')?o.dhMismoTren:null,
+     dhMinutos:(o.dhMinutos!=null)?o.dhMinutos:null,
+     dhMismoTrenVuelta:(typeof o.dhMismoTrenVuelta==='boolean')?o.dhMismoTrenVuelta:null,
+     dhMinutosVuelta:(o.dhMinutosVuelta!=null)?o.dhMinutosVuelta:null,
+     continuidad:(o.continuidad||[]).map(function(c){var cc={};for(var kk in c)cc[kk]=c[kk];return cc;}),
+     continuidadVuelta:(o.continuidadVuelta||[]).map(function(c){var cc={};for(var kk in c)cc[kk]=c[kk];return cc;}),
+     plusAct:o.plusAct||false, plusJT:o.plusJT||false,
+     modoArt5152:o.modoArt5152||'normal',
+     modoTrabajado:'normal',
+     plusIntlAuto:(o.linea||'').includes('Internacional')};
+
+  selDay = {d:destino.d, k:kDestino, t:TV[kDestino]||null};
+  curM = new Date(destino.y, destino.m-1, 1);
+  renderCal();
+  abrirForm(yaExistia);
+  toast(yaExistia
+    ? '⚠️ '+kDestino+' ya tenía algo — revisa antes de guardar'
+    : '📋 Copiado — elige el/los día(s) de compensación y guarda');
+}
+
+function _resolverConflictoCopia(accion){
+  closeOv('ov-copiar-conflicto');
+  var res = window._copiaConflictoPendiente;
+  if(!res) return;
+  if(accion==='sobrescribir') _escribirCopiaTurno(res,'sobrescribir');
+  else if(accion==='extra') _escribirCopiaTurno(res,'extra');
+  else toast('Copia cancelada');
+}
+
+// Construye las escrituras (sin aplicar todavía) para copiar el
+// turno de origen al día destino elegido — mismo patrón que la
+// carga del PDF: 1 día suelto, pernocta (2) o pernocta3 (3).
+// modoComp ('dinero'|'dias'|'mix') solo se usa cuando tipoElegido es
+// 'art5152' o 'htdl' — para 'dias'/'mix' esta función ya no se llama
+// (se enruta al formulario real, ver _abrirFormParaCopiaDiasMixto).
+function _construirEscrituraCopia(origen, destino, tipoElegido, modoComp){
+  var o = origen.t;
+  var kDestino = key(destino.y, destino.m, destino.d);
+  var esHTDL = (tipoElegido==='htdl');
+  var esArt5152 = (tipoElegido==='art5152');
+  var tipoFinal = esHTDL ? 'trabajado' : (tipoElegido || o.tipo);
+
+  function clonar(obj){ return obj ? JSON.parse(JSON.stringify(obj)) : obj; }
+
+  if(esHTDL){
+    // HTDL: una sola entrada en TV2 (turno extra), con la MISMA forma
+    // que ya usa guardarTurnoEnTV2 — soporta pernocta dentro de un
+    // único registro, así que no hace falta repartir en varias celdas.
+    var ddExtra = clonar(o);
+    ddExtra.tipo = 'trabajado';
+    ddExtra.comp = modoComp || 'dinero';
+    ddExtra.diasComp = [];
+    delete ddExtra.diaSiguiente; delete ddExtra.diaIntermedio;
+    delete ddExtra.cargadoDesdePdf;
+    return {escrituras:[{k:kDestino, data:ddExtra, esTV2:true}], incompletos:[]};
+  }
+
+  if(origen.dias===1){
+    var d1 = clonar(o);
+    d1.tipo = tipoFinal;
+    // FIX — Art.51/52 usa 'compensacion' (no 'comp'), y el turno de
+    // origen (normalmente Ordinario) nunca trae ese campo — sin esto
+    // el motor de dinero de Art.51/52 no sabía cómo tratarlo.
+    if(esArt5152) d1.compensacion = modoComp || 'dinero';
+    delete d1.cargadoDesdePdf;
+    return {escrituras:[{k:kDestino, data:d1}], incompletos:[]};
+  }
+
+  // Pernocta (2) o pernocta3 (3): reconstruir cada día a partir de lo
+  // que ya está guardado — el principal (o) trae ida y vuelta/resumen;
+  // los derivados (vuelta-pernocta / intermedio) se leen de TV.
+  var kVtaOrigen = o.diaSiguiente;
+  var kIntOrigen = o.diaIntermedio;
+  var tVtaOrigen = kVtaOrigen ? TV[kVtaOrigen] : null;
+  var tIntOrigen = kIntOrigen ? TV[kIntOrigen] : null;
+  if(!tVtaOrigen){ return null; }
+
+  var kIdaD = kDestino;
+  var kIntD = origen.dias===3 ? _sumarDiasKey(kDestino,1) : null;
+  var kVtaD = _sumarDiasKey(kDestino, origen.dias-1);
+
+  var principal = clonar(o);
+  principal.tipo = tipoFinal;
+  principal.diaSiguiente = kVtaD;
+  if(origen.dias===3) principal.diaIntermedio = kIntD;
+  // FIX — misma corrección que en el caso de día suelto: Art.51/52
+  // necesita 'compensacion' en el registro principal de la pernocta,
+  // o el motor de dinero no sabe cómo tratarlo.
+  if(esArt5152) principal.compensacion = modoComp || 'dinero';
+  delete principal.cargadoDesdePdf;
+
+  var escrituras = [{k:kIdaD, data:principal}];
+  if(origen.dias===3 && tIntOrigen){
+    var intD = clonar(tIntOrigen);
+    intD.origenPernocta = kIdaD;
+    delete intD.cargadoDesdePdf;
+    escrituras.push({k:kIntD, data:intD});
+  }
+  var vtaD = clonar(tVtaOrigen);
+  vtaD.origenPernocta = kIdaD;
+  delete vtaD.cargadoDesdePdf;
+  escrituras.push({k:kVtaD, data:vtaD});
+
+  return {escrituras:escrituras, incompletos:[]};
+}
+
+function _escribirCopiaTurno(res, modo){
+  res.escrituras.forEach(function(esc){
+    if(modo==='extra' || esc.esTV2){
+      var tipoHeredado = esc.esTV2 ? esc.data.tipo : ((TV[esc.k]&&TV[esc.k].tipo)||'ordinario');
+      if(!TV2[esc.k]) TV2[esc.k]=[];
+      var dd={}; for(var campo in esc.data) dd[campo]=esc.data[campo];
+      if(!esc.esTV2) dd.tipo = tipoHeredado;
+      TV2[esc.k].push(dd);
+    } else {
+      if(modo==='sobrescribir' && TV[esc.k] && TV[esc.k].diaSiguiente && TV[esc.k].diaSiguiente!==esc.data.diaSiguiente){
+        if(TV[TV[esc.k].diaSiguiente] && TV[TV[esc.k].diaSiguiente].origenPernocta===esc.k) delete TV[TV[esc.k].diaSiguiente];
+      }
+      TV[esc.k] = esc.data;
+    }
+  });
+  saveTV(); saveTV2();
+  renderCal(); renderStats();
+  if(selDay) renderDiaArea();
+  toast('✅ Turno copiado a '+res.escrituras[0].k);
+}
+
 function guardarRetraso(){
   if(!selDay||!selDay.t) return;
   var inp=document.getElementById('inp-retraso');
@@ -9495,6 +9882,9 @@ function renderDiaArea(){
       : '')
     +'<button class="dct-btn-sec sec-cyan" onclick="verDetallesEnHistorial(\''+k+'\')">📋 Detalles</button>'
     +'<button class="dct-btn-sec sec-green" onclick="compartirTurnoSeleccionado()">📤 Compartir</button>'
+    +((t.tipo==='ordinario'||t.tipo==='trabajado'||t.tipo==='art5152'||t.tipo==='vuelta-pernocta'||t.tipo==='pernocta3-intermedio'||t.tipo==='descanso')
+      ? '<button class="dct-btn-sec" onclick="abrirCopiarTurno(\''+k+'\')">📋 Copiar turno</button>'
+      : '')
     +'</div>'
     // NUEVO — Convertir turno existente en Baja Laboral, directamente
     // desde el historial, sin borrar el día a mano. Solo aplica a
@@ -15582,6 +15972,9 @@ function renderDiaAreaMulti(){
     + '</div>'
     + ((t.tipo==='ordinario'||t.tipo==='trabajado'||t.tipo==='art5152'||t.tipo==='vuelta-pernocta'||t.tipo==='pernocta3-intermedio')
       ? '<div class="dct-row-sec"><button class="dct-btn-sec sec-amber" onclick="abrirRetraso()">⏱ '+(retrasoMin>0?'+'+retrasoMin+'m':'Registrar retraso')+'</button></div>'
+      : '')
+    + ((t.tipo==='ordinario'||t.tipo==='trabajado'||t.tipo==='art5152'||t.tipo==='vuelta-pernocta'||t.tipo==='pernocta3-intermedio'||t.tipo==='descanso')
+      ? '<div class="dct-row-sec"><button class="dct-btn-sec" onclick="abrirCopiarTurno(\''+k+'\')">📋 Copiar turno</button></div>'
       : '')
     + '</div>';
 
