@@ -8990,8 +8990,18 @@ function renderizarPopUpSimplificado(t, esDiaVuelta, ocultarTotalDia){
         + '</div>';
     }
 
+    // NUEVO — Confirmado por Alex: cuando este bloque en realidad
+    // pertenece al día de la VUELTA (o intermedio) de una pernocta —
+    // dispara aquí porque guarda sus datos en los mismos campos que
+    // "ida" (sal/hF/hL/numTren), no porque lo sea — la etiqueta debe
+    // decir lo que es de verdad, no "IDA". El resto del bloque (DH,
+    // ruta, horas, "Viajas con") ya sale igual, solo cambia el rótulo.
+    var etiquetaBloqueIda = '🚂 IDA';
+    if(t.tipo==='vuelta-pernocta') etiquetaBloqueIda = '↩ VUELTA';
+    else if(t.tipo==='pernocta3-intermedio') etiquetaBloqueIda = '🏨 TRAMO INTERMEDIO';
+
     h += '<div class="tv-block ida'+(idaEsDH?' tv-block-dh':'')+'">'
-      + '<div class="tv-block-tag">🚂 IDA</div>'
+      + '<div class="tv-block-tag">'+etiquetaBloqueIda+'</div>'
       + numIdaHTML
       + dhIdaTag
       + (t.sal&&t.lle?'<div class="tv-route">'+t.sal+' → '+t.lle+'</div>':'')
