@@ -10576,7 +10576,25 @@ function _convertirCambioDescanso(nuevoTipo){
 /* ═══════════════════════════════════════
    CAMBIO CON COMPAÑERO — universal
 ═══════════════════════════════════════ */
+// NUEVO — el botón "Cambio" ahora pregunta primero qué quieres hacer,
+// en vez de ir directo a solicitar el cambio con un compañero. La
+// opción nueva ("Cambiar tipo de turno") reutiliza toda la lógica ya
+// construida para "Copiar turno" (popups de tipo/compensación,
+// cálculo de dinero) — no se reimplementa nada de cero.
 function abrirCambio(){
+  if(!selDay)return;
+  document.getElementById('cambio-tit').textContent='¿Qué quieres hacer?';
+  document.getElementById('cambio-body').innerHTML =
+    '<div style="padding:14px 16px">'
+    + '<button onclick="_abrirSolicitudCambioTurno()" style="width:100%;margin-bottom:10px;text-align:left;padding:14px;background:var(--s2);border:1px solid var(--div);border-radius:12px;color:var(--tx);cursor:pointer">'
+    + '<b>🔄 Solicitar cambio de turno</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Pide el cambio a un compañero por correo</span></button>'
+    + '<button onclick="_abrirCambioTipoTurno()" style="width:100%;text-align:left;padding:14px;background:var(--s2);border:1px solid var(--div);border-radius:12px;color:var(--tx);cursor:pointer">'
+    + '<b>🔁 Cambiar tipo de turno</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Pásalo a Ordinario, Art.51/52 o HTDL sin borrarlo</span></button>'
+    + '</div>';
+  openOv('ov-cambio');
+}
+
+function _abrirSolicitudCambioTurno(){
   if(!selDay)return;
   var t=selDay.t||{},k=selDay.k;
   var kw=k.split('-').map(Number);var y=kw[0],mo=kw[1],dd=kw[2];
@@ -10617,7 +10635,131 @@ function abrirCambio(){
     +'border:1.5px dashed var(--div);border-radius:11px;color:var(--tx2);font-size:12px;font-weight:700;cursor:pointer">'
     +'🔁 Registrar Intercambio</button>'
     +'</div>';
-  actualizarPrevCambio();openOv('ov-cambio');
+  actualizarPrevCambio();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — CAMBIAR TIPO DE TURNO (segunda opción del botón "Cambio").
+   Reclasifica un turno YA GUARDADO (Ordinario ↔ Art.51/52 ↔ HTDL)
+   sin borrarlo y volverlo a crear. Reutiliza el mismo lenguaje
+   visual y las mismas funciones de dinero ya construidas para
+   "Copiar turno" (_horasComputablesParaDinero, _aplicarDineroCopia),
+   con su propio estado — no comparte variables con _copiarOrigen.
+═══════════════════════════════════════════════════════════ */
+var _cambioTipoOrigen = null;   // {k, t, dias}
+var _cambioTipoElegido = null;
+
+function _abrirCambioTipoTurno(){
+  if(!selDay) return;
+  var k = selDay.k;
+  var t = TV[k];
+  if(!t){ toast('⚠️ No hay turno guardado este día'); return; }
+  var esDerivado = (t.tipo==='vuelta-pernocta' || t.tipo==='pernocta3-intermedio');
+  var kReal = esDerivado ? t.origenPernocta : k;
+  var tReal = esDerivado ? TV[kReal] : t;
+  if(!tReal){ toast('⚠️ No se encontró el turno de origen de la pernocta'); return; }
+  if(tReal.tipo!=='ordinario' && tReal.tipo!=='trabajado' && tReal.tipo!=='art5152'){
+    toast('⚠️ Este tipo de día no se puede reclasificar así');
+    return;
+  }
+  var dias = (tReal.modo==='pernocta3') ? 3 : (tReal.modo==='pernocta') ? 2 : 1;
+  _cambioTipoOrigen = {k:kReal, t:tReal, dias:dias};
+
+  document.getElementById('cambio-tit').textContent = '¿A qué tipo lo cambiamos?';
+  document.getElementById('cambio-body').innerHTML =
+    '<div style="padding:14px 16px">'
+    + '<button onclick="_elegirTipoCambioEstado(\'ordinario\')" style="width:100%;margin-bottom:8px;text-align:left;padding:14px;background:var(--s2);border:1px solid var(--div);border-radius:12px;color:var(--tx);cursor:pointer">'
+    + '<b>Ordinario</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Jornada normal de trabajo</span></button>'
+    + '<button onclick="_elegirTipoCambioEstado(\'art5152\')" style="width:100%;margin-bottom:8px;text-align:left;padding:14px;background:var(--s2);border:1px solid var(--div);border-radius:12px;color:var(--tx);cursor:pointer">'
+    + '<b>Art. 51/52</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Régimen especial de descanso</span></button>'
+    + '<button onclick="_elegirTipoCambioEstado(\'htdl\')" style="width:100%;text-align:left;padding:14px;background:var(--s2);border:1px solid var(--div);border-radius:12px;color:var(--tx);cursor:pointer">'
+    + '<b>HTDL</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Trabajado en día libre</span></button>'
+    + '</div>';
+}
+
+function _elegirTipoCambioEstado(tipoElegido){
+  _cambioTipoElegido = tipoElegido;
+  if(tipoElegido==='art5152' || tipoElegido==='htdl'){
+    var esPernocta = _cambioTipoOrigen.dias>1;
+    document.getElementById('cambio-tit').textContent = '¿Cómo se compensa?';
+    document.getElementById('cambio-body').innerHTML =
+      '<div style="padding:14px 16px">'
+      + '<button onclick="_aplicarCambioTipoTurno(\'dinero\')" style="width:100%;margin-bottom:8px;text-align:left;padding:14px;background:var(--s2);border:1px solid var(--div);border-radius:12px;color:var(--tx);cursor:pointer">'
+      + '<b>Dinero</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Se paga directamente</span></button>'
+      + '<button onclick="_abrirFormParaCambioTipo(\'dias\')" style="width:100%;'+(esPernocta?'margin-bottom:8px;':'')+'text-align:left;padding:14px;background:var(--s2);border:1px solid var(--div);border-radius:12px;color:var(--tx);cursor:pointer">'
+      + '<b>Días</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Genera día(s) libres el mes siguiente</span></button>'
+      + (esPernocta ? ('<button onclick="_abrirFormParaCambioTipo(\'mix\')" style="width:100%;text-align:left;padding:14px;background:var(--s2);border:1px solid var(--div);border-radius:12px;color:var(--tx);cursor:pointer">'
+        + '<b>Mixto</b><br><span style="font-size:11px;color:var(--tx3);font-weight:400">Parte dinero, parte días</span></button>') : '')
+      + '</div>';
+  } else {
+    _aplicarCambioTipoTurno(null);
+  }
+}
+
+// "Dinero" (u Ordinario, que no necesita compensación): se aplica
+// directamente sobre el mismo día, sin abrir el formulario completo.
+function _aplicarCambioTipoTurno(modoComp){
+  var o = _cambioTipoOrigen.t;
+  var k = _cambioTipoOrigen.k;
+  var dias = _cambioTipoOrigen.dias;
+  var esHTDL = (_cambioTipoElegido==='htdl');
+  var esArt5152 = (_cambioTipoElegido==='art5152');
+  var tipoFinal = esHTDL ? 'trabajado' : _cambioTipoElegido;
+
+  var nuevo = {}; for(var campo in o) nuevo[campo]=o[campo];
+  nuevo.tipo = tipoFinal;
+  if(modoComp==='dinero') _aplicarDineroCopia(nuevo, esHTDL, esArt5152, dias>1);
+  else { delete nuevo.comp; delete nuevo.compensacion; delete nuevo.importe; delete nuevo.horasEfectivas; }
+
+  TV[k] = nuevo;
+  saveTV();
+  closeOv('ov-cambio');
+  renderCal(); renderStats();
+  selDay = {d:selDay.d, k:selDay.k, t:TV[selDay.k]};
+  renderDiaArea();
+  toast('✅ Turno actualizado a '+(TIPO_INFO[tipoFinal]?TIPO_INFO[tipoFinal].lbl:tipoFinal));
+}
+
+// "Días"/"Mixto": igual que en "Copiar turno", se enruta al
+// formulario real (mismo mini-calendario de compensación ya
+// probado) — pre-rellenado y apuntando al MISMO día, no a uno nuevo.
+function _abrirFormParaCambioTipo(modoComp){
+  closeOv('ov-cambio');
+  var o = _cambioTipoOrigen.t;
+  var k = _cambioTipoOrigen.k;
+  var tipoFinal = (_cambioTipoElegido==='htdl') ? 'trabajado' : 'art5152';
+  var kIntOrigen = o.diaIntermedio;
+  var tIntOrigen = kIntOrigen ? TV[kIntOrigen] : null;
+
+  F={tipo:tipoFinal, linea:o.linea||null,
+     sal:o.sal||(AJ.base||null), lle:o.lle||null, hF:o.hF||null, hL:o.hL||null,
+     sal2:o.sal2||null, lle2:o.lle2||null, hF2:o.hF2||null, hL2:o.hL2||null,
+     sal3:(tIntOrigen&&tIntOrigen.sal)||null, lle3:(tIntOrigen&&tIntOrigen.lle)||null,
+     hF3:(tIntOrigen&&tIntOrigen.hF)||null, hL3:(tIntOrigen&&tIntOrigen.hL)||null,
+     modo:o.modo||null,
+     comp:(tipoFinal==='trabajado')?modoComp:null,
+     compArt5152:(tipoFinal==='art5152')?modoComp:null,
+     horas:o.horas||0, diasComp:[], notas:o.notas||'',
+     numTren:o.numTren||'', numTrenVuelta:o.numTrenVuelta||'',
+     numTrenIntermedio:o.numTrenIntermedio||'',
+     estadoServicio:o.estadoServicio||'ordinario',
+     estadoServicioDetalle:o.estadoServicioDetalle||'',
+     estadoServicioVuelta:o.estadoServicioVuelta||'ordinario',
+     estadoServicioVueltaDetalle:o.estadoServicioVueltaDetalle||'',
+     dhMismoTren:(typeof o.dhMismoTren==='boolean')?o.dhMismoTren:null,
+     dhMinutos:(o.dhMinutos!=null)?o.dhMinutos:null,
+     dhMismoTrenVuelta:(typeof o.dhMismoTrenVuelta==='boolean')?o.dhMismoTrenVuelta:null,
+     dhMinutosVuelta:(o.dhMinutosVuelta!=null)?o.dhMinutosVuelta:null,
+     continuidad:(o.continuidad||[]).map(function(c){var cc={};for(var kk in c)cc[kk]=c[kk];return cc;}),
+     continuidadVuelta:(o.continuidadVuelta||[]).map(function(c){var cc={};for(var kk in c)cc[kk]=c[kk];return cc;}),
+     plusAct:o.plusAct||false, plusJT:o.plusJT||false,
+     modoArt5152:o.modoArt5152||'normal',
+     modoTrabajado:'normal',
+     plusIntlAuto:(o.linea||'').includes('Internacional')};
+
+  selDay = {d:selDay.d, k:k, t:TV[k]};
+  abrirForm(true);
+  toast('📋 Elige el/los día(s) de compensación y guarda');
 }
 
 /* ═══════════════════════════════════════════════════════════
