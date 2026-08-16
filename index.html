@@ -11996,42 +11996,30 @@ function abrirTrabajoEnDescanso(){F.tipo='trabajado';renderFormBody();}
 /* ═══════════════════════════════════════
    GUARDAR TURNO
 ═══════════════════════════════════════ */
-// NUEVO — protección del día de vuelta/intermedio de una pernocta: si
-// ese día YA tiene algo real guardado (un turno tuyo, un cambio
-// registrado, etc.), NO se debe sobrescribir con el puntero normal de
-// pernocta (eso lo borraría todo). Devuelve true si el día está
-// "protegido" (hay que dejarlo tal cual y avisar aparte); false si
-// está vacío o solo tenía un puntero de pernocta huérfano/repetido
-// (caso normal de siempre, sin cambios de comportamiento).
-function _diaVueltaPernoctaProtegido(kDestino, kOrigen){
-  var actual = TV[kDestino];
-  if(!actual || !actual.tipo) return false; // vacío — comportamiento de siempre
-  if(actual.origenPernocta === kOrigen) return false; // puntero de esta misma pernocta, se puede regenerar
-  if(actual.tipo === 'vuelta-pernocta' || actual.tipo === 'pernocta3-intermedio') return false; // puntero huérfano de otra pernocta ya editada, se puede sustituir
-  return true; // hay un turno/cambio real — proteger
-}
-// Añade la nota informativa cuando el día de vuelta/intermedio está
-// protegido — mismo patrón de "nota que no toca nada" ya usado para
-// el Cambio con compañero, solo que aquí avisa de lo contrario: que
-// el dinero de ESE día ya vive completo en el día de la ida.
-function _avisarVueltaPernoctaProtegida(kDestino, kOrigen, etiquetaTramo, datosTramo){
-  var kop = kOrigen.split('-').map(Number);
-  var lblOrigen = kop[2]+' de '+MESES[kop[1]-1].toLowerCase();
-  if(!TV2[kDestino]) TV2[kDestino] = [];
-  TV2[kDestino].push({
-    tipo: 'ordinario',
-    turno_referencia_externa: true,
-    vueltaPernoctaInformativa: true,
-    origenPernocta: kOrigen,
-    etiquetaTramo: etiquetaTramo,
-    sal: datosTramo && datosTramo.sal || null,
-    lle: datosTramo && datosTramo.lle || null,
-    hF: datosTramo && datosTramo.hF || null,
-    hL: datosTramo && datosTramo.hL || null,
-    numTren: datosTramo && datosTramo.numTren || '',
-    notas: '💰 Ya contado completo en el día '+lblOrigen+' — aquí no suma nada aparte.',
-    companeroNombre: null
-  });
+// NUEVO — Confirmado por Alex: cuando el día de vuelta/intermedio de
+// una pernocta ya tenía un turno REAL guardado, ya no se protege sin
+// tocar (eso dejaba una nota informativa sin datos reales) — pasa a
+// SECUNDARIO conservando TODOS sus datos tal cual (si es Ordinario,
+// sus horas siguen sumando a Efectivas/Presencia con normalidad, sin
+// generar dinero aparte — el dinero extra solo lo genera HTDL/Art.51-
+// 52, que Ordinario no tiene, así que no hay riesgo de duplicar
+// nada). El día de vuelta/intermedio nuevo entra como PRINCIPAL, con
+// la misma estructura que ya usa siempre esa celda (tipo
+// 'vuelta-pernocta'/'pernocta3-intermedio'), para que se vea igual
+// que cualquier otra (con compañeros, DH, etc., si esa información
+// llega a calcularse ahí). Si el día estaba en descanso o vacío, se
+// sobrescribe limpio, sin nada que conservar.
+function _escribirDiaPernoctaConDemota(kDestino, kOrigen, nuevoDato){
+  var existente = TV[kDestino];
+  var esPunteroDeEstaMismaPernocta = existente && existente.origenPernocta === kOrigen;
+  var esVacioODescanso = !existente || !existente.tipo || existente.tipo==='descanso';
+  var esPunteroHuerfano = existente && (existente.tipo==='vuelta-pernocta' || existente.tipo==='pernocta3-intermedio');
+  if(existente && !esVacioODescanso && !esPunteroDeEstaMismaPernocta && !esPunteroHuerfano){
+    if(!TV2[kDestino]) TV2[kDestino]=[];
+    var ddViejo={}; for(var campo in existente) ddViejo[campo]=existente[campo];
+    TV2[kDestino].push(ddViejo);
+  }
+  TV[kDestino] = nuevoDato;
   saveTV2();
 }
 
@@ -12226,19 +12214,10 @@ function guardarTurno(){
       var _ks2=k.split('-').map(Number);var y=_ks2[0],mo=_ks2[1],dd=_ks2[2];
       var sig=new Date(y,mo-1,dd);sig.setDate(sig.getDate()+1);
       var kSig=key(sig.getFullYear(),sig.getMonth()+1,sig.getDate());
-      if(_diaVueltaPernoctaProtegido(kSig, k)){
-        // NUEVO — el día de vuelta ya tiene algo real (turno, cambio,
-        // etc.) guardado — no se toca. Solo se avisa con una nota; el
-        // dinero ya vive completo en el día de la ida (k), así que no
-        // hace falta sumar nada aparte en kSig.
-        _avisarVueltaPernoctaProtegida(kSig, k, 'vuelta', {sal:d.sal2, lle:d.lle2, hF:F.hF2, hL:F.hL2, numTren:F.numTrenVuelta});
-      } else {
-        if(TV[kSig]&&TV[kSig].origenPernocta===k) delete TV[kSig];
-        TV[kSig]={tipo:'vuelta-pernocta',linea:F.linea,
-          sal:d.sal2||null,lle:d.lle2||null,hF:F.hF2||null,hL:F.hL2||null,
-          numTren:F.numTrenVuelta||'',
-          nocturno:d.nocturno,origenPernocta:k};
-      }
+      _escribirDiaPernoctaConDemota(kSig, k, {tipo:'vuelta-pernocta',linea:F.linea,
+        sal:d.sal2||null,lle:d.lle2||null,hF:F.hF2||null,hL:F.hL2||null,
+        numTren:F.numTrenVuelta||'',
+        nocturno:d.nocturno,origenPernocta:k});
       d.diaSiguiente=kSig;
       // Limpiar restos de una pernocta3 previa en este mismo día de origen
       if(selDay.t&&selDay.t.diaIntermedio) delete TV[selDay.t.diaIntermedio];
@@ -12250,24 +12229,14 @@ function guardarTurno(){
       var diaFin=new Date(y3,mo3-1,dd3);diaFin.setDate(diaFin.getDate()+2);
       var kFin=key(diaFin.getFullYear(),diaFin.getMonth()+1,diaFin.getDate());
       var nocIntermedio=!!((F.hF3&&esHoraNocturna(F.hF3))||(F.hL3&&esHoraNocturna(F.hL3)));
-      if(_diaVueltaPernoctaProtegido(kInt, k)){
-        _avisarVueltaPernoctaProtegida(kInt, k, 'noche intermedia (día 2)', {sal:F.sal3, lle:F.lle3, hF:F.hF3, hL:F.hL3, numTren:F.numTrenIntermedio});
-      } else {
-        if(TV[kInt]&&TV[kInt].origenPernocta===k) delete TV[kInt];
-        TV[kInt]={tipo:'pernocta3-intermedio',linea:F.linea,
-          sal:F.sal3||'',lle:F.lle3||'',hF:F.hF3||'',hL:F.hL3||'',
-          numTren:F.numTrenIntermedio||'',
-          nocturno:nocIntermedio,origenPernocta:k};
-      }
-      if(_diaVueltaPernoctaProtegido(kFin, k)){
-        _avisarVueltaPernoctaProtegida(kFin, k, 'vuelta final (día 3)', {sal:d.sal2, lle:d.lle2, hF:F.hF2, hL:F.hL2, numTren:F.numTrenVuelta});
-      } else {
-        if(TV[kFin]&&TV[kFin].origenPernocta===k) delete TV[kFin];
-        TV[kFin]={tipo:'vuelta-pernocta',linea:F.linea,
-          sal:d.sal2||null,lle:d.lle2||null,hF:F.hF2||null,hL:F.hL2||null,
-          numTren:F.numTrenVuelta||'',
-          nocturno:d.nocturno,origenPernocta:k};
-      }
+      _escribirDiaPernoctaConDemota(kInt, k, {tipo:'pernocta3-intermedio',linea:F.linea,
+        sal:F.sal3||'',lle:F.lle3||'',hF:F.hF3||'',hL:F.hL3||'',
+        numTren:F.numTrenIntermedio||'',
+        nocturno:nocIntermedio,origenPernocta:k});
+      _escribirDiaPernoctaConDemota(kFin, k, {tipo:'vuelta-pernocta',linea:F.linea,
+        sal:d.sal2||null,lle:d.lle2||null,hF:F.hF2||null,hL:F.hL2||null,
+        numTren:F.numTrenVuelta||'',
+        nocturno:d.nocturno,origenPernocta:k});
       d.numTrenIntermedio=F.numTrenIntermedio||'';
       d.diaIntermedio=kInt;
       d.diaSiguiente=kFin;
@@ -15317,14 +15286,9 @@ function guardarTurnoEnTV2(){
     var _kkp2 = kk.split('-').map(Number);
     var _sig = new Date(_kkp2[0], _kkp2[1]-1, _kkp2[2]); _sig.setDate(_sig.getDate()+1);
     var _kSigTV2 = key(_sig.getFullYear(), _sig.getMonth()+1, _sig.getDate());
-    if(_diaVueltaPernoctaProtegido(_kSigTV2, kk)){
-      _avisarVueltaPernoctaProtegida(_kSigTV2, kk, 'vuelta', {sal:dd.sal2, lle:dd.lle2, hF:dd.hF2, hL:dd.hL2, numTren:dd.numTrenVuelta});
-    } else {
-      if(TV[_kSigTV2] && TV[_kSigTV2].origenPernocta===kk) delete TV[_kSigTV2];
-      TV[_kSigTV2] = {tipo:'vuelta-pernocta', linea:dd.linea,
-        sal:dd.sal2||null, lle:dd.lle2||null, hF:dd.hF2||null, hL:dd.hL2||null,
-        numTren:dd.numTrenVuelta||'', nocturno:dd.nocturno, origenPernocta:kk};
-    }
+    _escribirDiaPernoctaConDemota(_kSigTV2, kk, {tipo:'vuelta-pernocta', linea:dd.linea,
+      sal:dd.sal2||null, lle:dd.lle2||null, hF:dd.hF2||null, hL:dd.hL2||null,
+      numTren:dd.numTrenVuelta||'', nocturno:dd.nocturno, origenPernocta:kk});
     dd.diaSiguiente = _kSigTV2;
   } else if(dd.modo==='pernocta3'){
     var _kkp3 = kk.split('-').map(Number);
@@ -15333,22 +15297,12 @@ function guardarTurnoEnTV2(){
     var _fin = new Date(_kkp3[0], _kkp3[1]-1, _kkp3[2]); _fin.setDate(_fin.getDate()+2);
     var _kFinTV2 = key(_fin.getFullYear(), _fin.getMonth()+1, _fin.getDate());
     var _nocInt = !!((F.hF3&&esHoraNocturna(F.hF3))||(F.hL3&&esHoraNocturna(F.hL3)));
-    if(_diaVueltaPernoctaProtegido(_kIntTV2, kk)){
-      _avisarVueltaPernoctaProtegida(_kIntTV2, kk, 'noche intermedia (día 2)', {sal:F.sal3, lle:F.lle3, hF:F.hF3, hL:F.hL3, numTren:F.numTrenIntermedio});
-    } else {
-      if(TV[_kIntTV2] && TV[_kIntTV2].origenPernocta===kk) delete TV[_kIntTV2];
-      TV[_kIntTV2] = {tipo:'pernocta3-intermedio', linea:dd.linea,
-        sal:F.sal3||'', lle:F.lle3||'', hF:F.hF3||'', hL:F.hL3||'',
-        numTren:F.numTrenIntermedio||'', nocturno:_nocInt, origenPernocta:kk};
-    }
-    if(_diaVueltaPernoctaProtegido(_kFinTV2, kk)){
-      _avisarVueltaPernoctaProtegida(_kFinTV2, kk, 'vuelta final (día 3)', {sal:dd.sal2, lle:dd.lle2, hF:dd.hF2, hL:dd.hL2, numTren:dd.numTrenVuelta});
-    } else {
-      if(TV[_kFinTV2] && TV[_kFinTV2].origenPernocta===kk) delete TV[_kFinTV2];
-      TV[_kFinTV2] = {tipo:'vuelta-pernocta', linea:dd.linea,
-        sal:dd.sal2||null, lle:dd.lle2||null, hF:dd.hF2||null, hL:dd.hL2||null,
-        numTren:dd.numTrenVuelta||'', nocturno:dd.nocturno, origenPernocta:kk};
-    }
+    _escribirDiaPernoctaConDemota(_kIntTV2, kk, {tipo:'pernocta3-intermedio', linea:dd.linea,
+      sal:F.sal3||'', lle:F.lle3||'', hF:F.hF3||'', hL:F.hL3||'',
+      numTren:F.numTrenIntermedio||'', nocturno:_nocInt, origenPernocta:kk});
+    _escribirDiaPernoctaConDemota(_kFinTV2, kk, {tipo:'vuelta-pernocta', linea:dd.linea,
+      sal:dd.sal2||null, lle:dd.lle2||null, hF:dd.hF2||null, hL:dd.hL2||null,
+      numTren:dd.numTrenVuelta||'', nocturno:dd.nocturno, origenPernocta:kk});
     dd.numTrenIntermedio = F.numTrenIntermedio||'';
     dd.diaIntermedio = _kIntTV2;
     dd.diaSiguiente = _kFinTV2;
