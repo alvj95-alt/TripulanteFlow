@@ -8078,6 +8078,13 @@ function _escribirCopiaTurno(res){
     if(existente && existente.tipo!=='descanso'){
       if(!TV2[esc.k]) TV2[esc.k]=[];
       var ddViejo={}; for(var campoV in existente) ddViejo[campoV]=existente[campoV];
+      // NUEVO — marca de "era el principal de este día antes de la
+      // copia" — se usa SOLO para que el contador "TOTAL DEL DÍA" no
+      // lo sume junto al turno nuevo (así Alex puede ver de un
+      // vistazo solo las horas del turno que acaba de agregar). NO
+      // afecta a Stats del mes — ahí sus horas siguen contando igual
+      // que siempre, sin este filtro.
+      ddViejo.esAntiguoPrincipal = true;
       TV2[esc.k].push(ddViejo);
     }
     // Limpieza de enlaces de pernocta huérfanos si el día pisado
@@ -12017,6 +12024,10 @@ function _escribirDiaPernoctaConDemota(kDestino, kOrigen, nuevoDato){
   if(existente && !esVacioODescanso && !esPunteroDeEstaMismaPernocta && !esPunteroHuerfano){
     if(!TV2[kDestino]) TV2[kDestino]=[];
     var ddViejo={}; for(var campo in existente) ddViejo[campo]=existente[campo];
+    // NUEVO — misma marca que en "Copiar turno": para que "TOTAL DEL
+    // DÍA" no sume estas horas junto al nuevo día de vuelta/intermedio.
+    // Stats del mes no se ve afectado, ahí sigue sumando igual.
+    ddViejo.esAntiguoPrincipal = true;
     TV2[kDestino].push(ddViejo);
   }
   TV[kDestino] = nuevoDato;
@@ -15877,7 +15888,24 @@ function renderAccordionTurno(turno, k, esExtra, idxExtra, abiertoPorDefecto, ti
         + 'font-weight:700;cursor:pointer">💼 He trabajado este descanso</button>';
     }
   }
-  if(!t.vueltaPernoctaInformativa) cuerpo += renderizarPopUpSimplificado(t, false, true);
+  if(!t.vueltaPernoctaInformativa){
+    // NUEVO — Confirmado por Alex: el día de la vuelta debe mostrar
+    // también sus tramos de continuidad (ej. la escala de Madrid antes
+    // de llegar a Barcelona), no solo el primer tramo. Esos tramos
+    // viven guardados en el día de ORIGEN (continuidadVuelta) — aquí
+    // solo se toman prestados para PINTARLOS, sin duplicar el dato
+    // real ni tocar TV, así que no hay riesgo de que se desincronicen
+    // si editas uno de los dos días.
+    var tParaMostrar = t;
+    if((t.tipo==='vuelta-pernocta') && t.origenPernocta && TV[t.origenPernocta] &&
+       TV[t.origenPernocta].continuidadVuelta && TV[t.origenPernocta].continuidadVuelta.length &&
+       (!t.continuidad || !t.continuidad.length)){
+      tParaMostrar = {};
+      for(var _kcv in t) tParaMostrar[_kcv] = t[_kcv];
+      tParaMostrar.continuidad = TV[t.origenPernocta].continuidadVuelta;
+    }
+    cuerpo += renderizarPopUpSimplificado(tParaMostrar, false, true);
+  }
   if(t.notas && t.notas.trim()){
     cuerpo += '<div style="margin-top:8px;padding:8px 0;border-top:1px solid var(--div);'
       + 'font-size:11px;color:var(--acc)"><b style="color:var(--tx3);font-size:9px;'
@@ -15925,7 +15953,14 @@ function renderDiaAreaMulti(){
   // número mostrado aquí sea siempre coherente con el que se paga/
   // cuenta — incluye ambos turnos, sus escalas internas y el hueco
   // entre turno 1 y turno 2, tal como corresponde a un día HTDL.
-  var jornadaCombo = calcularJornadaDiaria(all, k);
+  // NUEVO — Confirmado por Alex: el "TOTAL DEL DÍA" combinado no debe
+  // sumar un turno que pasó a secundario por haber sido pisado (era
+  // el principal antes) — solo debe reflejar el turno nuevo. Esas
+  // horas del turno viejo siguen contando en Stats del mes con
+  // normalidad (calcularJornadaDiaria no cambia); aquí solo se filtra
+  // qué entra en ESTE total concreto de la tarjeta del día.
+  var allParaTotal = all.filter(function(x){ return !x.esAntiguoPrincipal; });
+  var jornadaCombo = calcularJornadaDiaria(allParaTotal, k);
   // FIX — el total real del día es la suma de los CUATRO buckets. Antes
   // solo se sumaban efectivasMin+presenciaMin (bucket Ordinario), asi
   // que un dia mixto (Turno Principal Ordinario + Turno Adicional HTDL)
