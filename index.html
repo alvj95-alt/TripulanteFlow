@@ -14703,6 +14703,7 @@ function calculateEarnings(ks){
 
 
   ks.forEach(function(k){
+   try{
     var t=TV[k];if(!t)return;
     var _ks=k.split('-');var mo=parseInt(_ks[1]),dd=_ks[2];
     var dL=parseInt(dd)+' '+MESES_C[parseInt(mo)-1];
@@ -15020,6 +15021,18 @@ function calculateEarnings(ks){
         if(ex.plusIntlAuto){tI+=P_INTL;dI.push(dL);}
       });
     }
+   } catch(errDia){
+     // NUEVO — diagnóstico visible sin herramientas de desarrollador:
+     // si el cálculo de UN día concreto falla, antes rompía todo el
+     // bucle silenciosamente (los días siguientes del mes se quedaban
+     // sin sumar, sin ningún aviso). Ahora se avisa con el día y el
+     // error exactos — con alert() en vez de toast() para que el
+     // mensaje se quede fijo en pantalla (el toast desaparece solo a
+     // los 2,5s, muy poco tiempo para leerlo y copiarlo) — y se sigue
+     // con el resto del mes.
+     console.error('Error calculando el día', k, errDia);
+     alert('⚠️ Error calculando '+k+':\n'+(errDia&&errDia.message||errDia)+'\n\n(Haz captura de esto y envíasela a soporte)');
+   }
   });
 
   // ── Enlaces de jornada: descanso incumplido entre días consecutivos ──
