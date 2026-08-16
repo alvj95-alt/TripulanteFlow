@@ -7964,36 +7964,71 @@ function _resolverConflictoCopia(accion){
 // modoComp ('dinero'|'dias'|'mix') solo se usa cuando tipoElegido es
 // 'art5152' o 'htdl' — para 'dias'/'mix' esta función ya no se llama
 // (se enruta al formulario real, ver _abrirFormParaCopiaDiasMixto).
+// Calcula las "horas computables" para dinero — misma fórmula que
+// usa guardarTurno() para HTDL (d.importe) y Art.51/52
+// (d.horasEfectivas): en pernocta solo cuenta el trabajo real (ida +
+// continuidad ida + continuidad vuelta + vuelta); en ida-vuelta del
+// mismo día también entra la escala/hueco entre tramos.
+function _horasComputablesParaDinero(d, esPernocta){
+  var hIda = (d.hF&&d.hL) ? calcMins(d.hF,d.hL)/60 : 0;
+  var hVuelta = (d.hF2&&d.hL2) ? calcMins(d.hF2,d.hL2)/60 : 0;
+  var minEscala=0, minContinuidad=0, finIdaReal=d.hL;
+  (d.continuidad||[]).forEach(function(c){
+    if(c.horaInicio&&c.horaFin) minContinuidad += calcMins(c.horaInicio,c.horaFin);
+    if(!esPernocta && c.escalaMin!=null && c.escalaMin>0) minEscala += c.escalaMin;
+    if(c.horaFin) finIdaReal = c.horaFin;
+  });
+  if(!esPernocta && finIdaReal && d.hF2){
+    var hueco = calcMins(finIdaReal, d.hF2);
+    if(hueco>0) minEscala += hueco;
+  }
+  var minContinuidadVuelta=0;
+  (d.continuidadVuelta||[]).forEach(function(c){
+    if(c.horaInicio&&c.horaFin) minContinuidadVuelta += calcMins(c.horaInicio,c.horaFin);
+    if(!esPernocta && c.escalaMin!=null && c.escalaMin>0) minContinuidadVuelta += c.escalaMin;
+  });
+  var hEscala = Math.round(minEscala/60*100)/100;
+  var hContinuidad = Math.round(minContinuidad/60*100)/100;
+  var hContinuidadVuelta = Math.round(minContinuidadVuelta/60*100)/100;
+  if(esPernocta) return Math.round(((d.horas||0)+hContinuidad+hContinuidadVuelta)*100)/100;
+  return Math.round((hIda+hEscala+hContinuidad+hVuelta+hContinuidadVuelta)*100)/100;
+}
+
+// Aplica el modo de compensación 'dinero' a un registro ya construido
+// (d), calculando importe/horasEfectivas EXACTAMENTE igual que hace
+// guardarTurno() — antes esto se dejaba en blanco y el dinero no
+// aparecía en Stats hasta entrar a editar el turno a mano.
+function _aplicarDineroCopia(d, esHTDL, esArt5152, esPernocta){
+  var horasComp = _horasComputablesParaDinero(d, esPernocta);
+  if(esHTDL){
+    d.comp = 'dinero';
+    var hFparaTasa = esPernocta ? d.hF : d.hF2;
+    var hLparaTasa = esPernocta ? d.hL : d.hL2;
+    d.importe = calcImp(horasComp, hFparaTasa, hLparaTasa, d.linea, d.plusAct, d.plusJT, d.plusIntlAuto);
+  } else if(esArt5152){
+    d.compensacion = 'dinero';
+    d.horasEfectivas = horasComp;
+  }
+}
+
 function _construirEscrituraCopia(origen, destino, tipoElegido, modoComp){
   var o = origen.t;
   var kDestino = key(destino.y, destino.m, destino.d);
   var esHTDL = (tipoElegido==='htdl');
   var esArt5152 = (tipoElegido==='art5152');
   var tipoFinal = esHTDL ? 'trabajado' : (tipoElegido || o.tipo);
+  var esPernocta = origen.dias>1;
 
   function clonar(obj){ return obj ? JSON.parse(JSON.stringify(obj)) : obj; }
-
-  if(esHTDL){
-    // HTDL: una sola entrada en TV2 (turno extra), con la MISMA forma
-    // que ya usa guardarTurnoEnTV2 — soporta pernocta dentro de un
-    // único registro, así que no hace falta repartir en varias celdas.
-    var ddExtra = clonar(o);
-    ddExtra.tipo = 'trabajado';
-    ddExtra.comp = modoComp || 'dinero';
-    ddExtra.diasComp = [];
-    delete ddExtra.diaSiguiente; delete ddExtra.diaIntermedio;
-    delete ddExtra.cargadoDesdePdf;
-    return {escrituras:[{k:kDestino, data:ddExtra, esTV2:true}], incompletos:[]};
-  }
 
   if(origen.dias===1){
     var d1 = clonar(o);
     d1.tipo = tipoFinal;
-    // FIX — Art.51/52 usa 'compensacion' (no 'comp'), y el turno de
-    // origen (normalmente Ordinario) nunca trae ese campo — sin esto
-    // el motor de dinero de Art.51/52 no sabía cómo tratarlo.
-    if(esArt5152) d1.compensacion = modoComp || 'dinero';
     delete d1.cargadoDesdePdf;
+    // FIX — HTDL y Art.51/52 ahora se tratan EXACTAMENTE igual que
+    // Ordinario a nivel de estructura (misma celda/celdas), la única
+    // diferencia real es el tipo y cómo se compensa el dinero.
+    if(modoComp==='dinero') _aplicarDineroCopia(d1, esHTDL, esArt5152, false);
     return {escrituras:[{k:kDestino, data:d1}], incompletos:[]};
   }
 
@@ -8014,11 +8049,8 @@ function _construirEscrituraCopia(origen, destino, tipoElegido, modoComp){
   principal.tipo = tipoFinal;
   principal.diaSiguiente = kVtaD;
   if(origen.dias===3) principal.diaIntermedio = kIntD;
-  // FIX — misma corrección que en el caso de día suelto: Art.51/52
-  // necesita 'compensacion' en el registro principal de la pernocta,
-  // o el motor de dinero no sabe cómo tratarlo.
-  if(esArt5152) principal.compensacion = modoComp || 'dinero';
   delete principal.cargadoDesdePdf;
+  if(modoComp==='dinero') _aplicarDineroCopia(principal, esHTDL, esArt5152, true);
 
   var escrituras = [{k:kIdaD, data:principal}];
   if(origen.dias===3 && tIntOrigen){
@@ -8037,14 +8069,6 @@ function _construirEscrituraCopia(origen, destino, tipoElegido, modoComp){
 
 function _escribirCopiaTurno(res){
   res.escrituras.forEach(function(esc){
-    if(esc.esTV2){
-      // HTDL copiado — siempre entra como turno extra (así ya se
-      // construyó en _construirEscrituraCopia), esto no cambia.
-      if(!TV2[esc.k]) TV2[esc.k]=[];
-      var ddH={}; for(var campoH in esc.data) ddH[campoH]=esc.data[campoH];
-      TV2[esc.k].push(ddH);
-      return;
-    }
     var existente = TV[esc.k];
     // NUEVO — regla confirmada por Alex: si ya había un turno REAL
     // (no descanso), no se pierde — pasa a SECUNDARIO (turno extra),
