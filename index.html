@@ -17019,6 +17019,9 @@ function parseSchedulePdfText(text){
       entry.tipo = 'LIBRE'; entry.codigo = 'DO';
     } else if(/DISPONIBLE/i.test(resto)){
       entry.tipo = 'RESERVA'; entry.codigo = 'R';
+    } else if(/\bCP\b/i.test(resto)){
+      // NUEVO — Confirmado por Alex: "CP" son días de vacaciones.
+      entry.tipo = 'VACACIONES'; entry.codigo = 'CP';
     } else {
       entry.tipo = 'SERVICIO';
       const parts = resto.split(/\s+/);
@@ -17155,8 +17158,14 @@ var ESTACIONES_PDF_BASE = {
   ATO:'Madrid-Puerta de Atocha',
   CHA:'Madrid-Chamartín Clara Campoamor',
   VIG:'Vigo-Urzáiz',
-  SVO:'Sevilla-Santa Justa',
-  VLC:'Valencia-Joaquín Sorolla',
+  SVQ:'Sevilla-Santa Justa',
+  SSB:'San Sebastián',
+  PAM:'Pamplona',
+  CAR:'Cartagena',
+  AGP:'Málaga-María Zambrano',
+  VLN:'Valencia Estació del Nord',
+  // NOTA — VLC y VLJ, a petición de Alex, NO van en la lista base:
+  // cada persona las enseña a mano la primera vez que le aparezcan.
   ZAZ:'Zaragoza-Delicias'
 };
 var ESTACIONES_PDF = (function(){
@@ -17403,6 +17412,20 @@ function _pdfConstruirEscrituras(bloque, anio, mesNum){
     return {escrituras:[{k:kDe(bloque[0].n), data:{tipo:'descanso', cargadoDesdePdf:true}}], incompletos:[]};
   }
 
+  // NUEVO — Confirmado por Alex: "R" (DISPONIBLE/RESERVA) es un día
+  // de oficina — se guarda igual que un turno de reserva simple hecho
+  // a mano ({tipo:'reserva', simple:true}), que la app YA sabe contar
+  // como 8h de Presencia por defecto (calcularJornadaDiaria, rama
+  // 'reserva', sin reservaHoraToma/Llegada). Tampoco se agrupa nunca.
+  if(bloque.length===1 && bloque[0].tipo==='RESERVA'){
+    return {escrituras:[{k:kDe(bloque[0].n), data:{tipo:'reserva', simple:true, cargadoDesdePdf:true}}], incompletos:[]};
+  }
+
+  // NUEVO — "CP" (vacaciones), mismo patrón que descanso/reserva.
+  if(bloque.length===1 && bloque[0].tipo==='VACACIONES'){
+    return {escrituras:[{k:kDe(bloque[0].n), data:{tipo:'vacaciones', simple:true, cargadoDesdePdf:true}}], incompletos:[]};
+  }
+
   var escrituras = [], incompletos = [];
 
   if(bloque.length===1){
@@ -17591,9 +17614,14 @@ function _omitirEstacionesPdf(){
 function _iniciarColaCargaPdf(){
   var bloques = _pdfDetectarBloques(horarioActualDias);
   var descansos = horarioActualDias.filter(function(e){ return e.tipo==='LIBRE'; }).map(function(e){ return [e]; });
-  var cola = bloques.concat(descansos).sort(function(a,b){ return a[0].n-b[0].n; });
+  // NUEVO — días "R" (reserva/disponible) también se cargan, mismo
+  // patrón que los descansos: nunca se agrupan, un día = un bloque.
+  var reservas = horarioActualDias.filter(function(e){ return e.tipo==='RESERVA'; }).map(function(e){ return [e]; });
+  // NUEVO — días "CP" (vacaciones), mismo patrón.
+  var vacaciones = horarioActualDias.filter(function(e){ return e.tipo==='VACACIONES'; }).map(function(e){ return [e]; });
+  var cola = bloques.concat(descansos).concat(reservas).concat(vacaciones).sort(function(a,b){ return a[0].n-b[0].n; });
   if(!cola.length){
-    toast('No hay días de servicio Ordinario ni descansos que cargar en este horario');
+    toast('No hay días de servicio, descansos ni reservas que cargar en este horario');
     return;
   }
   _cargaPdfCola = cola; _cargaPdfIdx = 0;
