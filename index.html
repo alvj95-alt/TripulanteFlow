@@ -20,7 +20,7 @@
      sube en formato .xlsx (el CSV no lo necesita). -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;font-family:'Inter',sans-serif}
 :root{
@@ -180,6 +180,34 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
 /* Hoy: anillo naranja */
 .dc-hoy{border-color:var(--nar)!important;color:var(--nar3)!important;font-weight:800}
 
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — Modo selección para borrado múltiple (maqueta A,
+   aprobada por Alex). Mantener pulsado un día entra en este modo;
+   tocar más días los añade/quita de la selección; una barra fija
+   abajo confirma o cancela. Aditivo — no toca .dc en su estado normal.
+═══════════════════════════════════════════════════════════ */
+.dc-marcado-borrar{outline:2.5px solid var(--nar)!important;transform:scale(.93)!important;background:rgba(249,115,22,.14)!important}
+/* FIX — el mantener pulsado en móvil puede disparar selección de
+   texto / menú de "copiar" nativo del sistema, que retrasa el
+   repintado hasta soltar el dedo. Se desactiva SOLO en las celdas
+   del calendario, sin tocar el resto de la app. */
+.dc{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.dc-check-borrar{position:absolute;top:2px;right:2px;width:15px;height:15px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.5);background:rgba(0,0,0,.25);
+  display:none;align-items:center;justify-content:center;font-size:9px;z-index:2}
+.modo-seleccion-borrado .dc-check-borrar{display:flex}
+.dc-marcado-borrar .dc-check-borrar{background:var(--nar);border-color:var(--nar);color:#1a1006;font-weight:900}
+#barra-borrado-masivo{position:fixed;left:0;right:0;bottom:0;background:var(--s1);
+  border-top:1px solid var(--div);padding:14px 18px calc(14px + env(safe-area-inset-bottom));
+  display:none;align-items:center;justify-content:space-between;gap:12px;
+  box-shadow:0 -10px 30px rgba(0,0,0,.4);z-index:150}
+#barra-borrado-masivo.on{display:flex}
+#barra-borrado-masivo .bbm-count{font-size:13px;font-weight:800;color:var(--tx)}
+#barra-borrado-masivo .bbm-btns{display:flex;gap:8px}
+#barra-borrado-masivo button{padding:10px 16px;border-radius:10px;border:none;font-weight:800;font-size:12.5px;cursor:pointer}
+#barra-borrado-masivo .bbm-cancel{background:var(--s2);color:var(--tx2);border:1px solid var(--div)}
+#barra-borrado-masivo .bbm-del{background:#DC2626;color:#fff}
+
 /* NUEVO — Sistema Horario Compañero: badge azul con el turno del
    compañero, superpuesto en la celda, y modo "solo compañero" que
    atenúa (no oculta del todo, para no perder los badges de retraso/
@@ -314,6 +342,32 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
 @keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 .sh-handle{width:34px;height:3px;background:var(--div);border-radius:2px;margin:9px auto 0;flex-shrink:0}
+
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — Estilo "billete de tren" para el popup de Novedades
+   (maqueta aprobada por Alex, versión oscura). Clases con prefijo
+   nov2- para no tocar nada del resto de overlays (.sh/.sh-hdr etc.
+   siguen intactos, esto solo se usa DENTRO de #ov-novedades).
+═══════════════════════════════════════════════════════════ */
+.nov2-head{padding:20px 22px 14px}
+.nov2-brand{font-size:9px;letter-spacing:2.5px;color:var(--nar2);font-weight:800;text-transform:uppercase}
+.nov2-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--tx);margin-top:5px;line-height:1}
+.nov2-route{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:10.5px;color:var(--tx3);font-weight:700;letter-spacing:.4px}
+.nov2-dot{width:4px;height:4px;border-radius:50%;background:var(--nar2);flex-shrink:0}
+.nov2-ln{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--tx3) 0 4px,transparent 4px 8px);opacity:.4}
+.nov2-perf{position:relative;height:20px;flex-shrink:0}
+.nov2-perf::before,.nov2-perf::after{content:'';position:absolute;top:-2px;width:20px;height:20px;background:var(--bg);border-radius:50%}
+.nov2-perf::before{left:-10px}
+.nov2-perf::after{right:-10px}
+.nov2-perf-line{position:absolute;left:22px;right:22px;top:9px;border-top:2px dashed var(--div)}
+.nov2-stub{display:grid;grid-template-columns:38px 1fr;gap:13px;padding:14px 0;border-bottom:1px solid var(--div)}
+.nov2-stub:last-child{border-bottom:none}
+.nov2-stub-ico{width:38px;height:38px;border-radius:10px;background:rgba(249,115,22,.12);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.nov2-stub-title{font-weight:800;font-size:13px;color:var(--tx);margin-bottom:4px;letter-spacing:.1px}
+.nov2-stub-desc{font-size:11.5px;color:var(--tx3);line-height:1.55}
+.nov2-btn{width:100%;padding:15px;background:var(--nar2);border:none;border-radius:10px;color:#1a1006;font-weight:800;font-size:13.5px;letter-spacing:.3px;cursor:pointer}
+.nov2-barcode{margin-top:13px;height:22px;background:repeating-linear-gradient(90deg,var(--tx3) 0 2px,transparent 2px 5px);opacity:.4}
+
 .sh-hdr{padding:10px 16px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--div);flex-shrink:0}
 .sh-ico{font-size:20px}
 .sh-tit{flex:1;font-size:14px;font-weight:800}
@@ -2667,6 +2721,99 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
 .tren-suggest-item:hover,.tren-suggest-item.activo{background:rgba(59,127,255,.14)}
 .tren-suggest-num{font-weight:800;color:var(--acc3);font-size:12px}
 .tren-suggest-ruta{font-size:10px;color:var(--tx3)}
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — CHECK-IN DEL DÍA. Píldora en el mes-nav del Calendario
+   (para todo el mundo) que abre un overlay estándar (.ov/.sh) con
+   el check-in del día, subido por foto + OCR (Tesseract.js, ya
+   cargado por el Panel de Horario) desde el propio navegador. Se
+   guarda en Supabase, tabla checkin_diario, con clave primaria
+   (fecha,sede) — así solo la PRIMERA persona que confirma la
+   subida puede crear la fila; a partir de ahí el registro queda
+   bloqueado para todo el mundo salvo Admin (política RLS "solo
+   admin edita"). 100% aditivo — no toca TV/AJ ni ningún otro dato
+   existente.
+   REDISEÑADO — mismo lenguaje visual que el resto de botones/píldoras
+   de la app (mismo esquema que .mn-hoy, .mn-btn, .dcv-btn, .m-save,
+   .m-del) en vez de colores/gradientes propios — así no desentona.
+   Además, al usar var(--acc)/var(--acc2), la píldora y los botones se
+   recolorean solos en modo Admin (rojo) o Interventor (violeta),
+   exactamente igual que el resto de la app. -->
+.ci-pill{font-size:10px;color:var(--acc2);font-weight:700;cursor:pointer;padding:3px 10px;
+  background:var(--s2);border:1px solid var(--acc);border-radius:20px;flex-shrink:0;
+  display:flex;align-items:center;gap:4px;white-space:nowrap}
+.ci-pill.ci-pill-bloqueado{color:var(--green2);border-color:var(--green)}
+
+.ci-day-nav{display:flex;align-items:center;gap:4px;padding:12px 16px 8px}
+.ci-day-btn{background:rgba(255,255,255,.06);border:none;color:var(--tx2);font-size:16px;cursor:pointer;
+  border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s}
+.ci-day-btn:hover:not(:disabled){background:rgba(37,99,235,.18);color:var(--acc2)}
+.ci-day-btn:disabled{opacity:.25;cursor:default}
+.ci-day-lbl{flex:1;text-align:center;font-size:13px;font-weight:800;letter-spacing:-.2px}
+.ci-day-hoy-badge{font-size:9px;font-weight:800;color:var(--nar2);background:rgba(249,115,22,.12);
+  border:1px solid rgba(249,115,22,.28);border-radius:20px;padding:3px 9px;flex-shrink:0}
+.ci-hist-note{margin:4px 16px 10px;font-size:10px;color:var(--tx3);text-align:center;line-height:1.4}
+
+.ci-empty{background:var(--s2);border:1.5px dashed var(--div);border-radius:14px;margin:4px 16px 14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:24px 18px}
+.ci-empty-ico{font-size:30px;opacity:.3}
+.ci-empty-tit{font-size:13px;font-weight:700;text-align:center}
+.ci-empty-sub{font-size:11px;color:var(--tx2);line-height:1.5;text-align:center;margin-top:2px}
+.ci-btn-subir{margin-top:6px;background:var(--acc);color:#fff;border:none;border-radius:9px;
+  padding:9px 20px;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .18s}
+.ci-btn-subir:hover{background:var(--acc2)}
+.ci-consejo{font-size:9.5px;color:var(--tx3);line-height:1.5;margin-top:10px;text-align:center;padding:0 6px}
+
+.ci-locked-foot{margin:6px 16px 10px;padding:9px 12px;background:var(--s1);border:1px solid var(--div);
+  border-radius:10px;font-size:10px;color:var(--tx2);display:flex;align-items:center;gap:7px}
+
+.turno-code{display:inline-flex;align-items:baseline;gap:3px;flex-wrap:wrap}
+.tc-first{font-weight:900;color:var(--acc3);font-size:14px;letter-spacing:.2px}
+.tc-first.tc-warn{color:var(--amber2)}
+.tc-first-mini{font-weight:800;color:var(--acc3);font-size:9.5px}
+.tc-first-mini.tc-warn{color:var(--amber2);background:rgba(217,119,6,.16);border:1px solid rgba(217,119,6,.4);border-radius:4px;padding:0 4px}
+.tc-arrow{color:var(--tx3);font-size:8px;opacity:.7;margin:0 1px}
+.tc-rest{font-weight:600;color:var(--tx3);font-size:9.5px}
+.tc-rest.tc-warn{color:var(--amber2);background:rgba(217,119,6,.16);border:1px solid rgba(217,119,6,.4);border-radius:4px;padding:0 4px}
+.tc-warn-ico{font-size:8px;margin-right:1px}
+.ci-legend{display:flex;gap:12px;padding:2px 16px 8px;flex-wrap:wrap}
+.ci-legend-item{display:flex;align-items:center;gap:4px;font-size:8.5px;color:var(--tx3);font-weight:700}
+
+.pos-chip{display:inline-flex;align-items:center;gap:3px;font-size:8.5px;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:.2px}
+.pos-CP{background:rgba(37,99,235,.18);color:#93C5FD;border:1px solid rgba(37,99,235,.4)}
+.pos-TCF{background:rgba(217,119,6,.18);color:#FCD34D;border:1px solid rgba(217,119,6,.4)}
+.pos-JT{background:rgba(124,58,237,.18);color:#C4B5FD;border:1px solid rgba(124,58,237,.4)}
+.est-aus{color:var(--red2);font-size:9px;font-weight:800;background:rgba(220,38,38,.14);border:1px solid rgba(220,38,38,.35);padding:2px 6px;border-radius:6px}
+.est-obs{color:var(--amber2);font-size:9px;font-weight:800;background:rgba(217,119,6,.14);border:1px solid rgba(217,119,6,.35);padding:2px 6px;border-radius:6px}
+.est-falta{color:var(--nar2);font-size:9px;font-weight:800;background:rgba(249,115,22,.16);border:1.5px solid rgba(249,115,22,.5);padding:2px 6px;border-radius:6px}
+
+.ci-grupo{margin:0 16px 12px;border-radius:16px;background:var(--s1);border:1px solid var(--div);overflow:hidden}
+.ci-ghdr{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--s2);border-bottom:1px solid var(--div)}
+.ci-hora{font-size:14px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--acc3);width:48px;flex-shrink:0}
+.ci-hora.est-falta{background:none;border:none;padding:0;font-size:14px}
+.ci-count{font-size:8.5px;color:var(--tx3);font-weight:800;background:var(--s3);padding:2px 7px;border-radius:20px;margin-left:auto;flex-shrink:0}
+.ci-persona{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+.ci-persona:last-child{border-bottom:none}
+.ci-mat{font-size:8.5px;color:var(--tx3);font-family:monospace;width:52px;flex-shrink:0}
+.ci-nom{flex:1;min-width:0}
+.ci-nom-tx{font-size:11.5px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci-ruta{display:flex;gap:3px;align-items:baseline;margin-top:2px;font-size:8px;flex-wrap:wrap}
+.ci-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+
+/* Vistazo de confirmación tras el OCR — mismo patrón que .mfoot/.m-save/.m-del */
+.ci-vistazo-note{margin:4px 16px 12px;padding:10px 12px;background:rgba(249,115,22,.08);
+  border:1px solid rgba(249,115,22,.28);border-radius:10px;font-size:10.5px;color:var(--nar3);line-height:1.5}
+.ci-vistazo-btns{position:sticky;bottom:0;background:var(--s1);border-top:1px solid var(--div);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:7px;flex-shrink:0}
+.ci-btn-cancelar{height:42px;padding:0 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);
+  border-radius:10px;color:#FCA5A5;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.ci-btn-confirmar{flex:1;height:42px;background:var(--acc);border:none;border-radius:10px;color:#fff;
+  font-size:13px;font-weight:800;cursor:pointer;transition:background .18s}
+.ci-btn-confirmar:hover{background:var(--acc2)}
+.ci-progreso{padding:30px 20px;text-align:center;font-size:12px;color:var(--tx2)}
+.ci-progreso-ico{font-size:28px;margin-bottom:10px;animation:ciSpin 1.4s linear infinite;display:inline-block}
+@keyframes ciSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.ci-progreso-bar{height:4px;background:var(--s2);border-radius:3px;margin:14px 20px 0;overflow:hidden}
+.ci-progreso-fill{height:100%;background:var(--acc);border-radius:3px;transition:width .2s;width:0%}
 </style>
 </head>
 <body>
@@ -3093,6 +3240,7 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
         <button id="vista-ambos" class="vista-btn"     onclick="setVistaMode('ambos')">⚖ Comparar</button>
         <button id="vista-quitar-comp" class="vista-btn" onclick="quitarCompanero()" title="Quitar compañero" style="flex:0;padding:0 8px;color:var(--tx3)">✕</button>
       </div>
+      <button class="ci-pill" id="btn-ci-pill" style="display:none" onclick="abrirCheckin()">✅ Check-in</button>
       <div class="mn-hoy" onclick="irHoy()">Hoy</div>
       <button class="mn-btn" onclick="chM(1)" title="Mes siguiente">›</button>
     </div>
@@ -3964,6 +4112,27 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
   <button class="bni" id="nav-stats" onclick="goP('stats')"><div class="bi">📊</div><div class="bl">STATS</div><div class="bd"></div></button>
   <button class="bni" id="nav-ajustes" onclick="goP('ajustes')"><div class="bi">⚙️</div><div class="bl">AJUSTES</div><div class="bd"></div></button>
 </div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     NUEVO — CHECK-IN DEL DÍA. Overlay estándar (.ov/.sh), igual
+     que ov-htdl-dias justo debajo. Contenido 100% dinámico, ver
+     renderCiXxx() en el bloque de JS del módulo (buscar "MÓDULO
+     CHECK-IN DEL DÍA" más abajo). No se auto-abre nunca: solo con
+     la píldora del mes-nav del Calendario (btn-ci-pill), visible
+     solo para Admin/Interventor.
+═══════════════════════════════════════════════════════════ -->
+<div class="ov" id="ov-checkin" onclick="closeOv('ov-checkin')">
+  <div class="sh" onclick="event.stopPropagation()" style="max-height:88%">
+    <div class="sh-handle"></div>
+    <div class="sh-hdr">
+      <div class="sh-ico">✅</div>
+      <div><div class="sh-tit">Check-in del día</div><div class="sh-sub" id="ci-sub">—</div></div>
+      <button class="sh-close" onclick="closeOv('ov-checkin')">✕</button>
+    </div>
+    <div id="ci-body" style="flex:1;min-height:0;overflow-y:auto;padding-bottom:10px"></div>
+  </div>
+</div>
+<input type="file" id="ci-file-input" accept="image/*" style="display:none" onchange="ciArchivoSeleccionado(this.files[0])">
 
 <!-- NUEVO: Modal Paso 1 — Selección de días libres/disponibles para HTDL
      Reubicado como hermano directo de .bnav (mismo contexto que ov-tipo y
@@ -5143,21 +5312,22 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
 <div class="ov" id="ov-novedades" onclick="if(event.target===this)cerrarNovedades()">
   <div class="sh" onclick="event.stopPropagation()" style="max-height:88%">
     <div class="sh-handle"></div>
-    <div class="sh-hdr">
-      <div class="sh-ico">🆕</div>
-      <div>
-        <div class="sh-tit">Novedades</div>
-        <div class="sh-sub" id="nov-version-lbl"></div>
+    <div class="nov2-head" style="position:relative">
+      <button class="sh-close" onclick="cerrarNovedades()" style="position:absolute;top:18px;right:18px">✕</button>
+      <div class="nov2-brand">TrenTurnos · Boletín de servicio</div>
+      <div class="nov2-title">Novedades</div>
+      <div class="nov2-route">
+        <span>BCN</span><span class="nov2-dot"></span><span class="nov2-ln"></span><span class="nov2-dot"></span>
+        <span id="nov-version-lbl"></span>
       </div>
-      <button class="sh-close" onclick="cerrarNovedades()">✕</button>
     </div>
-    <div style="padding:6px 18px 0;overflow-y:auto">
-      <ul id="nov-lista" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px"></ul>
+    <div class="nov2-perf"><div class="nov2-perf-line"></div></div>
+    <div style="padding:2px 22px 0;overflow-y:auto">
+      <ul id="nov-lista" style="list-style:none;padding:0;margin:0"></ul>
     </div>
-    <div style="padding:14px 18px 24px">
-      <button onclick="cerrarNovedades()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--acc),var(--acc2));border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800;cursor:pointer">
-        ✓ Entendido
-      </button>
+    <div style="padding:18px 22px 24px">
+      <button class="nov2-btn" onclick="cerrarNovedades()">✓ Entendido</button>
+      <div class="nov2-barcode"></div>
     </div>
   </div>
 </div>
@@ -5532,6 +5702,16 @@ body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;ali
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- NUEVO — barra de borrado múltiple (modo selección, maqueta A) -->
+<div id="barra-borrado-masivo">
+  <div class="bbm-count"><span id="bbm-contador">0</span> día(s) seleccionados</div>
+  <div class="bbm-btns">
+    <button class="bbm-cancel" onclick="_cancelarSeleccionBorrado()">Cancelar</button>
+    <button class="bbm-del" onclick="_confirmarEliminarSeleccionMasiva()">🗑 Eliminar</button>
+  </div>
+</div>
+
+
 <!-- BOTÓN DETENER ALARMA — aparece solo cuando hay alarma activa -->
 <div id="alarma-stop-btn" style="
   display:none;
@@ -5875,38 +6055,42 @@ function _saveArt5152UsoAnual(){ localStorage.setItem('art5152_uso_anual', JSON.
 /* ═══════════════════════════════════════
    INIT
 ═══════════════════════════════════════ */
-var NOV_VERSION = 'nov_v7';
+var NOV_VERSION = 'nov_v8';
+// FIX — Confirmado por Alex: antes esta fecha se calculaba con
+// new Date() en el momento en que la persona ABRÍA el popup, así que
+// mostraba "hoy" en vez de la fecha real en que se publicó esta
+// actualización — si alguien la veía por primera vez varios días
+// después de subirla, salía una fecha equivocada. Ahora es un texto
+// fijo, ligado a esta versión — se actualiza a mano cada vez que se
+// suba una nueva tanda de novedades (junto con NOV_VERSION y
+// listaNovedades, ver instrucciones más abajo).
+var NOV_FECHA = '17/8/2026';
 
 var listaNovedades = [
   {
-    ico: '🔀',
-    titulo: 'Módulo Interventor',
-    desc: 'El Buscador de Compañeros ahora también cruza tu tren con el Gráfico de Intervención y el Informe de agentes: te dice qué interventor lleva tu servicio ese día, además de con qué compañeros coincides.'
+    ico: '📥',
+    titulo: 'Carga automática de horario',
+    desc: 'Sube el PDF de tu horario individual y pulsa «Cargar en calendario» — reconoce pernoctas, escalas entre trenes y tramos DH sola, sin escribir nada a mano. También carga los días de reserva («R») y vacaciones («CP») del propio PDF.'
   },
   {
-    ico: '🏥',
-    titulo: 'Baja Médica sobre un turno ya puesto',
-    desc: 'Si te dan la baja y ya tenías el turno registrado, ya no hace falta borrar nada: desde el propio historial pulsas «Convertir en Baja Laboral». Si es tu primera baja del año, se abona el 100% de las horas; si no, se descuentan los 3 primeros días y desde el 4º se abona el 75%.'
+    ico: '📋',
+    titulo: 'Copiar turno',
+    desc: 'Copia cualquier turno ya guardado y pégalo en otro día, incluso de otro mes. Eliges si se guarda como Ordinario, Art.51/52 o HTDL, y cómo se compensa (dinero, días o mixto).'
   },
   {
-    ico: '⏳',
-    titulo: 'Reserva de HTDL y Art. 51/52',
-    desc: 'Al registrar una Reserva de HTDL o Artículo 51/52, ahora solo pides la hora de toma y de deje. Si luego «Pinchas / Verificas» el turno, la app te deja meter el tren real (ida, vuelta o pernocta) y recalcula todo con tu tarifa según el rol activo.'
+    ico: '🔁',
+    titulo: 'Cambiar tipo de turno',
+    desc: '¿Un turno ya puesto que en realidad debería ser HTDL o Art.51/52 en vez de Ordinario? Cámbialo en el sitio, sin borrar ni volver a escribir nada.'
   },
   {
-    ico: '💰',
-    titulo: 'Desglose Económico reorganizado',
-    desc: 'El resumen del mes ahora está en tarjetas separadas y más claras (Compensación económica, Pluses, Información adicional), y al final aparece bien grande el Total a Pagar del mes, sumando todo automáticamente.'
+    ico: '📊',
+    titulo: 'Auditoría de Horas más precisa',
+    desc: 'El cálculo de Horas Efectivas y de Presencia ya tiene en cuenta las esperas entre trenes conectados y los enlaces de jornada — el resultado queda mucho más cerca del cómputo oficial.'
   },
   {
-    ico: '📄',
-    titulo: 'Sube tu horario con una foto',
-    desc: 'Ya no hace falta que el cuadrante sea un PDF: ahora puedes sacarle una foto (o una captura) y la app lo reconoce igual de bien, gracias al nuevo lector de imágenes integrado.'
-  },
-  {
-    ico: '👤',
-    titulo: 'Perfil por rol: Tripulante / Auxiliar',
-    desc: 'Elige tu rol en Ajustes y las tarifas de HTDL, nocturnidad y Artículo 51/52 se autocompletan solas según el rol activo — sin tener que introducirlas a mano si no quieres.'
+    ico: '🗺️',
+    titulo: 'Diccionario de estaciones que aprende solo',
+    desc: 'La app ya reconoce de fábrica las siglas de estación más habituales. Si aparece una que no conoce, te pregunta una sola vez y la recuerda para siempre — para ti y para el resto.'
   }
 ];
 
@@ -8768,10 +8952,35 @@ function renderSlide(gridId, fecha){
         }
       }
     }
-    c.innerHTML=retBadge+tv2Bg+parkingBadge+trenBadge+'<span>'+d+'</span>'+(t&&!isS?'<span class="dc-ico">'+(TIPO_INFO[t.tipo]?TIPO_INFO[t.tipo].ico:'')+'</span>':'');
+    c.innerHTML=retBadge+tv2Bg+parkingBadge+trenBadge+'<span>'+d+'</span>'+(t&&!isS?'<span class="dc-ico">'+(TIPO_INFO[t.tipo]?TIPO_INFO[t.tipo].ico:'')+'</span>':'')+'<span class="dc-check-borrar">✓</span>';
     // FIX closure: capturar d, k, t correctamente en cada iteración
+    // NUEVO — modo selección para borrado múltiple (maqueta A): tap
+    // normal sigue abriendo el día como siempre; mantener pulsado
+    // ~500ms entra en modo selección (empezando por ese día ya
+    // marcado); un tap NORMAL mientras el modo está activo marca o
+    // desmarca ese día en vez de abrirlo.
     (function(dd, kk, tt){
-      c.onclick=function(){ clickDia(dd, kk, tt); };
+      var _pressTimer = null;
+      var _yaEntroPorPulsacionLarga = false;
+      function _empezarPulsacion(){
+        _yaEntroPorPulsacionLarga = false;
+        _pressTimer = setTimeout(function(){
+          _yaEntroPorPulsacionLarga = true;
+          _iniciarSeleccionBorrado(kk, c);
+        }, 500);
+      }
+      function _cancelarPulsacion(){ clearTimeout(_pressTimer); }
+      c.addEventListener('touchstart', _empezarPulsacion, {passive:true});
+      c.addEventListener('touchend', _cancelarPulsacion);
+      c.addEventListener('touchmove', _cancelarPulsacion);
+      c.addEventListener('mousedown', _empezarPulsacion);
+      c.addEventListener('mouseup', _cancelarPulsacion);
+      c.addEventListener('mouseleave', _cancelarPulsacion);
+      c.onclick=function(){
+        if(_yaEntroPorPulsacionLarga){ _yaEntroPorPulsacionLarga=false; return; } // evita que el propio long-press dispare también un click
+        if(_modoSeleccionBorrado){ _toggleSeleccionBorrado(kk, c); return; }
+        clickDia(dd, kk, tt);
+      };
     })(d, k, t);
     frag.appendChild(c);
   }
@@ -8779,6 +8988,18 @@ function renderSlide(gridId, fecha){
   // Una sola operación de DOM: vaciar + insertar todo de golpe
   grid.innerHTML='';
   grid.appendChild(frag);
+
+  // NUEVO — si el modo selección de borrado ya estaba activo antes de
+  // este renderizado (ej. un renderCal() en segundo plano mientras la
+  // persona tenía días marcados), se reaplican la clase del grid y
+  // las marcas de los días ya elegidos, para no perder la selección.
+  if(_modoSeleccionBorrado){
+    grid.classList.add('modo-seleccion-borrado');
+    Object.keys(_diasSeleccionadosBorrar).forEach(function(kSel){
+      var celda = grid.querySelector('[data-k="'+kSel+'"]');
+      if(celda) celda.classList.add('dc-marcado-borrar');
+    });
+  }
 
   // NUEVO — Sistema Horario Compañero: si hay datos de un compañero
   // importados y el modo de vista no es 'mio', añade un overlay con
@@ -12880,6 +13101,122 @@ function confirmarEliminar(){
    Guarda turnos + ajustes en un .json
    y los restaura sin tocar el código.
 ═══════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — BORRADO MÚLTIPLE POR SELECCIÓN (maqueta A, aprobada por
+   Alex). Mantener pulsado un día entra en "modo selección"; tocar
+   más días los añade/quita; una barra fija abajo confirma o cancela.
+   100% aditivo — no toca clickDia() ni confirmarEliminar() (el
+   borrado de un solo día desde la ficha sigue exactamente igual).
+═══════════════════════════════════════════════════════════ */
+var _modoSeleccionBorrado = false;
+var _diasSeleccionadosBorrar = {};
+
+function _iniciarSeleccionBorrado(k, celdaEl){
+  if(_modoSeleccionBorrado) return;
+  _modoSeleccionBorrado = true;
+  _diasSeleccionadosBorrar = {};
+  document.getElementById('days').classList.add('modo-seleccion-borrado');
+  _toggleSeleccionBorrado(k, celdaEl);
+  if(navigator.vibrate) navigator.vibrate(30); // vibración corta de confirmación, si el dispositivo la soporta
+}
+
+function _toggleSeleccionBorrado(k, celdaEl){
+  // FIX — Confirmado por Alex: el marcado no se veía al instante en
+  // móvil (solo aparecía al recargar/mover el calendario). Dos causas
+  // probables: 1) el elemento recibido podía estar obsoleto si el
+  // calendario se había vuelto a pintar entre medias — se vuelve a
+  // buscar la celda VIVA por su data-k, por si acaso; 2) el estilo
+  // ":active" nativo del navegador durante la pulsación ganaba por
+  // especificidad CSS — ahora también se aplica el estilo DIRECTO al
+  // elemento (no solo la clase), que nada puede pisar por encima.
+  var celdaViva = document.querySelector('[data-k="'+k+'"]') || celdaEl;
+  if(_diasSeleccionadosBorrar[k]){
+    delete _diasSeleccionadosBorrar[k];
+    if(celdaViva){
+      celdaViva.classList.remove('dc-marcado-borrar');
+      celdaViva.style.outline=''; celdaViva.style.background='';
+    }
+  } else {
+    _diasSeleccionadosBorrar[k] = true;
+    if(celdaViva){
+      celdaViva.classList.add('dc-marcado-borrar');
+      celdaViva.style.outline='2.5px solid #F97316';
+      celdaViva.style.background='rgba(249,115,22,.14)';
+      celdaViva.offsetHeight; // fuerza a que el navegador pinte YA, sin esperar al siguiente frame
+    }
+  }
+  var n = Object.keys(_diasSeleccionadosBorrar).length;
+  document.getElementById('bbm-contador').textContent = n;
+  document.getElementById('barra-borrado-masivo').classList.toggle('on', n>0);
+}
+
+function _cancelarSeleccionBorrado(){
+  _modoSeleccionBorrado = false;
+  _diasSeleccionadosBorrar = {};
+  var grid = document.getElementById('days');
+  if(grid){
+    grid.classList.remove('modo-seleccion-borrado');
+    Array.prototype.slice.call(grid.querySelectorAll('.dc-marcado-borrar')).forEach(function(el){
+      el.classList.remove('dc-marcado-borrar');
+      el.style.outline=''; el.style.background=''; // limpia también el estilo directo, ver _toggleSeleccionBorrado()
+    });
+  }
+  document.getElementById('barra-borrado-masivo').classList.remove('on');
+}
+
+// Limpieza de UN día para el borrado masivo — mismos pasos que ya
+// hace confirmarEliminar() para un solo día (contadores de Art.51/52,
+// días de compensación propios y de Mix, pernocta de 2/3 días,
+// turnos extra en TV2), pero SIN tocar selDay ni la UI (overlays,
+// toasts, renderCal) — eso se hace UNA sola vez al final del lote,
+// no en cada iteración.
+function _eliminarDiaParaBorradoMasivo(k){
+  var t = TV[k];
+  if(!t) return;
+  if(t.tipo==='art5152' && (t.compensacion==='dinero' || t.compensacion==='dias')){
+    var mesOrigenDel = k.slice(0,7);
+    var anioOrigenDel = k.slice(0,4);
+    if(ART5152_USO[mesOrigenDel]){
+      ART5152_USO[mesOrigenDel] = Math.max(0, ART5152_USO[mesOrigenDel]-1);
+      _saveArt5152Uso();
+    }
+    if(ART5152_USO_ANUAL[anioOrigenDel]){
+      ART5152_USO_ANUAL[anioOrigenDel] = Math.max(0, ART5152_USO_ANUAL[anioOrigenDel]-1);
+      _saveArt5152UsoAnual();
+    }
+  }
+  if(t.diasComp && t.diasComp.length){
+    t.diasComp.forEach(function(iso){ if(TV[iso] && TV[iso].origen===k) delete TV[iso]; });
+  }
+  if(t.mixDias && t.mixDias.diasComp && t.mixDias.diasComp.length){
+    t.mixDias.diasComp.forEach(function(iso){ if(TV[iso] && TV[iso].origen===k) delete TV[iso]; });
+  }
+  if(t.diaSiguiente && TV[t.diaSiguiente] && TV[t.diaSiguiente].origenPernocta===k){
+    delete TV[t.diaSiguiente];
+  }
+  if(t.diaIntermedio && TV[t.diaIntermedio] && TV[t.diaIntermedio].origenPernocta===k){
+    delete TV[t.diaIntermedio];
+  }
+  delete TV[k];
+  if(TV2[k]) delete TV2[k];
+}
+
+function _confirmarEliminarSeleccionMasiva(){
+  var dias = Object.keys(_diasSeleccionadosBorrar);
+  if(!dias.length) return;
+  var etiquetas = dias.slice().sort().map(function(k){ return parseInt(k.split('-')[2],10); }).join(', ');
+  if(!confirm('¿Eliminar '+dias.length+' día(s) del calendario (día '+etiquetas+')?\n\nEsta acción no se puede deshacer.')) return;
+  dias.forEach(function(k){ _eliminarDiaParaBorradoMasivo(k); });
+  saveTV(); saveTV2();
+  _cancelarSeleccionBorrado();
+  if(selDay && dias.indexOf(selDay.k)!==-1){
+    clearSelDay();
+    document.getElementById('dia-area').innerHTML='';
+  }
+  renderCal(); renderStats();
+  toast('🗑 '+dias.length+' día(s) eliminados');
+}
+
 function pedirBorrarTodo(){openOv('ov-borrar');}
 
 /* ═══════════════════════════════════════════════════════════
@@ -14378,6 +14715,10 @@ function goP(n){
     renderStats();
   }
   if(n==='ajustes')loadAjUI();
+  // NUEVO — refresca la píldora ✅ Check-in (visible/oculta según rol,
+  // y en azul si ya hay check-in subido hoy) cada vez que se entra en
+  // Calendario, para que nunca quede desactualizada de una sesión a otra.
+  if(n==='cal' && typeof mostrarPillCheckinSiCorresponde==='function') mostrarPillCheckinSiCorresponde();
   // NUEVO: refrescar la lista individual de meses al entrar en Horario
   if(n==='horario' && typeof renderMonthListIndividual==='function') renderMonthListIndividual();
   // NUEVO — al entrar en la pestaña Compañeros, dispara la misma
@@ -17640,6 +17981,27 @@ function _procesarSiguienteBloquePdf(){
   if(_cargaPdfIdx >= _cargaPdfCola.length){ _finalizarCargaPdf(); return; }
   var bloque = _cargaPdfCola[_cargaPdfIdx];
   var res = _pdfConstruirEscrituras(bloque, _cargaPdfAnio, _cargaPdfMes);
+
+  // NUEVO — Confirmado por Alex: cuando los descansos llegan antes en
+  // un PDF aparte (que nunca se sube a la app) y ya están puestos a
+  // mano, el PDF individual del mes en curso los vuelve a mostrar
+  // como "día libre" — si el día ya tiene descanso, DOP o COMPE
+  // puesto, ya coincide, no hay nada que preguntar. Los "COMPE" salen
+  // en el PDF como "LD" — son los días de descanso que generó un
+  // HTDL trabajado el mes anterior (compensación "por día"). No se
+  // sobrescribe ninguno de los tres (el DOP y el COMPE perderían su
+  // marca especial y su enlace al turno de origen) — se saltan sin más.
+  if(res.escrituras.length===1 && res.escrituras[0].data.tipo==='descanso'){
+    var kLibre = res.escrituras[0].k;
+    var existenteLibre = TV[kLibre];
+    if(existenteLibre && (existenteLibre.tipo==='descanso' || existenteLibre.tipo==='dop' || existenteLibre.tipo==='comp')){
+      _cargaPdfResumen.yaCoincidian = (_cargaPdfResumen.yaCoincidian||0) + 1;
+      _cargaPdfIdx++;
+      _procesarSiguienteBloquePdf();
+      return;
+    }
+  }
+
   if(!_bloqueTieneConflicto(res.escrituras)){
     _escribirBloquePdf(res, 'directo');
     if(res.incompletos.length) _cargaPdfResumen.revisar = _cargaPdfResumen.revisar.concat(res.incompletos);
@@ -17689,6 +18051,24 @@ function _escribirBloquePdf(res, modo){
       ddExtra.tipo = tipoHeredado; ddExtra.comp = 'dinero'; ddExtra.diasComp = [];
       TV2[esc.k].push(ddExtra);
     } else {
+      // FIX — Confirmado por Alex: al "Sobrescribir" un día que ya
+      // tenía un turno real puesto, ese turno YA NO se pierde — pasa
+      // a SECUNDARIO con sus horas congeladas en este mismo momento,
+      // exactamente el mismo mecanismo que ya usan "Copiar turno" y
+      // "Cambiar tipo de turno". Antes se pisaba directo y esas horas
+      // desaparecían de la Auditoría de golpe, en vez de seguir
+      // sumando según su tipo (Ordinario→Efectiva/Presencia,
+      // HTDL/Art.51-52→dinero/días).
+      var existentePdf = TV[esc.k];
+      if(existentePdf && existentePdf.tipo!=='descanso'){
+        if(!TV2[esc.k]) TV2[esc.k]=[];
+        var ddViejoPdf={}; for(var campoVP in existentePdf) ddViejoPdf[campoVP]=existentePdf[campoVP];
+        ddViejoPdf.esAntiguoPrincipal = true;
+        try{
+          ddViejoPdf._horasGarantizadas = calcularJornadaDiaria([existentePdf], esc.k);
+        }catch(errGarantiaPdf){ /* si falla, calcularJornadaDiaria() recalcula como siempre */ }
+        TV2[esc.k].push(ddViejoPdf);
+      }
       if(modo==='sobrescribir' && TV[esc.k] && TV[esc.k].diaSiguiente && TV[esc.k].diaSiguiente!==esc.data.diaSiguiente){
         if(TV[TV[esc.k].diaSiguiente] && TV[TV[esc.k].diaSiguiente].origenPernocta===esc.k) delete TV[TV[esc.k].diaSiguiente];
       }
@@ -17705,6 +18085,7 @@ function _finalizarCargaPdf(){
   renderCal(); renderStats();
   var r = _cargaPdfResumen;
   var msg = '✅ '+r.cargados+' nuevos · '+r.sobrescritos+' sobrescritos · '+r.extra+' como extra · '+r.omitidos+' omitidos';
+  if(r.yaCoincidian) msg += ' · '+r.yaCoincidian+' descansos ya coincidían';
   if(r.revisar.length) msg += ' · Revisar: '+r.revisar.join(', ');
   toast(msg);
 }
@@ -19374,27 +19755,34 @@ function _obtenerPasosTour(){
    MÓDULO NOVEDADES — popup dinámico basado en listaNovedades[].
    Para añadir una versión futura:
      1. Edita listaNovedades con los nuevos objetos
-     2. Cambia NOV_VERSION a 'nov_v6' (o la siguiente)
+     2. Cambia NOV_VERSION a 'nov_v8' (o la siguiente)
+     3. Cambia NOV_FECHA a la fecha real de publicación (fija, no se
+        calcula sola — antes usaba la fecha de "hoy" al abrir el
+        popup, lo cual era incorrecto si alguien lo veía días después)
    El popup volverá a salir automáticamente a todos los usuarios.
    Clave localStorage: NOV_VERSION — aislada de TV/AJ/turnos.
 ═══════════════════════════════════════════════════════════ */
 
 function mostrarNovedades(){
-  // Renderizar lista desde el array
+  // Renderizar lista desde el array — estilo "billete de tren"
+  // (maqueta aprobada por Alex): icono en caja + título + descripción,
+  // separados por línea, igual que los resguardos de un billete.
   var ul = document.getElementById('nov-lista');
   if(!ul) return;
   ul.innerHTML = listaNovedades.map(function(n){
-    return '<li style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--div)">'
-      +'<div style="font-size:24px;flex-shrink:0;margin-top:1px">'+n.ico+'</div>'
+    return '<li class="nov2-stub">'
+      +'<div class="nov2-stub-ico">'+n.ico+'</div>'
       +'<div>'
-      +'<div style="font-size:13px;font-weight:800;color:var(--tx);margin-bottom:3px">'+n.titulo+'</div>'
-      +'<div style="font-size:11px;color:var(--tx3);line-height:1.55">'+n.desc+'</div>'
+      +'<div class="nov2-stub-title">'+n.titulo+'</div>'
+      +'<div class="nov2-stub-desc">'+n.desc+'</div>'
       +'</div>'
       +'</li>';
   }).join('');
-  // Etiqueta de versión
+  // FIX — "BCN" ahora vive en su propia línea de ruta (junto a los
+  // puntitos), así que aquí solo va la fecha, para no repetir "BCN"
+  // dos veces.
   var lbl = document.getElementById('nov-version-lbl');
-  if(lbl) lbl.textContent = 'TrenTurnos v5 · BCN · '+new Date().toLocaleDateString('es-ES');
+  if(lbl) lbl.textContent = NOV_FECHA;
   openOv('ov-novedades');
 }
 
@@ -20082,6 +20470,370 @@ const SUPABASE_URL_ADMIN = 'https://xoftsdupynwhzxsiusox.supabase.co';
 const SUPABASE_KEY_ADMIN = 'sb_publishable_jpuwxGvqz80zsRn2N_-qww_xqS1InnE';
 const sbAdmin = supabase.createClient(SUPABASE_URL_ADMIN, SUPABASE_KEY_ADMIN);
 
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — MÓDULO CHECK-IN DEL DÍA (foto + OCR → Supabase).
+   Tabla checkin_diario (fecha,sede) como clave primaria: solo la
+   primera persona que confirma una subida puede crear la fila
+   (política RLS "insertar si no existe", abierta a cualquiera). A
+   partir de ahí, cualquier intento de volver a subir usa upsert()
+   sobre la misma fila — Postgres lo convierte en UPDATE, y la
+   política RLS "solo admin edita" bloquea ese UPDATE para
+   cualquiera que no sea Admin. Así el "primero gana, solo Admin
+   corrige" vive en las políticas de la base de datos, no en este
+   JS (que se podría saltar). Reutiliza sbAdmin, AJ, toast(),
+   openOv()/closeOv() y Tesseract.js ya cargados por el resto de
+   la app — no crea ninguna dependencia nueva.
+═══════════════════════════════════════════════════════════ */
+var _ciFilasPendientes = null;
+
+function ciFechaHoyISO(){
+  var d = new Date();
+  var mm = String(d.getMonth()+1).padStart(2,'0');
+  var dd = String(d.getDate()).padStart(2,'0');
+  return d.getFullYear()+'-'+mm+'-'+dd;
+}
+function ciEsAdminOInterventor(){
+  return !!(typeof perfilAdminActual!=='undefined' && perfilAdminActual && perfilAdminActual.rol==='admin')
+      || !!(typeof usuarioActual!=='undefined' && usuarioActual && usuarioActual.esInterventor);
+}
+// NUEVO — Quién es "yo" ahora mismo, para dejar constancia de quién
+// sube el check-in. NO crea ningún dato ni sesión nueva: solo lee lo
+// que la app YA tiene guardado, con esta prioridad:
+//  1) Admin logueado (perfilAdminActual) — identifica por su email,
+//     ya que el login de Admin es con email+contraseña, no matrícula.
+//  2) Interventor con matrícula ya validada (mismo localStorage que
+//     usa el resto del Portal de Interventor).
+//  3) Tripulante normal — AJ.matricula/AJ.nombre, de siempre.
+function ciIdentidadActual(){
+  if(typeof perfilAdminActual!=='undefined' && perfilAdminActual && perfilAdminActual.rol==='admin'){
+    return { matricula: 'ADMIN', nombre: perfilAdminActual.email || 'Administrador' };
+  }
+  var matInterventor = localStorage.getItem('interventorMatriculaValidada');
+  if(matInterventor){
+    return { matricula: matInterventor, nombre: localStorage.getItem('interventorNombreValidado') || ('Interventor '+matInterventor) };
+  }
+  return { matricula: AJ.matricula || '', nombre: AJ.nombre || '' };
+}
+// Muestra/oculta la píldora del mes-nav según el rol, y consulta si
+// hoy ya existe check-in para pintarla en azul ("ya subido") o verde
+// pulsante ("pendiente de subir"). Se llama al entrar en Calendario
+// y al arrancar la app — nunca abre el overlay por sí sola.
+async function mostrarPillCheckinSiCorresponde(){
+  var pill = document.getElementById('btn-ci-pill');
+  if(!pill) return;
+  // MODIFICADO — el Check-in del día es para todo el mundo (no solo
+  // Admin/Interventor); lo único reservado a Admin es poder modificar
+  // un check-in que ya subió otra persona (ver renderCiBloqueado).
+  pill.style.display='flex';
+  pill.classList.remove('ci-pill-bloqueado');
+  pill.innerHTML = '✅ Check-in';
+  var fila = await ciObtenerFilaHoy();
+  if(fila){ pill.classList.add('ci-pill-bloqueado'); pill.innerHTML='✅ Check-in ✓'; }
+}
+var _ciFechaViendo = null; // objeto Date del día que se está mirando en el overlay
+
+function ciFechaISO(d){
+  var mm = String(d.getMonth()+1).padStart(2,'0');
+  var dd = String(d.getDate()).padStart(2,'0');
+  return d.getFullYear()+'-'+mm+'-'+dd;
+}
+function ciEsHoy(d){
+  return ciFechaISO(d) === ciFechaHoyISO();
+}
+function ciFechaBonita(d){
+  return d.toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'long'});
+}
+async function abrirCheckin(){
+  openOv('ov-checkin');
+  _ciFechaViendo = new Date();
+  await ciCargarYRenderizarFecha();
+}
+// NUEVO — histórico: mueve el día que se está viendo dentro del
+// overlay (delta=-1 día anterior, +1 día siguiente). No deja avanzar
+// más allá de hoy — el check-in de mañana no existe todavía.
+function ciCambiarDia(delta){
+  var d = new Date(_ciFechaViendo);
+  d.setDate(d.getDate()+delta);
+  if(d > new Date()) return;
+  _ciFechaViendo = d;
+  ciCargarYRenderizarFecha();
+}
+async function ciObtenerFilaFecha(fechaISO){
+  if(typeof sbAdmin === 'undefined') return null;
+  try{
+    var resp = await sbAdmin.from('checkin_diario').select('*')
+      .eq('fecha', fechaISO).eq('sede', AJ.base || '').maybeSingle();
+    return (resp && resp.data) ? resp.data : null;
+  }catch(e){ console.error(e); return null; }
+}
+async function ciObtenerFilaHoy(){ return ciObtenerFilaFecha(ciFechaHoyISO()); }
+
+function ciBarraDiaHtml(){
+  var esHoy = ciEsHoy(_ciFechaViendo);
+  return '<div class="ci-day-nav">'+
+    '<button class="ci-day-btn" onclick="ciCambiarDia(-1)" title="Día anterior">‹</button>'+
+    '<div class="ci-day-lbl">'+ciFechaBonita(_ciFechaViendo)+'</div>'+
+    (esHoy ? '<span class="ci-day-hoy-badge">HOY</span>' : '')+
+    '<button class="ci-day-btn" onclick="ciCambiarDia(1)" title="Día siguiente"'+(esHoy?' disabled':'')+'>›</button>'+
+    '</div>';
+}
+// Carga el check-in del día que se está viendo (_ciFechaViendo) y
+// decide qué pintar: si es HOY, el flujo completo de subir/ver/editar
+// de siempre; si es un día pasado, siempre en solo lectura — el
+// histórico no se sube ni se edita, solo se consulta.
+async function ciCargarYRenderizarFecha(){
+  document.getElementById('ci-sub').textContent = (AJ.base||'Base') + ' · ' + _ciFechaViendo.toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+  renderCiCargando();
+  var fila = await ciObtenerFilaFecha(ciFechaISO(_ciFechaViendo));
+  if(ciEsHoy(_ciFechaViendo)){
+    if(fila) renderCiBloqueado(fila); else renderCiVacio();
+  } else {
+    if(fila) renderCiHistorico(fila); else renderCiSinDatosHistoricos();
+  }
+}
+function renderCiSinDatosHistoricos(){
+  document.getElementById('ci-body').innerHTML = ciBarraDiaHtml()+
+    '<div class="ci-empty">'+
+      '<div class="ci-empty-ico">🗂️</div>'+
+      '<div class="ci-empty-tit">No hay check-in guardado para este día</div>'+
+      '<div class="ci-empty-sub">Puede que ese día nadie llegara a subirlo.</div>'+
+    '</div>';
+}
+function renderCiHistorico(fila){
+  var filas = fila.datos || [];
+  var grupos = ciAgruparPorPrimerTramo(filas);
+  var html = ciBarraDiaHtml();
+  grupos.forEach(function(g){ html += ciRenderGrupoHtml(g); });
+  html += '<div class="ci-hist-note">🗂️ Histórico de solo lectura — subido por '+(fila.subido_por_nombre||fila.subido_por_matricula||'—')+'</div>';
+  document.getElementById('ci-body').innerHTML = html;
+}
+function renderCiCargando(){
+  document.getElementById('ci-body').innerHTML = ciBarraDiaHtml()+'<div class="ci-progreso"><span class="ci-progreso-ico">🚆</span><div>Cargando…</div></div>';
+}
+function renderCiVacio(){
+  document.getElementById('ci-body').innerHTML = ciBarraDiaHtml()+
+    '<div class="ci-empty">'+
+      '<div class="ci-empty-ico">📤</div>'+
+      '<div class="ci-empty-tit">Aún no se ha subido el check-in de hoy</div>'+
+      '<div class="ci-empty-sub">Sube la foto de la hoja de check-in de '+(AJ.base||'la base')+' (de tu galería o cámara). En cuanto alguien la confirme, queda lista para todo el mundo.</div>'+
+      '<button class="ci-btn-subir" onclick="document.getElementById(\'ci-file-input\').click()">📤 Subir foto del check-in</button>'+
+      '<div class="ci-consejo">Procura que se vea toda la tabla, recta y bien iluminada — así el lector automático la entiende mejor.</div>'+
+    '</div>';
+}
+function renderCiProgreso(msg, pct){
+  document.getElementById('ci-body').innerHTML =
+    '<div class="ci-progreso"><span class="ci-progreso-ico">🚆</span><div>'+msg+'</div></div>'+
+    '<div class="ci-progreso-bar"><div class="ci-progreso-fill" style="width:'+Math.max(0,Math.min(100,pct))+'%"></div></div>';
+}
+
+// Recibe la foto elegida/tomada, la pasa por un preprocesado en
+// canvas (escala de grises + estirado de contraste + ampliado si es
+// pequeña — el mismo tipo de mejora que demostró marcar la
+// diferencia frente a la foto en crudo) y se la da a Tesseract.
+async function ciArchivoSeleccionado(file){
+  if(!file) return;
+  renderCiProgreso('Preparando imagen…', 5);
+  try{
+    var imagenPreparada = await ciPrepararImagen(file);
+    var resultadoOcr = await Tesseract.recognize(imagenPreparada, 'spa', {
+      logger: function(m){
+        if(m.status==='recognizing text'){
+          renderCiProgreso('Leyendo la tabla (OCR)… '+Math.round((m.progress||0)*100)+'%', 15+Math.round((m.progress||0)*75));
+        }
+      }
+    });
+    var filas = ciParsearTextoOcr(resultadoOcr.data.text);
+    if(!filas.length){
+      renderCiVacio();
+      toast('No se pudo leer la tabla — prueba con una foto más recta y con más luz');
+      return;
+    }
+    renderCiVistazo(filas);
+  }catch(err){
+    console.error(err);
+    renderCiVacio();
+    toast('Error leyendo la imagen: '+err.message);
+  }
+}
+function ciPrepararImagen(file){
+  return new Promise(function(resolve, reject){
+    var img = new Image();
+    img.onload = function(){
+      try{
+        var escala = img.width < 1400 ? 2 : 1;
+        var canvas = document.createElement('canvas');
+        canvas.width = img.width*escala;
+        canvas.height = img.height*escala;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        var data = ctx.getImageData(0,0,canvas.width,canvas.height);
+        var px = data.data, i, min=255, max=0, g;
+        var grises = new Float32Array(px.length/4);
+        for(i=0;i<px.length;i+=4){
+          g = 0.299*px[i]+0.587*px[i+1]+0.114*px[i+2];
+          grises[i/4]=g;
+          if(g<min)min=g; if(g>max)max=g;
+        }
+        var rango = Math.max(1,max-min);
+        for(i=0;i<px.length;i+=4){
+          var v = ((grises[i/4]-min)/rango)*255;
+          px[i]=px[i+1]=px[i+2]=v;
+        }
+        ctx.putImageData(data,0,0);
+        resolve(canvas);
+      }catch(e){ reject(e); }
+    };
+    img.onerror = function(){ reject(new Error('No se pudo cargar la imagen')); };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// Parser heurístico del texto OCR de la tabla. Es "mejor esfuerzo" a
+// propósito — el vistazo posterior (renderCiVistazo) es quien atrapa
+// lo que esto no lea bien, marcándolo en naranja en vez de dar por
+// bueno un dato que no está.
+function ciParsearTextoOcr(texto){
+  var lineas = texto.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  var filas = [];
+  var nombrePendiente = '';
+  var reMat   = /^(\d{6,7})/;
+  var reHora  = /(\d{1,2}:\d{2})/;
+  var rePos   = /\b((?:CP|TCF|JT)(?:[-·](?:CP|TCF|JT))*)\b/;
+  var reTurno = /\b(\d{3,6}(?:UM|DH|F)?(?:[-·]\d{3,6}(?:UM|DH|F)?){1,4})\b/;
+  lineas.forEach(function(linea){
+    var mMat = linea.match(reMat);
+    if(!mMat){
+      // Sin matrícula: puede ser un nombre que la tabla partió en dos
+      // líneas (wrapping) — se guarda para pegarlo a la siguiente fila.
+      var soloTexto = linea.replace(/[^A-ZÁÉÍÓÚÑa-záéíóúñ,\s]/g,'').trim();
+      if(soloTexto.length>2 && soloTexto.length<40) nombrePendiente = (nombrePendiente+' '+soloTexto).trim();
+      return;
+    }
+    var resto = linea.slice(mMat[0].length);
+    var mTurno = resto.match(reTurno);
+    var mPos   = resto.match(rePos);
+    var mHora  = resto.match(reHora);
+    var nombre = resto;
+    if(mTurno) nombre = nombre.replace(mTurno[0],'');
+    if(mPos)   nombre = nombre.replace(mPos[0],'');
+    if(mHora)  nombre = nombre.replace(mHora[0],'');
+    nombre = nombre.replace(/[|\[\]!¡_]/g,' ').replace(/\s{2,}/g,' ').trim();
+    nombre = ((nombrePendiente ? nombrePendiente+' ' : '') + nombre).replace(/\s{2,}/g,' ').trim();
+    nombrePendiente = '';
+    filas.push({
+      matricula: mMat[1],
+      nombre: nombre || '(nombre no leído)',
+      turno: mTurno ? mTurno[1].replace(/·/g,'-') : '',
+      posicion: mPos ? mPos[1].replace(/·/g,'-') : '',
+      hora: mHora ? mHora[1] : '',
+      obs: ''
+    });
+  });
+  return filas;
+}
+
+// Agrupa por HORA + primer tramo (el número de tren principal) —
+// misma regla de negocio ya validada en las maquetas: quien comparte
+// el primer tramo va en la misma tarjeta, aunque luego cada persona
+// tenga su propio tren de vuelta.
+function ciAgruparPorPrimerTramo(filas){
+  var grupos = {}, orden = [];
+  filas.forEach(function(f){
+    var primero = (f.turno||'').split('-')[0] || '';
+    var key = (f.hora||'?')+'|'+primero;
+    if(!grupos[key]){ grupos[key] = {hora:f.hora, primero:primero, personas:[]}; orden.push(key); }
+    grupos[key].personas.push(f);
+  });
+  return orden.map(function(k){ return grupos[k]; });
+}
+function ciRenderGrupoHtml(g){
+  var primeroWarn = /DH|UM/i.test(g.primero||'');
+  var html = '<div class="ci-grupo"><div class="ci-ghdr">'+
+    '<div class="ci-hora'+(g.hora?'':' est-falta')+'">'+(g.hora||'¿hora?')+'</div>'+
+    '<span class="turno-code"><span class="tc-first'+(primeroWarn?' tc-warn':'')+'">'+(primeroWarn?'<span class="tc-warn-ico">⚠</span>':'')+(g.primero||'¿tren?')+'</span></span>'+
+    '<div class="ci-count">'+g.personas.length+' persona'+(g.personas.length===1?'':'s')+'</div>'+
+    '</div>';
+  g.personas.forEach(function(p){
+    var segmentos = (p.turno||'').split('-').filter(Boolean);
+    var rutaHtml = '';
+    segmentos.forEach(function(seg,i){
+      var warn = /DH|UM/i.test(seg);
+      var cls = i===0 ? 'tc-first-mini' : 'tc-rest';
+      rutaHtml += '<span class="'+cls+(warn?' tc-warn':'')+'">'+(warn?'<span class="tc-warn-ico">⚠</span>':'')+seg+'</span>';
+      if(i<segmentos.length-1) rutaHtml += '<span class="tc-arrow">→</span>';
+    });
+    if(!segmentos.length) rutaHtml = '<span class="est-falta">sin tren leído</span>';
+    var posChips = (p.posicion||'').split('-').filter(Boolean).map(function(pc){
+      return '<span class="pos-chip pos-'+pc+'">'+pc+'</span>';
+    }).join('');
+    if(!posChips) posChips = '<span class="est-falta">?</span>';
+    html += '<div class="ci-persona"><div class="ci-mat">'+p.matricula+'</div>'+
+      '<div class="ci-nom"><div class="ci-nom-tx">'+p.nombre+'</div><div class="ci-ruta">'+rutaHtml+'</div></div>'+
+      '<div class="ci-right">'+posChips+(p.obs?'<span class="est-obs">'+p.obs+'</span>':'')+'</div></div>';
+  });
+  return html+'</div>';
+}
+function renderCiVistazo(filas){
+  _ciFilasPendientes = filas;
+  var grupos = ciAgruparPorPrimerTramo(filas);
+  var sinHora = filas.filter(function(f){return !f.hora;}).length;
+  var html = '<div class="ci-vistazo-note">📋 Esto es lo que se ha leído de la foto ('+filas.length+' persona'+(filas.length===1?'':'s')+'). Échale un vistazo antes de confirmar'+(sinHora?' — hay '+sinHora+' fila(s) sin hora detectada, en naranja':'')+'.</div>';
+  grupos.forEach(function(g){ html += ciRenderGrupoHtml(g); });
+  document.getElementById('ci-body').innerHTML = html+
+    '<div class="ci-vistazo-btns">'+
+      '<button class="ci-btn-cancelar" onclick="renderCiVacio()">✕ Repetir foto</button>'+
+      '<button class="ci-btn-confirmar" onclick="ciConfirmarSubida()">✓ Confirmar y subir</button>'+
+    '</div>';
+}
+// Sube con upsert sobre (fecha,sede): si no existía fila, la política
+// RLS de INSERT deja pasar a cualquiera (primero en confirmar, gana).
+// Si ya existía, Postgres lo convierte en UPDATE y la política RLS
+// "solo admin edita" bloquea a quien no sea Admin — sin necesitar
+// distinguir aquí "es la primera vez o no", lo decide la base de datos.
+async function ciConfirmarSubida(){
+  if(!_ciFilasPendientes || !_ciFilasPendientes.length) return;
+  renderCiProgreso('Subiendo…', 92);
+  var identidad = ciIdentidadActual();
+  var payload = {
+    fecha: ciFechaHoyISO(),
+    sede: AJ.base || '',
+    subido_por_matricula: identidad.matricula || '',
+    subido_por_nombre: identidad.nombre || '',
+    subido_en: new Date().toISOString(),
+    datos: _ciFilasPendientes,
+    editado_por_admin: !!(typeof perfilAdminActual!=='undefined' && perfilAdminActual && perfilAdminActual.rol==='admin')
+  };
+  try{
+    var resp = await sbAdmin.from('checkin_diario').upsert(payload, {onConflict:'fecha,sede'}).select().single();
+    if(resp.error) throw resp.error;
+    toast('✅ Check-in subido');
+    _ciFilasPendientes = null;
+    renderCiBloqueado(resp.data);
+  }catch(err){
+    console.error(err);
+    toast('Ya hay un check-in de hoy — solo Admin puede modificarlo');
+    var fila = await ciObtenerFilaHoy();
+    if(fila) renderCiBloqueado(fila); else renderCiVacio();
+  }
+}
+function renderCiBloqueado(fila){
+  var filas = fila.datos || [];
+  var grupos = ciAgruparPorPrimerTramo(filas);
+  var esAdmin = !!(typeof perfilAdminActual!=='undefined' && perfilAdminActual && perfilAdminActual.rol==='admin');
+  var horaSubida = '';
+  try{ horaSubida = new Date(fila.subido_en).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}); }catch(e){}
+  var html = ciBarraDiaHtml();
+  grupos.forEach(function(g){ html += ciRenderGrupoHtml(g); });
+  html += '<div class="ci-locked-foot">🔒 Subido por <b>'+(fila.subido_por_nombre||fila.subido_por_matricula||'—')+'</b>'+(horaSubida?' a las '+horaSubida:'')+
+    (fila.editado_por_admin ? ' · editado por un administrador' : '')+'</div>';
+  if(esAdmin){
+    html += '<div style="padding:4px 16px 10px"><button class="ci-btn-subir" style="width:100%" onclick="renderCiVacio()">✏️ Volver a subir foto (solo Admin)</button></div>';
+  }
+  document.getElementById('ci-body').innerHTML = html;
+  var pill = document.getElementById('btn-ci-pill');
+  if(pill){ pill.classList.add('ci-pill-bloqueado'); pill.innerHTML = '✅ Check-in ✓'; }
+}
+
 let perfilAdminActual = null; // {id, email, rol}
 // NUEVO — cualquier persona con sesión iniciada (admin o con
 // matrícula+PIN), para la copia de seguridad personal en la nube.
@@ -20362,7 +21114,11 @@ async function subirArchivoGlobalAdmin(tipo, file){
     nombre_archivo: file.name,
     url_archivo: urlData.data.publicUrl,
     fecha_subida: new Date().toISOString(),
-    subido_por: perfilAdminActual.id
+    subido_por: perfilAdminActual.id,
+    // NUEVO — además del id (que ya se guardaba pero nunca se leía en
+    // ningún sitio), se guarda el email del admin — así se puede
+    // mostrar "quién lo subió" de forma legible en el panel.
+    subido_por_email: perfilAdminActual.email || ''
   };
   if(sedeSlug){
     var sedeSel2 = document.getElementById('selSedeHorarioGeneral');
@@ -20449,7 +21205,8 @@ async function subirIntervencionGlobalAdmin(){
     nombre_servicio: nombre,
     fecha_inicio: fecha,
     fecha_subida: new Date().toISOString(),
-    subido_por: perfilAdminActual.id
+    subido_por: perfilAdminActual.id,
+    subido_por_email: perfilAdminActual.email || ''
   });
   if(tabla.error){
     elEstado.textContent = 'Archivos subidos, pero no se pudo registrar: ' + tabla.error.message;
@@ -21431,7 +22188,8 @@ async function refrescarEstadoArchivosAdmin(){
     if(filasHorario.length){
       elHorario.classList.remove('sin-archivo');
       elHorario.innerHTML = filasHorario.map(function(f){
-        return '<div style="margin-bottom:4px"><b>'+(f.sede||f.tipo.replace('horario_general_',''))+'</b>: '+f.nombre_archivo+' · '+new Date(f.fecha_subida).toLocaleString('es-ES')+'</div>';
+        return '<div style="margin-bottom:4px"><b>'+(f.sede||f.tipo.replace('horario_general_',''))+'</b>: '+f.nombre_archivo+' · '+new Date(f.fecha_subida).toLocaleString('es-ES')+
+          (f.subido_por_email ? ' · <span style="color:var(--tx3)">subido por '+f.subido_por_email+'</span>' : '')+'</div>';
       }).join('');
     } else {
       elHorario.classList.add('sin-archivo');
@@ -21449,7 +22207,8 @@ async function refrescarEstadoArchivosAdmin(){
     if(filasIntervencion.length){
       elIntervencion.classList.remove('sin-archivo');
       elIntervencion.innerHTML = filasIntervencion.map(function(f){
-        return '<div style="margin-bottom:4px"><b>'+(f.nombre_servicio||f.tipo.replace('grafico_intervencion_',''))+'</b>: '+f.nombre_archivo+' · '+new Date(f.fecha_subida).toLocaleString('es-ES')+'</div>';
+        return '<div style="margin-bottom:4px"><b>'+(f.nombre_servicio||f.tipo.replace('grafico_intervencion_',''))+'</b>: '+f.nombre_archivo+' · '+new Date(f.fecha_subida).toLocaleString('es-ES')+
+          (f.subido_por_email ? ' · <span style="color:var(--tx3)">subido por '+f.subido_por_email+'</span>' : '')+'</div>';
       }).join('');
     } else {
       elIntervencion.classList.add('sin-archivo');
@@ -25522,6 +26281,14 @@ clearBtn.addEventListener('click', ()=>{
     // esto asegura que el portal aparezca de todos modos, un poco
     // más tarde que de costumbre en vez de nunca.
     setTimeout(revisarPerfil, 3200);
+    // NUEVO — primera comprobación de la píldora ✅ Check-in (el
+    // Calendario ya está abierto por defecto al cargar, así que no
+    // pasa por goP('cal')). Con un pequeño margen para que la
+    // restauración de sesión/rol (cargarPerfilYVerificarAdmin) tenga
+    // tiempo de completarse antes de decidir si se muestra o no.
+    setTimeout(function(){
+      if(typeof mostrarPillCheckinSiCorresponde==='function') mostrarPillCheckinSiCorresponde();
+    }, 3500);
   }
 
   if(document.readyState === 'loading'){
